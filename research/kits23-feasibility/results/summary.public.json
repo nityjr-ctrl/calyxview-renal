@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 2,
+  "status": "complete",
+  "researchOnly": true,
+  "title": "20-study KiTS23 non-overlapping, within-KiTS feasibility benchmark",
+  "generatedAtUtc": "2026-09-01T15:35:32.441478+00:00",
+  "protocol": {
+    "dataset": "KiTS23",
+    "model": "nnU-Net v1 Task135_KiTS2021",
+    "configuration": "3d_fullres, five-fold ensemble, test-time augmentation disabled, no postprocessing file",
+    "cohortSize": 20,
+    "evaluatedCases": 20,
+    "successfulCases": 19,
+    "failedCases": 1,
+    "labelSource": "KiTS23 training reference segmentations",
+    "scope": "Non-overlapping, within-KiTS research feasibility only"
+  },
+  "metrics": {
+    "kidneyAndMass": {
+      "diceMean": 0.92411005885799,
+      "diceMeanCi95": [
+        0.8212384387176844,
+        0.9803392824816439
+      ],
+      "surfaceDiceMean": 0.9127874450455955,
+      "surfaceDiceMeanCi95": [
+        0.8103521587139709,
+        0.9711397377792721
+      ],
+      "hd95MmMean": 86.32300117825235,
+      "hd95MmMeanCi95": [
+        1.4479276594602364,
+        246.74177633022794
+      ],
+      "volumeMaeMlMean": 45.40022670558928,
+      "volumeMaeMlMeanCi95": [
+        8.130377565841906,
+        107.7470888295689
+      ]
+    },
+    "mass": {
+      "diceMean": 0.7951750497272281,
+      "diceMeanCi95": [
+        0.6762497748364431,
+        0.8837559379153737
+      ],
+      "surfaceDiceMean": 0.7148075444915069,
+      "surfaceDiceMeanCi95": [
+        0.6107481160793251,
+        0.7962970367782505
+      ],
+      "hd95MmMean": 101.47523912497562,
+      "hd95MmMeanCi95": [
+        11.412291634714501,
+        264.77705423240377
+      ],
+      "volumeMaeMlMean": 30.864561346904587,
+      "volumeMaeMlMeanCi95": [
+        11.925503190797613,
+        53.663016754771334
+      ]
+    },
+    "tumour": {
+      "diceMean": 0.6980658775539468,
+      "diceMeanCi95": [
+        0.542819370581355,
+        0.8334924680822752
+      ],
+      "surfaceDiceMean": 0.6180385948304133,
+      "surfaceDiceMeanCi95": [
+        0.48297272471445,
+        0.7358273246384258
+      ],
+      "hd95MmMean": 158.0137810925973,
+      "hd95MmMeanCi95": [
+        31.03070026660558,
+        342.2012625266757
+      ],
+      "volumeMaeMlMean": 34.678200350080054,
+      "volumeMaeMlMeanCi95": [
+        12.203797872483849,
+        62.84491764099172
+      ]
+    }
+  },
+  "runtime": {
+    "medianSecondsPerCase": 408.30150000000003,
+    "totalSeconds": 10950.502
+  },
+  "provenance": {
+    "datasetRevision": "c1088353084c17b8882a11db71429e7c022b7785",
+    "imagingRevision": "65f1f295873a326230153c7e1de0c7dba10f0b29",
+    "datasetSourceIdentityScope": "Tracked source commit-equivalent; active images, labels, and inputs independently hash-verified",
+    "portableManifestSha256": "bc529b7e5edfa9c5ac0979de1d38a027735b741760e3e82c14acc78ec900c561",
+    "modelArchiveMd5": "b27ab702742083080b95baac00ba186f",
+    "modelArchiveSha256": "a9255f78ba05a0f06d7afc638118d131194758f812542508d3a8ae2abaa867d3",
+    "nnunetCommit": "db16c6cef5fdd5a180159184e46b58bcca670446",
+    "runtimeSourceIdentityScope": "Tracked source commit-equivalent; ignored runtime artefacts inventoried at capture time but not treated as upstream commit content"
+  }
+}

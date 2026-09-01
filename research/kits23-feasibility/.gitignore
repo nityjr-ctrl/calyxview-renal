@@ -1,0 +1,59 @@
+# Never commit source medical volumes, labels, or predictions.
+*.nii
+*.nii.gz
+*.dcm
+*.dicom
+*.nrrd
+*.mha
+*.mhd
+
+# Never commit model archives or learned parameters.
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.pt
+*.pth
+*.pkl
+*.ckpt
+*.model
+*.onnx
+*.h5
+*.hdf5
+*.safetensors
+*.npz
+*.npy
+
+# Local benchmark state. Keep runs outside the website/repository whenever possible.
+run-*/
+runs/
+data/
+datasets/
+source/
+labels/
+nnunet_input/
+predictions/
+timings/
+logs/
+scratch/
+models/
+weights/
+nnunet-results/
+nnunet-raw/
+nnunet-preprocessed/
+
+# Local environments and caches.
+.venv/
+venv/
+wsl-env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+.env
+*.log
+
+# Operating-system/editor noise.
+.DS_Store
+Thumbs.db
+desktop.ini

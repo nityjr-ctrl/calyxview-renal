@@ -1,0 +1,11 @@
+# Report/acquisition environment (Python 3.12 recommended).
+# Known reproducibility pins from the frozen feasibility run:
+numpy==1.26.4
+surface-distance==0.1
+
+# Runtime libraries. Their exact installed versions are captured in report/summary.json;
+# they are intentionally not assigned guessed pins here.
+huggingface-hub
+nibabel
+scipy
+Pillow

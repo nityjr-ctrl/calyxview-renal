@@ -10,6 +10,7 @@
 - The file input value is cleared immediately after inventory creation.
 - The visualised anatomy is authored synthetic geometry and is never derived from selected data.
 - Clinical export and sign-off controls are unavailable by design.
+- The deployed research result is a small aggregate JSON object only. It contains cohort-level metrics, counts, runtime and frozen revisions/hashes; it contains no study rows, case identifiers, local paths, scan data, masks, model weights, logs or QC images.
 
 ## Known limitations
 
@@ -18,6 +19,13 @@
 - File extensions are not proof of DICOM conformance.
 - The preflight, quality, segmentation, reconstruction and review stages are simulated.
 - Measurements, scores and volume figures are illustrative and may be wrong.
+- The separate 20-study offline feasibility benchmark is research evidence, not browser inference or clinical validation. Its aggregate scores must not be applied to an individual patient or institution.
+
+## Benchmark publication boundary
+
+The reproducible benchmark pipeline runs outside the website repository. Source CT NIfTI files, reference masks, generated masks, model checkpoints, case-level timing and quality-control artifacts are retained only in the local research workspace under the applicable data and model terms. The release gate accepts a completed 20-study denominator and emits only [`../research/kits23-feasibility/results/summary.public.json`](../research/kits23-feasibility/results/summary.public.json).
+
+Repository tests reject local filesystem paths, medical-volume filenames, patient/study fields, case rows, partial denominators and invalid metric ranges. The production bundle is inspected separately because source-control exclusions alone are not a privacy control.
 
 ## Future service boundary
 

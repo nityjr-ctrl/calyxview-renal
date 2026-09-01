@@ -1,0 +1,4 @@
+# Install PyTorch separately first; see README.md. Do not add torch here because
+# the CUDA wheel comes from PyTorch's dedicated cu128 package index. Clone the
+# audited nnU-Net source revision and install it editable as documented.
+numpy==1.26.4

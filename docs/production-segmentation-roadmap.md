@@ -2,6 +2,8 @@
 
 This document describes work that is explicitly **outside** the deployed prototype. It is not a claim that the current site processes CT data or is suitable for patient care.
 
+The repository includes one completed 20-study, non-overlapping, within-KiTS feasibility benchmark of a published kidney/tumour research model. That bounded technical check is useful engineering evidence, but it does not satisfy any of the privacy, clinical-workflow, independent validation, human-factors, quality-management or regulatory gates below.
+
 ## 1. Intended use and governance
 
 - Define users, patients, jurisdictions, clinical decisions and the exact role of the output.

@@ -16,3 +16,34 @@ coverage/
 next-env.d.ts
 .DS_Store
 Thumbs.db
+
+# Medical-image and model artifacts must remain outside the repository.
+*.dcm
+*.dicom
+*.nii
+*.nii.gz
+*.nrrd
+*.mha
+*.mhd
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.safetensors
+*.model
+*.model.pkl
+Task135_KiTS2021.zip
+model-results/
+nnUNet_results/
+
+# Local benchmark inputs, predictions, logs and visual QC are never published.
+research/**/data/
+research/**/labels/
+research/**/predictions/
+research/**/logs/
+research/**/timings/
+research/**/qc/
+research/**/run-*/
+research/**/report/
+research/**/results/*
+!research/kits23-feasibility/results/summary.public.json

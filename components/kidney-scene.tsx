@@ -144,6 +144,9 @@ export function KidneyScene({
       'Interactive synthetic three-dimensional kidney, tumour, vessels, and collecting system',
     );
     renderer.domElement.setAttribute('role', 'img');
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
     host.appendChild(renderer.domElement);
 
     const hemi = new THREE.HemisphereLight(0xc8ffe9, 0x06110e, 2.1);
@@ -440,12 +443,22 @@ export function KidneyScene({
     renderer.domElement.addEventListener('pointercancel', stopDragging);
     renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
 
+    let resizeFrame = 0;
+    let renderWidth = 0;
+    let renderHeight = 0;
     const resize = () => {
-      const width = Math.max(1, host.clientWidth);
-      const height = Math.max(1, host.clientHeight);
-      renderer.setSize(width, height, false);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        const width = Math.max(1, host.clientWidth);
+        const height = Math.max(1, host.clientHeight);
+        if (width === renderWidth && height === renderHeight) return;
+
+        renderWidth = width;
+        renderHeight = height;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      });
     };
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(host);
@@ -509,6 +522,7 @@ export function KidneyScene({
 
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(resizeFrame);
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
       renderer.domElement.removeEventListener('pointermove', onPointerMove);
@@ -526,5 +540,5 @@ export function KidneyScene({
     };
   }, []);
 
-  return <div ref={hostRef} className="h-full min-h-[360px] w-full" />;
+  return <div ref={hostRef} className="h-full min-h-[360px] min-w-0 w-full overflow-hidden" />;
 }

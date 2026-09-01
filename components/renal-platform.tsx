@@ -9,7 +9,6 @@ import {
   BookOpen,
   Box,
   Check,
-  ChevronDown,
   Circle,
   CircleCheck,
   ClipboardCheck,
@@ -41,6 +40,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useEffect,
   lazy,
   Suspense,
   type DragEvent,
@@ -194,7 +194,7 @@ function LayerButton({
       <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-xs text-white/70">{label}</span>
-        <span className="block text-[9px] uppercase tracking-[.12em] text-white/25">{provenance}</span>
+        <span className="block text-[11px] uppercase tracking-[.1em] text-white/60">{provenance}</span>
       </span>
     </button>
   );
@@ -242,7 +242,7 @@ function CaseSidebar({
       <aside className="workspace-sidebar left-sidebar">
         <p className="section-label">Safe intake path</p>
         <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">Local DICOM preflight</h1>
-        <p className="mt-2 text-xs leading-5 text-white/40">
+        <p className="mt-2 text-xs leading-5 text-white/64">
           A transparent prototype flow that never uploads, stores or segments selected files.
         </p>
 
@@ -254,7 +254,7 @@ function CaseSidebar({
               </span>
               <div>
                 <p className="text-xs text-white/66">{stage.label}</p>
-                <p className="mt-1 text-[10px] leading-4 text-white/28">
+                <p className="mt-1 text-[11px] leading-4 text-white/60">
                   {index < 3 ? 'Local demonstration' : 'Synthetic output'}
                 </p>
               </div>
@@ -267,7 +267,7 @@ function CaseSidebar({
             <LockKeyhole className="size-3.5" />
             Zero-transfer prototype
           </div>
-          <p className="mt-2 text-[10px] leading-4 text-white/34">
+          <p className="mt-2 text-xs leading-5 text-white/64">
             {importedManifest
               ? `${importedManifest.fileCount} file handles were counted locally; names and contents were not retained.`
               : 'No file content is read, transmitted or retained by this site.'}
@@ -329,7 +329,7 @@ function CaseSidebar({
             <GraduationCap className="size-3.5" />
             Training boundary
           </div>
-          <p className="mt-2 text-[10px] leading-4 text-white/36">
+          <p className="mt-2 text-xs leading-5 text-white/64">
             General education only. This does not replace supervised surgical training, credentialing or local protocols.
           </p>
         </div>
@@ -358,7 +358,7 @@ function CaseSidebar({
           <ShieldCheck className="size-3.5" />
           Provenance explicit
         </div>
-        <p className="mt-2 text-[10px] leading-4 text-white/34">
+        <p className="mt-2 text-xs leading-5 text-white/64">
           Built-in procedural teaching model. No patient scan and no AI segmentation.
         </p>
       </div>
@@ -643,7 +643,7 @@ function PlanningInspector({
               </div>
               <Badge className="bg-white/5 text-[9px] text-white/48" variant="outline">SIMULATED</Badge>
             </div>
-            <p className="mt-3 text-[11px] leading-5 text-white/38">
+            <p className="mt-3 text-xs leading-5 text-white/64">
               Generated in-browser from authored geometry. It is not reconstructed from CT and contains no patient information.
             </p>
           </div>
@@ -663,7 +663,7 @@ function PlanningInspector({
                 <span key={item} className="rounded-md border border-white/8 px-2 py-1 text-[9px] text-white/28">{item}</span>
               ))}
             </div>
-            <p className="mt-3 text-[10px] leading-4 text-white/30">These states are shown for integration design only and are not active in the prototype.</p>
+            <p className="mt-3 text-xs leading-5 text-white/64">These states are shown for integration design only and are not active in the prototype.</p>
           </div>
         </div>
       ) : null}
@@ -682,7 +682,7 @@ function PlanningInspector({
               <Info className="size-3.5" />
               Example values only
             </div>
-            <p className="mt-2 text-[10px] leading-4 text-white/34">
+            <p className="mt-2 text-xs leading-5 text-white/64">
               These numbers are hard-coded to demonstrate layout. They are not calculated from geometry or imaging.
             </p>
           </div>
@@ -744,7 +744,7 @@ function PlanningInspector({
             <div className="mt-4 rounded-xl border border-white/8 bg-black/10 p-3.5">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-[9px] uppercase tracking-[.12em] text-white/30">Illustrative residual estimate</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-white/62">Illustrative residual estimate</p>
                   <p className="mt-1 font-mono text-xl text-white/82">{illustrativeResidual}%</p>
                 </div>
                 <BarChart3 className="size-5 text-emerald-200/55" />
@@ -752,7 +752,7 @@ function PlanningInspector({
               <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/6">
                 <div className="h-full rounded-full bg-emerald-300/70" style={{ width: `${illustrativeResidual}%` }} />
               </div>
-              <p className="mt-2 text-[9px] text-white/25">Formula-driven illustration — not a volumetric calculation</p>
+              <p className="mt-2 text-xs leading-5 text-white/70">Formula-driven illustration — not a volumetric calculation</p>
             </div>
           </div>
 
@@ -784,7 +784,7 @@ function PlanningInspector({
               <ShieldAlert className="size-3.5" />
               Fail closed
             </div>
-            <p className="mt-2 text-[10px] leading-4 text-white/34">
+            <p className="mt-2 text-xs leading-5 text-white/64">
               Export to a clinical plan is intentionally unavailable. A future pipeline must require expert review and verified provenance.
             </p>
           </div>
@@ -840,7 +840,7 @@ function ImportWorkspace({
               Local-only prototype
             </Badge>
             <h1 className="mt-4 max-w-xl text-2xl font-semibold tracking-[-.03em] text-white/92 sm:text-3xl">Bring a DICOM study to the privacy gate</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/42">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/65">
               Demonstrate the intake workflow without sending the selected files anywhere. The final 3D anatomy always remains the built-in synthetic case.
             </p>
           </div>
@@ -854,7 +854,7 @@ function ImportWorkspace({
             <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-200/72" />
             <div>
               <p className="text-xs font-medium text-amber-50/76">Removing a patient name is not enough</p>
-              <p className="mt-1.5 text-[11px] leading-5 text-white/38">
+              <p className="mt-1.5 text-xs leading-5 text-white/70">
                 DICOM can contain identifiers in metadata, private fields, overlays, embedded documents and pixels. Use only synthetic data or data de-identified under your organisation’s approved process.
               </p>
             </div>
@@ -868,7 +868,7 @@ function ImportWorkspace({
             onChange={(event) => setConsent(event.target.checked)}
             className="mt-0.5 size-4 accent-emerald-400"
           />
-          <span className="text-[11px] leading-5 text-white/50">
+          <span className="text-xs leading-5 text-white/70">
             I confirm that these files are synthetic or institutionally de-identified, that I am authorised to use them, and that I will not use this prototype for patient care.
           </span>
         </label>
@@ -893,7 +893,7 @@ function ImportWorkspace({
               <UploadCloud className="size-5" />
             </div>
             <h2 className="mt-4 text-sm font-medium text-white/72">Choose files on this device</h2>
-            <p className="mt-1.5 text-[11px] text-white/32">.dcm or .dicom • Multiple files supported • Contents never read</p>
+            <p className="mt-1.5 text-xs text-white/70">.dcm or .dicom • Multiple files supported • Contents never read</p>
             <Button
               className="mt-5 border-white/10 bg-white/6 text-white/70 hover:bg-white/10 hover:text-white"
               variant="outline"
@@ -902,7 +902,7 @@ function ImportWorkspace({
             >
               <FileStack /> Choose files
             </Button>
-            {!consent ? <p className="mt-3 text-[10px] text-amber-100/45">Confirm the safety statement to enable file selection.</p> : null}
+            {!consent ? <p className="mt-3 text-xs text-amber-100/80">Confirm the safety statement to enable file selection.</p> : null}
           </div>
         ) : (
           <div className="mt-5 overflow-hidden rounded-xl border border-white/9 bg-white/[.025]">
@@ -944,7 +944,7 @@ function ImportWorkspace({
                           <p className="text-[11px] text-white/58">{stage.label}</p>
                           <span className="text-[9px] uppercase tracking-[.1em] text-white/22">{index < 3 ? 'Local demo' : 'Synthetic'}</span>
                         </div>
-                        {active ? <p className="mt-1 text-[10px] text-white/30">{stage.prototypeBehaviour}</p> : null}
+                        {active ? <p className="mt-1 text-[11px] text-white/62">{stage.prototypeBehaviour}</p> : null}
                       </div>
                     </div>
                   );
@@ -957,7 +957,7 @@ function ImportWorkspace({
                     <CircleCheck className="size-4" />
                     Demonstration complete
                   </div>
-                  <p className="mt-2 text-[10px] leading-4 text-white/36">
+                  <p className="mt-2 text-xs leading-5 text-white/70">
                     No CT segmentation was performed. Continue to the built-in synthetic result to explore the intended planning experience.
                   </p>
                   <Button className="mt-4 bg-emerald-300 text-[#052117] hover:bg-emerald-200" onClick={continueToDemo}>
@@ -984,7 +984,7 @@ function ImportWorkspace({
           </p>
         ) : null}
 
-        <div className="mt-5 flex items-center gap-2 text-[10px] text-white/26">
+        <div className="mt-5 flex items-center gap-2 text-xs leading-5 text-white/64">
           <LockKeyhole className="size-3" />
           Selected file handles are discarded when cleared, replaced, or this tab closes.
         </div>
@@ -1007,7 +1007,7 @@ function ImportSafetyPanel() {
             <CircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-300/70" />
             <div>
               <p className="text-[11px] text-white/62">{title}</p>
-              <p className="mt-1 text-[10px] leading-4 text-white/30">{body}</p>
+              <p className="mt-1 text-xs leading-5 text-white/64">{body}</p>
             </div>
           </div>
         ))}
@@ -1024,7 +1024,7 @@ function ImportSafetyPanel() {
           ].map((item) => (
             <div key={item} className="flex gap-3">
               <Circle className="mt-0.5 size-3.5 shrink-0 text-white/18" />
-              <p className="text-[10px] leading-4 text-white/35">{item}</p>
+              <p className="text-xs leading-5 text-white/64">{item}</p>
             </div>
           ))}
         </div>
@@ -1035,7 +1035,7 @@ function ImportSafetyPanel() {
           <ShieldAlert className="size-3.5" />
           Not an anonymiser
         </div>
-        <p className="mt-2 text-[10px] leading-4 text-white/34">
+        <p className="mt-2 text-xs leading-5 text-white/70">
           This interface does not inspect metadata, private fields or burned-in pixels and cannot certify that a study is de-identified.
         </p>
       </div>
@@ -1054,6 +1054,7 @@ function TrainingPanel({
   answers: Record<number, number>;
   setAnswers: React.Dispatch<React.SetStateAction<Record<number, number>>>;
 }) {
+  const [confidence, setConfidence] = useState<Record<number, string>>({});
   const lesson = trainingSteps[step];
   const selected = answers[step];
   const answered = selected !== undefined;
@@ -1066,7 +1067,7 @@ function TrainingPanel({
         <span className="font-mono text-[10px] text-white/32">{String(step + 1).padStart(2, '0')} / {String(trainingSteps.length).padStart(2, '0')}</span>
       </div>
       <h2 className="mt-3 text-lg font-semibold tracking-tight text-white/86">{lesson.title}</h2>
-      <p className="mt-2 text-[11px] leading-5 text-white/40">{lesson.instruction}</p>
+      <p className="mt-2 text-xs leading-5 text-white/64">{lesson.instruction}</p>
 
       <div className="mt-5 border-t border-white/8 pt-5">
         <p className="text-xs font-medium leading-5 text-white/64">{lesson.question}</p>
@@ -1098,7 +1099,7 @@ function TrainingPanel({
           <p className="text-[10px] font-semibold uppercase tracking-[.11em] text-white/52">
             {selected === lesson.correct ? 'Correct' : 'Review the rationale'}
           </p>
-          <p className="mt-2 text-[10px] leading-4 text-white/38">{lesson.rationale}</p>
+          <p className="mt-2 text-xs leading-5 text-white/64">{lesson.rationale}</p>
         </div>
       ) : null}
 
@@ -1129,6 +1130,7 @@ function TrainingPanel({
           variant="ghost"
           onClick={() => {
             setAnswers({});
+            setConfidence({});
             setStep(0);
           }}
         >
@@ -1137,13 +1139,23 @@ function TrainingPanel({
       ) : null}
 
       <div className="mt-6 border-t border-white/8 pt-5">
-        <div className="flex items-center justify-between text-[10px] text-white/30">
+        <div className="flex items-center justify-between text-[11px] text-white/60">
           <span>Confidence</span>
           <span>Self-reflection</span>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-1.5">
           {['Low', 'Medium', 'High'].map((item) => (
-            <button key={item} type="button" className="choice-chip">{item}</button>
+            <button
+              key={item}
+              type="button"
+              className="choice-chip"
+              aria-pressed={confidence[step] === item}
+              onClick={() =>
+                setConfidence((current) => ({ ...current, [step]: item }))
+              }
+            >
+              {item}
+            </button>
           ))}
         </div>
       </div>
@@ -1152,13 +1164,39 @@ function TrainingPanel({
 }
 
 function DisclaimerDialog({ onClose }: { onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    if (!dialog) return undefined;
+    dialog.showModal();
+
+    return () => {
+      if (dialog.open) dialog.close();
+      previousFocus?.focus();
+    };
+  }, []);
+
   return (
-    <div className="dialog-backdrop">
-      <dialog
-        open
-        className="disclaimer-dialog"
-        aria-labelledby="disclaimer-title"
-      >
+    <dialog
+      ref={dialogRef}
+      className="disclaimer-dialog"
+      aria-labelledby="disclaimer-title"
+      aria-describedby="disclaimer-description"
+      aria-modal="true"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          onClose();
+        }
+      }}
+    >
+      <div>
         <div className="flex items-start justify-between gap-5">
           <div className="grid size-10 place-items-center rounded-xl border border-amber-200/10 bg-amber-200/[.04] text-amber-200/75">
             <ShieldAlert className="size-5" />
@@ -1167,29 +1205,31 @@ function DisclaimerDialog({ onClose }: { onClose: () => void }) {
             <X className="size-4" />
           </button>
         </div>
-        <p className="mt-5 text-[10px] font-semibold uppercase tracking-[.14em] text-amber-100/55">Research & education prototype</p>
+        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[.14em] text-amber-100/75">Research & education prototype</p>
         <h2 id="disclaimer-title" className="mt-2 text-2xl font-semibold tracking-[-.03em] text-white/92">Not for patient care</h2>
-        <p className="mt-4 text-sm leading-6 text-white/48">
-          This demonstration has not been clinically validated or authorised for clinical use. It is not FDA cleared or approved and is not UKCA/CE marked as a medical device.
-        </p>
-        <p className="mt-3 text-sm leading-6 text-white/48">
-          Do not use it for diagnosis, treatment, patient management, real-world surgical planning or intraoperative guidance. Anatomy, measurements and workflow outputs may be incomplete or wrong. Use approved clinical imaging systems and qualified clinical judgement for every patient-care decision.
-        </p>
+        <div id="disclaimer-description">
+          <p className="mt-4 text-sm leading-6 text-white/70">
+            This demonstration has not been clinically validated or authorised for clinical use. It is not FDA cleared or approved and is not UKCA/CE marked as a medical device.
+          </p>
+          <p className="mt-3 text-sm leading-6 text-white/70">
+            Do not use it for diagnosis, treatment, patient management, real-world surgical planning or intraoperative guidance. Anatomy, measurements and workflow outputs may be incomplete or wrong. Use approved clinical imaging systems and qualified clinical judgement for every patient-care decision.
+          </p>
+        </div>
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           <div className="rounded-xl border border-emerald-200/10 bg-emerald-200/[.03] p-3.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[.11em] text-emerald-100/60">Designed for</p>
-            <p className="mt-2 text-[11px] leading-5 text-white/42">Interface exploration, workflow design and general education with synthetic anatomy.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[.11em] text-emerald-100/75">Designed for</p>
+            <p className="mt-2 text-xs leading-5 text-white/65">Interface exploration, workflow design and general education with synthetic anatomy.</p>
           </div>
           <div className="rounded-xl border border-rose-200/10 bg-rose-200/[.03] p-3.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[.11em] text-rose-100/60">Never use for</p>
-            <p className="mt-2 text-[11px] leading-5 text-white/42">Diagnosis, patient-specific planning, treatment selection, consent or surgical guidance.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[.11em] text-rose-100/75">Never use for</p>
+            <p className="mt-2 text-xs leading-5 text-white/65">Diagnosis, patient-specific planning, treatment selection, consent or surgical guidance.</p>
           </div>
         </div>
         <Button className="mt-6 w-full bg-emerald-300 text-[#052117] hover:bg-emerald-200" onClick={onClose}>
           I understand the prototype boundary
         </Button>
-      </dialog>
-    </div>
+      </div>
+    </dialog>
   );
 }
 
@@ -1296,7 +1336,7 @@ export function RenalPlatform({
               <span className="truncate text-sm font-semibold tracking-[-.025em] text-white/92 sm:text-base">CalyxView</span>
               <span className="text-[10px] font-medium uppercase tracking-[.14em] text-emerald-200/62">3D demo</span>
             </div>
-            <p className="hidden text-[9px] uppercase tracking-[.14em] text-white/24 sm:block">Partial nephrectomy planning concept</p>
+            <p className="hidden text-[10px] uppercase tracking-[.12em] text-white/45 sm:block">Synthetic renal anatomy research and training prototype</p>
           </div>
         </div>
 
@@ -1318,11 +1358,13 @@ export function RenalPlatform({
               <span className="hidden sm:inline">Overview</span>
             </button>
           ) : null}
-          <button type="button" className="case-switcher" onClick={() => setMode('plan')}>
+          <output className="case-switcher case-indicator" aria-live="polite">
             <span className="hidden max-w-44 truncate sm:block">{caseLabel}</span>
-            <span className="sm:hidden">Case</span>
-            <ChevronDown className="size-3" />
-          </button>
+            <span className="sm:hidden">
+              {mode === 'import' ? 'Local intake' : mode === 'learn' ? 'Training' : 'Synthetic'}
+            </span>
+            <CircleCheck className="size-3" aria-hidden="true" />
+          </output>
         </div>
       </header>
 
@@ -1395,7 +1437,7 @@ export function RenalPlatform({
           <CircleCheck className="size-4 text-emerald-200" />
           <div>
             <p className="text-xs text-white/78">Synthetic result opened</p>
-            <p className="mt-0.5 text-[10px] text-white/34">No anatomy was generated from the selected files.</p>
+            <p className="mt-0.5 text-xs text-white/64">No anatomy was generated from the selected files.</p>
           </div>
         </output>
       ) : null}

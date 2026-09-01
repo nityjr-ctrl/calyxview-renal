@@ -10,7 +10,7 @@ A production-style research and education prototype for exploring how a future v
 
 ## What is implemented
 
-- A responsive, image-led editorial overview with four plain-language navigation choices and one clear route into the 3D workspace.
+- A responsive, image-led editorial overview with five plain-language navigation choices and one clear route into the 3D workspace.
 - An on-page five-step operating guide and direct entry points for the synthetic case, local file-flow demonstration and guided lesson.
 - An interactive synthetic kidney preview on the overview page, with structure visibility controls and explicit provenance labels.
 - Interactive WebGL kidney, renal mass, arterial tree, venous tree and collecting-system anatomy.
@@ -21,6 +21,7 @@ A production-style research and education prototype for exploring how a future v
 - Provenance, QA and source-state interfaces that distinguish simulated, derived and future verified data.
 - Downloadable snapshot of the synthetic 3D view.
 - Persistent research-use boundaries, detailed safety information, responsive design and hardened Netlify headers.
+- An aggregate-only research section for a frozen 20-study KiTS23 feasibility benchmark, with Dice, Surface Dice, HD95, volume error, runtime and reproducibility evidence.
 - A typed `SegmentationGateway` seam for a future approved backend in [`lib/prototype-pipeline.ts`](lib/prototype-pipeline.ts).
 
 ## How to use the prototype
@@ -40,6 +41,14 @@ Selected files remain on the device. The app does not use `FileReader`, `fetch`,
 The progress sequence is deliberately simulated. The displayed kidney is built-in procedural teaching anatomy and never comes from a selected scan.
 
 Removing names from DICOM headers is not enough to establish anonymisation. Private attributes, nested content, UIDs, overlays, embedded documents and burned-in pixel text all require validated handling and risk assessment. See [DICOM PS3.15 Annex E](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html), [HHS de-identification guidance](https://www.hhs.gov/hipaa/for-professionals/special-topics/de-identification/index.html) and [ICO anonymisation guidance](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/about-this-guidance/).
+
+## Measured research feasibility benchmark
+
+The **Research** section reports a frozen, non-overlapping, within-KiTS feasibility run on 20 public KiTS23 CT studies (`case_00400`–`case_00419`). It uses the published nnU-Net v1 `Task135_KiTS2021` five-fold `3d_fullres` ensemble with test-time augmentation disabled. This is not an independent external dataset or clinical validation.
+
+Only the aggregate public payload in [`research/kits23-feasibility/results/summary.public.json`](research/kits23-feasibility/results/summary.public.json) is bundled into the site. CT volumes, reference labels, predictions, model weights, case-level rows, timing records, logs and mask QC remain outside Git and Netlify. The fixed prompt, scripts, checksums, failure policy and step-by-step reproduction guide are in [`research/kits23-feasibility/README.md`](research/kits23-feasibility/README.md).
+
+The benchmark tests an offline research model against KiTS23 training reference segmentations for kidney plus mass, tumour plus cyst, and tumour. It does not make the browser demo a CT-analysis system, and it does not establish clinical safety, benefit, cross-hospital generalisation or fitness for partial-nephrectomy decisions.
 
 ## Architecture
 
@@ -90,6 +99,7 @@ npm run dev
 Quality gates:
 
 ```bash
+npm test
 npm run lint
 npm run typecheck
 npm run build
@@ -107,4 +117,11 @@ The production build is written to `netlify-dist/`. Netlify uses the build and s
 - [KiTS23 kidney tumour segmentation challenge](https://kits-challenge.org/kits23/)
 - [nnU-Net](https://www.nature.com/articles/s41592-020-01008-z)
 
+## Project licensing
+
+This repository does not currently grant a licence to reuse the CalyxView Renal
+application code, design or original content; those materials are all rights
+reserved unless the owner adds an explicit project licence. Repository
+visibility is not permission to reuse it. KiTS data, nnU-Net software and other
+third-party materials remain governed by their own licences and rights holders.
 No licence is granted for clinical use, patient data or medical-device claims.

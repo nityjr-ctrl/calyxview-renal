@@ -24,6 +24,7 @@ import {
 import { lazy, Suspense, useEffect, useState } from 'react';
 
 import type { AnatomyLayers } from '@/components/kidney-scene';
+import { FeasibilityBenchmark } from '@/components/feasibility-benchmark';
 import { RenalPlatform } from '@/components/renal-platform';
 
 const KidneyScene = lazy(() =>
@@ -135,6 +136,7 @@ function SiteHeader({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
           <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a>
           <a href="#demo" onClick={() => setMenuOpen(false)}>3D demo</a>
           <a href="#learning" onClick={() => setMenuOpen(false)}>Learning</a>
+          <a href="#research" onClick={() => setMenuOpen(false)}>Research</a>
           <a href="#safety" onClick={() => setMenuOpen(false)}>Safety</a>
           <button type="button" className="site-nav-cta" onClick={() => openDemo()}>
             Open the demo <ArrowRight />
@@ -349,6 +351,8 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
           </div>
         </section>
 
+        <FeasibilityBenchmark />
+
         <section id="safety" className="safety-section" aria-labelledby="safety-title">
           <div className="site-shell">
             <div className="section-heading">
@@ -402,6 +406,7 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
             <a href="#how-it-works">How it works</a>
             <a href="#demo">3D demo</a>
             <a href="#learning">Learning</a>
+            <a href="#research">Research</a>
             <a href="#safety">Safety</a>
           </div>
         </div>
