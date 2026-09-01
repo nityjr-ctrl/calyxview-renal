@@ -2,6 +2,8 @@
 
 A production-style research and education prototype for exploring how a future validated platform could support partial-nephrectomy planning and training.
 
+**Live prototype:** [calyxview-renal.netlify.app](https://calyxview-renal.netlify.app/)
+
 > **RESEARCH & EDUCATION PROTOTYPE — NOT FOR PATIENT CARE**
 >
 > This demonstration is not clinically validated, FDA cleared or approved, or UKCA/CE marked as a medical device. Do not use it for diagnosis, treatment, patient management, real-world surgical planning, consent or intraoperative guidance.
