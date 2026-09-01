@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { RenalPlatform } from '@/components/renal-platform';
+import { RenalSite } from '@/components/renal-site';
 import '@/app/globals.css';
 
 const root = document.getElementById('root');
@@ -12,6 +12,6 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
-    <RenalPlatform />
+    <RenalSite />
   </StrictMode>,
 );

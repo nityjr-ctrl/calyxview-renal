@@ -10,6 +10,9 @@ A production-style research and education prototype for exploring how a future v
 
 ## What is implemented
 
+- A responsive, image-led editorial overview with four plain-language navigation choices and one clear route into the 3D workspace.
+- An on-page five-step operating guide and direct entry points for the synthetic case, local file-flow demonstration and guided lesson.
+- An interactive synthetic kidney preview on the overview page, with structure visibility controls and explicit provenance labels.
 - Interactive WebGL kidney, renal mass, arterial tree, venous tree and collecting-system anatomy.
 - Drag rotation, wheel zoom, anatomical view presets, layer isolation, opacity, clipping and resection-margin exploration.
 - Illustrative planning controls for approach, clamp scenario, margin and residual-volume presentation.
@@ -19,6 +22,16 @@ A production-style research and education prototype for exploring how a future v
 - Downloadable snapshot of the synthetic 3D view.
 - Persistent research-use boundaries, detailed safety information, responsive design and hardened Netlify headers.
 - A typed `SegmentationGateway` seam for a future approved backend in [`lib/prototype-pipeline.ts`](lib/prototype-pipeline.ts).
+
+## How to use the prototype
+
+1. Choose **Explore the 3D demo** to begin with the built-in synthetic kidney; no files are required.
+2. Use **Try file flow** only if you want to demonstrate the future intake journey. Select synthetic files or files de-identified under an approved institutional process.
+3. Confirm the safety statement. The prototype then counts file handles, extensions and total size locally; it does not read DICOM metadata or pixels.
+4. In **Explore 3D**, drag to rotate, scroll or pinch to zoom, switch anatomical views and reveal or hide the kidney, tumour, arteries, veins and collecting system.
+5. Open **Guided lesson** to complete five short observation checks with immediate explanations.
+
+The editorial design rationale and original hero-asset provenance are documented in [`docs/design-direction.md`](docs/design-direction.md).
 
 ## Safe prototype boundary
 

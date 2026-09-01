@@ -3,6 +3,7 @@
 import {
   Activity,
   AlertTriangle,
+  ArrowLeft,
   ArrowRight,
   BarChart3,
   BookOpen,
@@ -444,7 +445,7 @@ function ViewToolbar({
       <button type="button" className="icon-button" onClick={() => setPreset('anterior')} aria-label="Reset anatomy view">
         <RotateCcw className="size-3.5" />
       </button>
-      <button type="button" className="icon-button" onClick={onSnapshot} aria-label="Download plan snapshot">
+      <button type="button" className="icon-button" onClick={onSnapshot} aria-label="Save demo image">
         <Download className="size-3.5" />
       </button>
     </div>
@@ -607,21 +608,26 @@ function PlanningInspector({
   setClamp: (value: 'selective' | 'main' | 'none') => void;
 }) {
   const illustrativeResidual = Math.max(71, 90.2 - marginMm * 0.86).toFixed(1);
-  const tabs: InspectorTab[] = ['source', 'anatomy', 'plan', 'qa'];
+  const tabs: Array<{ id: InspectorTab; label: string }> = [
+    { id: 'source', label: 'About' },
+    { id: 'anatomy', label: 'Anatomy' },
+    { id: 'plan', label: 'Example' },
+    { id: 'qa', label: 'Safety' },
+  ];
 
   return (
     <aside className="workspace-sidebar right-sidebar">
       <div className="inspector-tabs" role="tablist" aria-label="Case inspector">
         {tabs.map((item) => (
           <button
-            key={item}
+            key={item.id}
             type="button"
             role="tab"
-            aria-selected={tab === item}
-            onClick={() => setTab(item)}
-            className={tab === item ? 'inspector-tab-active' : ''}
+            aria-selected={tab === item.id}
+            onClick={() => setTab(item.id)}
+            className={tab === item.id ? 'inspector-tab-active' : ''}
           >
-            {item}
+            {item.label}
           </button>
         ))}
       </div>
@@ -738,7 +744,7 @@ function PlanningInspector({
             <div className="mt-4 rounded-xl border border-white/8 bg-black/10 p-3.5">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-[9px] uppercase tracking-[.12em] text-white/30">Residual volume</p>
+                  <p className="text-[9px] uppercase tracking-[.12em] text-white/30">Illustrative residual estimate</p>
                   <p className="mt-1 font-mono text-xl text-white/82">{illustrativeResidual}%</p>
                 </div>
                 <BarChart3 className="size-5 text-emerald-200/55" />
@@ -886,7 +892,7 @@ function ImportWorkspace({
             <div className="grid size-12 place-items-center rounded-2xl border border-white/8 bg-white/[.035] text-white/54">
               <UploadCloud className="size-5" />
             </div>
-            <h2 className="mt-4 text-sm font-medium text-white/72">Drop anonymised DICOM files here</h2>
+            <h2 className="mt-4 text-sm font-medium text-white/72">Choose files on this device</h2>
             <p className="mt-1.5 text-[11px] text-white/32">.dcm or .dicom • Multiple files supported • Contents never read</p>
             <Button
               className="mt-5 border-white/10 bg-white/6 text-white/70 hover:bg-white/10 hover:text-white"
@@ -1187,8 +1193,14 @@ function DisclaimerDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function RenalPlatform() {
-  const [mode, setMode] = useState<WorkspaceMode>('plan');
+export function RenalPlatform({
+  onExit,
+  initialMode = 'plan',
+}: {
+  onExit?: () => void;
+  initialMode?: WorkspaceMode;
+}) {
+  const [mode, setMode] = useState<WorkspaceMode>(initialMode);
   const [layers, setLayers] = useState<AnatomyLayers>({
     kidney: true,
     tumour: true,
@@ -1268,23 +1280,30 @@ export function RenalPlatform() {
   };
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" id="workspace-top">
       <header className="app-header">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="brand-mark"><Activity className="size-4" /></div>
+          <button
+            type="button"
+            className="brand-mark"
+            onClick={onExit}
+            aria-label={onExit ? 'Back to CalyxView Renal overview' : 'CalyxView Renal'}
+          >
+            {onExit ? <ArrowLeft className="size-4" /> : <Activity className="size-4" />}
+          </button>
           <div className="min-w-0">
             <div className="flex items-baseline gap-2">
               <span className="truncate text-sm font-semibold tracking-[-.025em] text-white/92 sm:text-base">CalyxView</span>
-              <span className="text-[10px] font-medium uppercase tracking-[.14em] text-emerald-200/62">Renal Lab</span>
+              <span className="text-[10px] font-medium uppercase tracking-[.14em] text-emerald-200/62">3D demo</span>
             </div>
             <p className="hidden text-[9px] uppercase tracking-[.14em] text-white/24 sm:block">Partial nephrectomy planning concept</p>
           </div>
         </div>
 
         <nav className="mode-nav" aria-label="Primary workspace">
-          <ModeButton active={mode === 'plan'} icon={<Box className="size-3.5" />} label="Plan" onClick={() => setMode('plan')} />
-          <ModeButton active={mode === 'import'} icon={<FileUp className="size-3.5" />} label="Import" onClick={() => setMode('import')} />
-          <ModeButton active={mode === 'learn'} icon={<BookOpen className="size-3.5" />} label="Learn" onClick={() => setMode('learn')} />
+          <ModeButton active={mode === 'plan'} icon={<Box className="size-3.5" />} label="Explore 3D" onClick={() => setMode('plan')} />
+          <ModeButton active={mode === 'import'} icon={<FileUp className="size-3.5" />} label="Try file flow" onClick={() => setMode('import')} />
+          <ModeButton active={mode === 'learn'} icon={<BookOpen className="size-3.5" />} label="Guided lesson" onClick={() => setMode('learn')} />
         </nav>
 
         <div className="flex items-center justify-end gap-2">
@@ -1293,6 +1312,12 @@ export function RenalPlatform() {
             <span className="hidden sm:inline">Research & education</span>
             <span className="sm:hidden">R&D</span>
           </button>
+          {onExit ? (
+            <button type="button" className="case-switcher overview-return" onClick={onExit}>
+              <ArrowLeft className="size-3" />
+              <span className="hidden sm:inline">Overview</span>
+            </button>
+          ) : null}
           <button type="button" className="case-switcher" onClick={() => setMode('plan')}>
             <span className="hidden max-w-44 truncate sm:block">{caseLabel}</span>
             <span className="sm:hidden">Case</span>
