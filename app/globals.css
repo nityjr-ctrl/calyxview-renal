@@ -2622,3 +2622,120 @@ button:disabled {
     gap: 16px 32px;
   }
 }
+
+/* --- CT-to-3D planning pipeline section ---------------------------------- */
+.pipeline-section {
+  background: #f6f4ee;
+}
+
+.pipeline-output-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 48px;
+}
+
+.pipeline-output-card {
+  border: 1px solid var(--site-line);
+  border-radius: 22px;
+  background: rgb(255 255 255 / .55);
+  padding: 26px 24px;
+}
+
+.pipeline-output-card > svg {
+  width: 24px;
+  height: 24px;
+  color: var(--site-green);
+  stroke-width: 1.7;
+}
+
+.pipeline-output-card h3 {
+  margin: 16px 0 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.pipeline-output-card p {
+  margin: 10px 0 0;
+  color: #66736c;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.pipeline-table-wrap {
+  overflow-x: auto;
+  margin-top: 22px;
+  border: 1px solid var(--site-line);
+  border-radius: 20px;
+  background: #fbfaf6;
+}
+
+.pipeline-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.pipeline-table th,
+.pipeline-table td {
+  padding: 13px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--site-line);
+  white-space: nowrap;
+}
+
+.pipeline-table thead th {
+  color: #536159;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: rgb(23 32 28 / .03);
+}
+
+.pipeline-table tbody th {
+  color: var(--site-ink);
+  font-weight: 700;
+}
+
+.pipeline-table tbody tr:last-child th,
+.pipeline-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pipeline-table td strong {
+  color: var(--site-green-deep);
+  font-weight: 700;
+}
+
+.pipeline-table td small {
+  color: #66736c;
+  font-size: 11px;
+}
+
+.pipeline-table-best th,
+.pipeline-table-best td {
+  background: rgb(117 201 167 / .16);
+}
+
+.pipeline-results-grid {
+  margin-top: 22px;
+}
+
+.pipeline-results-grid .benchmark-metric-value dd strong {
+  font-size: clamp(24px, 2.6vw, 34px);
+}
+
+@media (max-width: 1024px) {
+  .pipeline-output-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .pipeline-output-grid {
+    grid-template-columns: 1fr;
+  }
+}

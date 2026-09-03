@@ -25,6 +25,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 
 import type { AnatomyLayers } from '@/components/kidney-scene';
 import { FeasibilityBenchmark } from '@/components/feasibility-benchmark';
+import { PlanningPipeline } from '@/components/planning-pipeline';
 import { RenalPlatform } from '@/components/renal-platform';
 
 const KidneyScene = lazy(() =>
@@ -136,6 +137,7 @@ function SiteHeader({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
           <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a>
           <a href="#demo" onClick={() => setMenuOpen(false)}>3D demo</a>
           <a href="#learning" onClick={() => setMenuOpen(false)}>Learning</a>
+          <a href="#planning" onClick={() => setMenuOpen(false)}>Pipeline</a>
           <a href="#research" onClick={() => setMenuOpen(false)}>Research</a>
           <a href="#safety" onClick={() => setMenuOpen(false)}>Safety</a>
           <button type="button" className="site-nav-cta" onClick={() => openDemo()}>
@@ -237,9 +239,11 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
           <div className="hero-shade" />
           <div className="site-shell hero-content">
             <p className="hero-eyebrow">Partial nephrectomy · research &amp; education</p>
-            <h1 id="hero-title">A clearer way to explore renal anatomy.</h1>
+            <h1 id="hero-title">From CT to a measured 3D kidney.</h1>
             <p className="hero-copy">
-              A hands-on prototype for seeing kidney, tumour, vessel and collecting-system relationships in 3D—using a built-in synthetic teaching case.
+              A research prototype for partial nephrectomy: a 3D teaching case you can explore in the
+              browser, and a tested pipeline that turns a CT outline into a 3D model with computed
+              nephrometry and resection geometry.
             </p>
             <div className="hero-actions">
               <button type="button" className="button button-mint" onClick={() => openDemo()}>
@@ -249,7 +253,7 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
                 See how it works <ArrowDown />
               </a>
             </div>
-            <p className="hero-footnote">It does not analyse patient scans.</p>
+            <p className="hero-footnote">The browser demo does not analyse patient scans. The pipeline runs on the workstation, on anonymised data only.</p>
           </div>
         </section>
 
@@ -261,10 +265,13 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
             </div>
             <div className="intro-copy">
               <p>
-                CT data contains spatial information. This safe prototype shows how a future validated system could turn that information into a reviewed 3D planning experience.
+                CT data contains spatial information. This prototype shows two halves of turning it into a
+                reviewed 3D planning experience: a browser demo built on authored anatomy, and a Python
+                pipeline that has already produced measured 3D cases from real, expert-outlined kidneys.
               </p>
               <p>
-                Today, the site uses only authored anatomy and a simulated workflow. That keeps the experience useful for product design and teaching without pretending to perform clinical segmentation.
+                The browser demo never touches patient scans. The pipeline runs on the workstation, refuses
+                identified data, and publishes only aggregate results here. Neither is a medical device.
               </p>
               <a className="text-link" href="#how-it-works">Follow the five steps <ArrowRight /></a>
             </div>
@@ -351,6 +358,8 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
           </div>
         </section>
 
+        <PlanningPipeline />
+
         <FeasibilityBenchmark />
 
         <section id="safety" className="safety-section" aria-labelledby="safety-title">
@@ -406,6 +415,7 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
             <a href="#how-it-works">How it works</a>
             <a href="#demo">3D demo</a>
             <a href="#learning">Learning</a>
+            <a href="#planning">Pipeline</a>
             <a href="#research">Research</a>
             <a href="#safety">Safety</a>
           </div>
