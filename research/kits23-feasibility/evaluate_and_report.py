@@ -107,6 +107,27 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Run directory containing manifests/, labels/, and predictions/.",
     )
+    parser.add_argument(
+        "--reference-release-root",
+        type=Path,
+        help=(
+            "Separate post-lock reference release root. When supplied, --prediction-lock "
+            "is required and references are never read from the inference root."
+        ),
+    )
+    parser.add_argument(
+        "--prediction-lock",
+        type=Path,
+        help="Private immutable prediction-lock.json created before reference release.",
+    )
+    parser.add_argument(
+        "--report-dir",
+        type=Path,
+        help=(
+            "Output report directory. Required to be outside the inference root for a "
+            "blinded run; defaults to <reference-release-root>/report."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -123,6 +144,256 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _load_json_object(path: Path, label: str) -> dict[str, Any]:
+    if not path.is_file() or path.is_symlink():
+        raise ValueError(f"{label} must be a regular file: {path}")
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"{label} is not valid UTF-8 JSON") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} must contain one JSON object")
+    return value
+
+
+def _bound_file(
+    base: Path,
+    relative: Any,
+    expected_sha256: Any,
+    expected_bytes: Any,
+    label: str,
+) -> Path:
+    if not isinstance(relative, str) or not relative or "\\" in relative:
+        raise ValueError(f"{label} has an invalid relative path")
+    relative_path = Path(relative)
+    if relative_path.is_absolute() or ".." in relative_path.parts:
+        raise ValueError(f"{label} path escapes its root")
+    if not isinstance(expected_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
+        raise ValueError(f"{label} has an invalid SHA-256")
+    if not isinstance(expected_bytes, int) or isinstance(expected_bytes, bool) or expected_bytes < 0:
+        raise ValueError(f"{label} has an invalid byte count")
+    path = base.joinpath(*relative_path.parts)
+    if not path.is_file() or path.is_symlink():
+        raise ValueError(f"{label} is missing or not a regular file: {relative}")
+    if path.stat().st_size != expected_bytes or sha256_file(path) != expected_sha256:
+        raise ValueError(f"{label} changed after prediction locking: {relative}")
+    return path
+
+
+def _verify_locked_case_artifacts(
+    run_root: Path, case_records: Sequence[Mapping[str, Any]], case_ids: Sequence[str]
+) -> None:
+    if [record.get("case_id") for record in case_records] != list(case_ids):
+        raise ValueError("Prediction lock case records do not match the frozen cohort order")
+    for record in case_records:
+        case_id = str(record["case_id"])
+        _bound_file(
+            run_root,
+            record.get("input_image_relative"),
+            record.get("input_image_sha256"),
+            record.get("input_image_bytes"),
+            f"Locked CT for {case_id}",
+        )
+        _bound_file(
+            run_root,
+            record.get("timing_relative"),
+            record.get("timing_sha256"),
+            record.get("timing_bytes"),
+            f"Locked timing for {case_id}",
+        )
+        attempts = record.get("attempts")
+        if not isinstance(attempts, list) or not attempts:
+            raise ValueError(f"Prediction lock attempts are missing for {case_id}")
+        for attempt in attempts:
+            if not isinstance(attempt, Mapping):
+                raise ValueError(f"Prediction lock attempt is malformed for {case_id}")
+            logs = attempt.get("logs")
+            if not isinstance(logs, list):
+                raise ValueError(f"Prediction lock logs are malformed for {case_id}")
+            for log in logs:
+                if not isinstance(log, Mapping):
+                    raise ValueError(f"Prediction lock log evidence is malformed for {case_id}")
+                _bound_file(
+                    run_root,
+                    log.get("relative"),
+                    log.get("sha256"),
+                    log.get("bytes"),
+                    f"Locked log for {case_id}",
+                )
+        prediction = record.get("prediction")
+        if prediction is None:
+            expected = run_root / "predictions" / f"{case_id}.nii.gz"
+            if expected.exists() or expected.is_symlink():
+                raise ValueError(f"A failed locked case gained a prediction: {case_id}")
+        elif isinstance(prediction, Mapping):
+            _bound_file(
+                run_root,
+                prediction.get("relative"),
+                prediction.get("sha256"),
+                prediction.get("bytes"),
+                f"Locked prediction for {case_id}",
+            )
+        else:
+            raise ValueError(f"Prediction lock prediction evidence is malformed for {case_id}")
+
+
+def verify_blinded_release(
+    run_root: Path,
+    reference_release_root: Path,
+    prediction_lock_path: Path,
+) -> dict[str, Any]:
+    """Verify every immutable gate before the first reference NIfTI is loaded."""
+
+    run_root = run_root.resolve()
+    reference_release_root = reference_release_root.resolve()
+    prediction_lock_path = prediction_lock_path.resolve()
+    if prediction_lock_path != run_root / "prediction-lock.json":
+        raise ValueError("--prediction-lock must be the canonical run-root prediction-lock.json")
+    if reference_release_root == run_root or reference_release_root.is_relative_to(run_root):
+        raise ValueError("Reference release root must remain outside the inference root")
+
+    # Reference/label paths below the inference root are forbidden even after release.
+    forbidden_parts = {
+        "label",
+        "labels",
+        "labelstr",
+        "labelsts",
+        "reference",
+        "references",
+        "segmentation",
+        "segmentations",
+        "groundtruth",
+        "masks",
+    }
+    for path in run_root.rglob("*"):
+        tokens = {
+            token
+            for part in path.relative_to(run_root).parts
+            for token in re.split(r"[^a-z0-9]+", part.lower().replace("ground-truth", "groundtruth"))
+            if token
+        }
+        if tokens & forbidden_parts:
+            raise ValueError(f"Reference-like material is forbidden in the inference root: {path}")
+
+    prediction_lock = _load_json_object(prediction_lock_path, "Prediction lock")
+    if prediction_lock.get("schema_version") != 1:
+        raise ValueError("Prediction lock schema_version must be 1")
+    if prediction_lock.get("lock_type") != "prediction_lock_before_reference_release":
+        raise ValueError("Prediction lock has the wrong lock_type")
+    if prediction_lock.get("research_only") is not True:
+        raise ValueError("Prediction lock must state research_only=true")
+    reference_state = prediction_lock.get("reference_state")
+    if not isinstance(reference_state, Mapping):
+        raise ValueError("Prediction lock lacks reference_state")
+    if reference_state.get("reference_material_present") is not False:
+        raise ValueError("Prediction lock does not prove reference-free inference")
+    if reference_state.get("reference_material_loaded") is not False:
+        raise ValueError("Prediction lock does not prove references were unopened")
+
+    prediction_lock_sha256 = sha256_file(prediction_lock_path)
+    public_digest_path = run_root / "prediction-lock.sha256"
+    if public_digest_path.read_bytes() != (prediction_lock_sha256 + "\n").encode("ascii"):
+        raise ValueError("Public prediction-lock digest does not match the private lock")
+
+    cohort = prediction_lock.get("cohort")
+    if not isinstance(cohort, Mapping):
+        raise ValueError("Prediction lock lacks cohort evidence")
+    case_ids = cohort.get("case_ids")
+    if (
+        not isinstance(case_ids, list)
+        or len(case_ids) != 20
+        or any(not isinstance(case_id, str) or not CASE_ID_PATTERN.fullmatch(case_id) for case_id in case_ids)
+        or len(set(case_ids)) != len(case_ids)
+    ):
+        raise ValueError("Prediction lock must bind exactly 20 unique public case IDs")
+    for prefix, section_name in (
+        ("manifest", "cohort"),
+        ("cohort_lock", "cohort"),
+        ("model_lock", "model"),
+    ):
+        section = prediction_lock.get(section_name)
+        if not isinstance(section, Mapping):
+            raise ValueError(f"Prediction lock lacks {section_name} evidence")
+        _bound_file(
+            run_root,
+            section.get(f"{prefix}_relative"),
+            section.get(f"{prefix}_sha256"),
+            section.get(f"{prefix}_bytes"),
+            f"Locked {prefix}",
+        )
+    provenance = prediction_lock.get("inference_provenance")
+    if not isinstance(provenance, Mapping):
+        raise ValueError("Prediction lock lacks inference provenance evidence")
+    _bound_file(
+        run_root,
+        provenance.get("relative"),
+        provenance.get("sha256"),
+        provenance.get("bytes"),
+        "Locked inference provenance",
+    )
+    inference = prediction_lock.get("inference")
+    if not isinstance(inference, Mapping) or inference.get("evaluated_cases") != 20:
+        raise ValueError("Prediction lock lacks a complete 20-case inference record")
+    case_records = inference.get("cases")
+    if not isinstance(case_records, list):
+        raise ValueError("Prediction lock lacks per-case immutable evidence")
+    _verify_locked_case_artifacts(run_root, case_records, case_ids)
+
+    release_path = reference_release_root / "reference-release.json"
+    release = _load_json_object(release_path, "Reference release")
+    if release.get("schema_version") != 1:
+        raise ValueError("Reference release schema_version must be 1")
+    if release.get("release_type") != "reference_release_after_prediction_lock":
+        raise ValueError("Reference release has the wrong release_type")
+    if release.get("research_only") is not True:
+        raise ValueError("Reference release must state research_only=true")
+    if release.get("prediction_lock_sha256") != prediction_lock_sha256:
+        raise ValueError("Reference release is not bound to this prediction lock")
+    if release.get("cohort_lock_sha256") != cohort.get("cohort_lock_sha256"):
+        raise ValueError("Reference release cohort lock binding is invalid")
+    if release.get("manifest_sha256") != cohort.get("manifest_sha256"):
+        raise ValueError("Reference release manifest binding is invalid")
+    if release.get("case_ids") != case_ids or release.get("case_count") != 20:
+        raise ValueError("Reference release case identity/order changed")
+    custody_mode = release.get("custody_mode")
+    if custody_mode not in {"same_operator_script_blinded", "independent_custodian"}:
+        raise ValueError("Reference release has an invalid custody mode")
+    if release.get("operator_blinded") is not (custody_mode == "independent_custodian"):
+        raise ValueError("Reference release overstates its operator-blinding status")
+
+    reference_records = release.get("cases")
+    if not isinstance(reference_records, list) or [item.get("case_id") for item in reference_records if isinstance(item, Mapping)] != case_ids:
+        raise ValueError("Reference release per-case evidence is incomplete or reordered")
+    expected_reference_names: set[str] = set()
+    for record in reference_records:
+        if not isinstance(record, Mapping):
+            raise ValueError("Reference release per-case evidence is malformed")
+        expected_reference_names.add(f"{record['case_id']}.nii.gz")
+        _bound_file(
+            reference_release_root,
+            record.get("relative"),
+            record.get("sha256"),
+            record.get("bytes"),
+            f"Released reference for {record['case_id']}",
+        )
+    references_dir = reference_release_root / "references"
+    actual_reference_names = {path.name for path in references_dir.iterdir()}
+    if actual_reference_names != expected_reference_names:
+        raise ValueError("Reference release contains missing or extra reference files")
+
+    return {
+        "mode": "script_inference_blinded",
+        "operator_blinded": release["operator_blinded"],
+        "custody_mode": custody_mode,
+        "custody_limitation": release.get("custody_limitation"),
+        "prediction_lock_sha256": prediction_lock_sha256,
+        "cohort_lock_sha256": cohort.get("cohort_lock_sha256"),
+        "manifest_sha256": cohort.get("manifest_sha256"),
+        "reference_release_sha256": sha256_file(release_path),
+        "public_prediction_lock_receipt": release.get("public_prediction_lock_receipt"),
+    }
 
 
 def require_manifest(path: Path) -> list[dict[str, str]]:
@@ -656,27 +927,40 @@ def build_summary(
     manifest_path: Path,
     rows: Sequence[Mapping[str, Any]],
     timing_warnings: Sequence[str],
+    blinded_evidence: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     rng = np.random.default_rng(BOOTSTRAP_SEED)
     portable_manifest_path = run_root / "manifests" / "manifest.portable.json"
-    if not portable_manifest_path.is_file():
+    if blinded_evidence is None and not portable_manifest_path.is_file():
         raise FileNotFoundError(
             "Canonical path-free manifest is required: manifests/manifest.portable.json"
         )
-    successful = [row for row in rows if row["status"] == "ok"]
-    failures = [row for row in rows if row["status"] != "ok"]
-    summary: dict[str, Any] = {
-        "title": "CalyxView Renal — 20-case KiTS23 feasibility evaluation",
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "disclaimer": DISCLAIMER,
-        "research_only": True,
-        "manifest": {
+    if blinded_evidence is None:
+        manifest_summary = {
             "path": str(portable_manifest_path.relative_to(run_root)).replace("\\", "/"),
             "sha256": sha256_file(portable_manifest_path),
             "path_free": True,
             "local_csv_sha256": sha256_file(manifest_path),
             "case_count": len(rows),
-        },
+        }
+        title = "CalyxView Renal — 20-case KiTS23 feasibility evaluation"
+    else:
+        manifest_summary = {
+            "path": "manifests/manifest.csv",
+            "sha256": sha256_file(manifest_path),
+            "path_free": True,
+            "image_only_five_column_contract": True,
+            "case_count": len(rows),
+        }
+        title = "CalyxView Renal — 20-case KiTS23 script-blinded evaluation"
+    successful = [row for row in rows if row["status"] == "ok"]
+    failures = [row for row in rows if row["status"] != "ok"]
+    summary: dict[str, Any] = {
+        "title": title,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "disclaimer": DISCLAIMER,
+        "research_only": True,
+        "manifest": manifest_summary,
         "completion": {
             "manifest_cases": len(rows),
             "evaluated_successfully": len(successful),
@@ -735,6 +1019,8 @@ def build_summary(
             "qc_content": "public case identifier and derived segmentation masks only",
         },
     }
+    if blinded_evidence is not None:
+        summary["blinding_and_custody"] = dict(blinded_evidence)
     for region_name in REGIONS:
         summary["regions"][region_name] = {
             "dice": bootstrap_mean_summary(
@@ -779,22 +1065,29 @@ def build_summary(
             "cases_with_timing": len(runtime_values),
             "cases_without_timing": len(rows) - len(runtime_values),
         }
-    provenance_path = run_root / "provenance.json"
+    provenance_path = run_root / (
+        "provenance.inference.json" if blinded_evidence is not None else "provenance.json"
+    )
     if provenance_path.is_file():
         try:
             provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
-            summary["execution_provenance"] = {
-                "captured_at_utc": provenance.get("captured_at_utc"),
-                "cohort": provenance.get("cohort"),
-                "model": provenance.get("model"),
-                "framework": provenance.get("framework"),
-                "hardware": provenance.get("hardware"),
-                "inference_contract": provenance.get("inference_contract"),
-                "privacy": provenance.get("privacy"),
-            }
+            if blinded_evidence is not None:
+                # The blinded provenance recorder is itself path-free,
+                # aggregate-only and bound into the immutable prediction lock.
+                summary["execution_provenance"] = provenance
+            else:
+                summary["execution_provenance"] = {
+                    "captured_at_utc": provenance.get("captured_at_utc"),
+                    "cohort": provenance.get("cohort"),
+                    "model": provenance.get("model"),
+                    "framework": provenance.get("framework"),
+                    "hardware": provenance.get("hardware"),
+                    "inference_contract": provenance.get("inference_contract"),
+                    "privacy": provenance.get("privacy"),
+                }
         except (OSError, UnicodeError, json.JSONDecodeError) as exc:
             summary["timing_warnings"].append(
-                f"Could not include provenance.json: {exc}"
+                f"Could not include {provenance_path.name}: {exc}"
             )
     return summary
 
@@ -1097,9 +1390,37 @@ def main() -> None:
     args = parse_args()
     run_root = args.run_root.resolve()
     manifest_path = run_root / "manifests" / "manifest.csv"
-    labels_dir = run_root / "labels"
     predictions_dir = run_root / "predictions"
-    report_dir = run_root / "report"
+    blinded_arguments = (args.reference_release_root, args.prediction_lock)
+    if any(value is not None for value in blinded_arguments) and not all(
+        value is not None for value in blinded_arguments
+    ):
+        raise ValueError(
+            "--reference-release-root and --prediction-lock must be supplied together"
+        )
+    blinded_evidence: Mapping[str, Any] | None = None
+    if args.reference_release_root is not None:
+        reference_release_root = args.reference_release_root.resolve()
+        labels_dir = reference_release_root / "references"
+        report_dir = (
+            args.report_dir.resolve()
+            if args.report_dir is not None
+            else reference_release_root / "report"
+        )
+        if report_dir == run_root or report_dir.is_relative_to(run_root):
+            raise ValueError("Blinded report directory must remain outside the inference root")
+        # Every lock, hash and release binding is verified before evaluate_case can
+        # call load_segmentation on the first released reference.
+        blinded_evidence = verify_blinded_release(
+            run_root,
+            reference_release_root,
+            args.prediction_lock,
+        )
+    else:
+        if args.report_dir is not None:
+            raise ValueError("--report-dir is only valid with a blinded reference release")
+        labels_dir = run_root / "labels"
+        report_dir = run_root / "report"
     qc_dir = report_dir / "qc"
 
     records = require_manifest(manifest_path)
@@ -1133,7 +1454,13 @@ def main() -> None:
     summary_path = report_dir / "summary.json"
     report_path = report_dir / "report.html"
     write_case_results(results_path, rows)
-    summary = build_summary(run_root, manifest_path, rows, timing_warnings)
+    summary = build_summary(
+        run_root,
+        manifest_path,
+        rows,
+        timing_warnings,
+        blinded_evidence,
+    )
     worst_cases = write_worst_case_gallery(report_dir, rows)
     summary["worst_case_gallery"] = {
         "ranking": "failures first, then ascending mean Surface Dice and mean Dice",

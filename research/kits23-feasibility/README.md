@@ -446,3 +446,39 @@ Until those controls and evidence exist, the website upload and 3D experience mu
 - `BENCHMARK_PROMPT.md`: reusable frozen experiment instructions for a research operator or coding agent.
 - `ATTRIBUTION_AND_RESEARCH_NOTICE.md`: public attribution, licence, research-use, and publication boundaries.
 - `requirements-nnunet.txt` and `requirements-report.txt`: separate the legacy inference stack from acquisition/reporting dependencies.
+
+## Stronger script-blinded successor protocol
+
+The original `case_00400`–`case_00419` experiment above is retained as historical
+feasibility evidence. It used CT-only model inference, but references existed
+locally and were inspected before inference for integrity and geometry. Do not
+retroactively describe it as operationally blinded.
+
+The successor workflow is defined in
+[`BLINDED_EVALUATION_PROTOCOL.md`](BLINDED_EVALUATION_PROTOCOL.md). Its essential
+order is:
+
+1. complete the independent protocol review;
+2. create the pre-inference model lock;
+3. acquire the deterministic random CT cohort with no reference path or field;
+4. run CT-only inference and preserve all successes/failures;
+5. capture reference-free provenance and lock every result;
+6. publish the digest-only prediction receipt;
+7. release KiTS references into a separate evaluation root;
+8. score only after all lock and hash checks pass;
+9. publish aggregate evidence only.
+
+On this workstation the correct claim is **script/inference-blinded, not
+independently operator-blinded**. A future independently blinded study requires a
+separate reference custodian or host.
+
+Additional files for that workflow:
+
+- `create_model_lock.py`: verifies and freezes the published model before inference.
+- `prepare_blinded_cohort.py`: deterministic image-only sampling and acquisition.
+- `capture_blinded_provenance.py`: reference-free runtime/model/source verification.
+- `lock_predictions.py`: immutable private prediction lock plus digest-only public receipt.
+- `release_references.py`: commit-pinned post-lock reference release into a separate root.
+- `BLINDED_EVALUATION_PROTOCOL.md`: plain-language sequence, gates, metrics and custody limits.
+- `BLINDED_BENCHMARK_PROMPT.md`: reusable execution prompt for the complete successor run.
+- `test/`: mutation, substitution, boundary, lock-order and no-reference-before-scoring tests.
