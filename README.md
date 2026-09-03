@@ -87,6 +87,16 @@ The current site does **not** implement any of the following:
 
 The detailed production work programme is in [`docs/production-segmentation-roadmap.md`](docs/production-segmentation-roadmap.md).
 
+## Companion project and the PACS request
+
+The endourology sibling, **CalyxView** ([github.com/nityjr-ctrl/CalyxView](https://github.com/nityjr-ctrl/CalyxView)),
+reconstructs kidney parenchyma, collecting system and stones from CT for URS and
+PCNL teaching, and carries a local-only DICOM intake check plus a tested
+DICOM-to-3D pipeline. Both projects need the same thing next: an anonymised DICOM
+export of CT urograms and stone CTs from PACS. The request, with the exact series,
+format, anonymisation and handover specification, is in
+[`docs/PACS-DICOM-EXPORT-REQUEST.md`](docs/PACS-DICOM-EXPORT-REQUEST.md).
+
 ## Development
 
 Requirements: Node.js 22.13 or newer.
