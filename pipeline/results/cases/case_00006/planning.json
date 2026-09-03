@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "tool": "renalplan 0.1.0",
+  "generatedAtUtc": "2026-09-03T09:14:46.774326+00:00",
+  "disclaimer": "Research and teaching prototype. Not a medical device. Not for diagnosis, treatment selection, surgical planning, margin selection or patient care.",
+  "caseId": "case_00006",
+  "provenance": {
+    "labels": "/root/CalyxView-data/kits/case_00006/segmentation.nii.gz",
+    "ct": null,
+    "postprocess": null,
+    "mesh": {
+      "taubin_iter": 15,
+      "taubin_lambda": 0.5,
+      "taubin_nu": 0.53,
+      "target_faces": 20000,
+      "keep_largest": true,
+      "closing_iter": 1
+    },
+    "spacingMm": [
+      0.742,
+      0.742,
+      3.0
+    ],
+    "runtimeSeconds": 8.4
+  },
+  "nephrometry": {
+    "renal": {
+      "radius_cm": 3.59,
+      "radius_pts": 1,
+      "exophytic_fraction": 0.001,
+      "exophytic_pts": 3,
+      "nearness_mm": 0.7,
+      "nearness_pts": 3,
+      "ap": "a",
+      "location_pts": 2,
+      "location_detail": "crosses a polar line",
+      "hilar": false,
+      "total": 9,
+      "complexity": "moderate",
+      "notes": [
+        "Renal sinus approximated as the hull-enclosed space that is not parenchyma or tumour.",
+        "No vessel mask; hilar suffix not assessed."
+      ]
+    },
+    "renalLabel": "9a",
+    "padua": {
+      "polar_location": "middle",
+      "polar_pts": 2,
+      "exophytic_pts": 3,
+      "rim": "medial",
+      "rim_pts": 2,
+      "sinus_involved": true,
+      "sinus_pts": 2,
+      "collecting_involved": null,
+      "collecting_pts": 1,
+      "size_pts": 1,
+      "total": 11,
+      "complexity": "high"
+    },
+    "assumptions": [
+      "Renal sinus approximated as the hull-enclosed space that is not parenchyma or tumour."
+    ]
+  },
+  "planning": {
+    "margin_mm": 5.0,
+    "tumour_ml": 11.295021057128906,
+    "ipsilateral_kidney_ml": 176.79393310546874,
+    "contralateral_kidney_ml": 207.73254089355467,
+    "resection_ml": 20.46324005126953,
+    "parenchyma_removed_ml": 9.168218994140625,
+    "residual_ipsilateral_ml": 167.6257141113281,
+    "preserved_fraction_ipsilateral": 0.9481417782098258,
+    "ipsilateral_share_of_total": 0.4597705101207615,
+    "cyst_ml": 3.7826339721679685,
+    "tumour_to_sinus_mm": 0.7421875,
+    "tumour_to_collecting_mm": null,
+    "tumour_to_vessels_mm": null,
+    "contact_surface_area_cm2": 34.73814392089844,
+    "notes": [
+      "Margin envelope is a uniform dilation of the tumour; not a surgical plan."
+    ]
+  }
+}

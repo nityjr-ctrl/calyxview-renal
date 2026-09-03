@@ -47,3 +47,12 @@ research/**/run-*/
 research/**/report/
 research/**/results/*
 !research/kits23-feasibility/results/summary.public.json
+
+# renalplan pipeline (Python)
+pipeline/out/
+pipeline/**/__pycache__/
+pipeline/.pytest_cache/
+pipeline/*.egg-info/
+*.nii
+*.nii.gz
+*.dcm
