@@ -326,7 +326,7 @@ def cmd_optimise_mesh(a):
         cases = [c for c in cases if c.parent.name in a.cases]
     cases = cases[: a.limit or None]
     sweep = []
-    iters = [0, 5, 10, 15, 25, 40]
+    iters = [0, 10, 25]
     faces = [4000, 10000, 20000, 40000]
     for seg in cases:
         labels = load_nifti(seg, dtype=np.uint8)
@@ -337,7 +337,8 @@ def cmd_optimise_mesh(a):
                 continue
             for it in iters:
                 for tf in faces:
-                    p = MeshParams(taubin_iter=it, target_faces=tf)
+                    # keep every component so a two-kidney label is scored fairly
+                    p = MeshParams(taubin_iter=it, target_faces=tf, keep_largest=False)
                     t0 = time.time()
                     mesh = mask_to_mesh(mask, labels.affine, p)
                     if mesh is None:

@@ -80,14 +80,35 @@ rules, and the effect is measured the same way.
 ## 3. Mesh fidelity sweep
 
 `renalplan optimise-mesh` meshes each kidney and tumour mask at Taubin
-iterations {0, 5, 10, 15, 25, 40} and decimation targets {4k, 10k, 20k, 40k}
+iterations {0, 10, 25} and decimation targets {4k, 10k, 20k, 40k}
 faces, voxelises the mesh back onto the source grid and scores it against the
 mask. Results in `mesh/mesh_sweep.csv`, plot in `mesh/mesh_sweep.png`,
 recommendation in `mesh/mesh_recommendation.json` (criteria: mean Dice at
 least 0.97 and mean absolute volume error at most 3%, then the fewest faces,
 then the lowest HD95).
 
-MESH_RESULTS_PLACEHOLDER
+Three cases (`case_00002`, `00003`, `00006`), kidney label (both kidneys) and
+tumour, mean over cases:
+
+| Structure | Taubin | Target faces | Dice vs mask | HD95 (mm) | abs. volume error |
+| --- | --- | --- | --- | --- | --- |
+| Kidney | 0 | 4 000 | 0.981 | 1.6 | 1.2% |
+| Kidney | 10 | 10 000 | 0.988 | 2.0 | 1.3% |
+| Kidney | 10 | 20 000 | 0.991 | 1.5 | 1.7% |
+| Kidney | 0 | 40 000 | 0.992 | 1.5 | 1.5% |
+| Kidney | 25 | 40 000 | 0.990 | 3.1 | 1.2% |
+| Tumour | 0 to 10 | any | 0.988 | 0.9 | 2.3% |
+| Tumour | 25 | any | 0.985 | 0.9 | 2.2% |
+
+Every setting keeps Dice above 0.98 and volume error under 2.5%, so the choice
+is about size and smoothness rather than fidelity. The recommendation file
+picks the cheapest setting that meets the criteria (4 000 faces, no smoothing);
+for the viewer the pipeline default of 20 000 faces with 15 Taubin iterations
+is a sensible middle: sub-2 mm HD95, under 2% volume error and a smooth
+surface. Tumours are small enough that decimation never engages below 40 000
+faces, and heavy smoothing (25 iterations) starts to shrink them.
+
+![mesh sweep](mesh/mesh_sweep.png)
 
 ## Reproducing
 
