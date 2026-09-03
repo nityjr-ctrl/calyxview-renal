@@ -60,25 +60,40 @@ def mask_to_mesh(mask: np.ndarray, affine: np.ndarray, params: MeshParams = Mesh
     return mesh
 
 
-def voxelise(mesh: trimesh.Trimesh, affine: np.ndarray, shape, chunk: int = 400_000) -> np.ndarray:
-    """Rasterise a closed mesh back onto the voxel grid. Only voxels inside the
-    mesh bounding box are tested, in chunks, so memory stays flat on large CTs."""
-    inv = np.linalg.inv(affine)
-    corners = np.array([[x, y, z] for x in mesh.bounds[:, 0] for y in mesh.bounds[:, 1] for z in mesh.bounds[:, 2]])
-    vc = (inv @ np.c_[corners, np.ones(8)].T).T[:, :3]
-    lo = np.maximum(np.floor(vc.min(0)).astype(int) - 1, 0)
-    hi = np.minimum(np.ceil(vc.max(0)).astype(int) + 2, np.asarray(shape))
+def voxelise(mesh: trimesh.Trimesh, affine: np.ndarray, shape) -> np.ndarray:
+    """Rasterise a closed mesh back onto the voxel grid, slice by slice: the
+    mesh is moved into voxel-index space, cut at every integer z, and the
+    resulting polygons are tested against the slice's grid points. Exact for
+    voxel centres and memory-light on large CTs."""
+    import shapely
+
+    m = mesh.copy()
+    m.apply_transform(np.linalg.inv(affine))
     out = np.zeros(shape, bool)
-    if np.any(hi <= lo):
+    lo, hi = m.bounds
+    z0, z1 = max(0, int(np.ceil(lo[2]))), min(shape[2] - 1, int(np.floor(hi[2])))
+    x0, x1 = max(0, int(np.floor(lo[0]))), min(shape[0] - 1, int(np.ceil(hi[0])))
+    y0, y1 = max(0, int(np.floor(lo[1]))), min(shape[1] - 1, int(np.ceil(hi[1])))
+    if z1 < z0 or x1 < x0 or y1 < y0:
         return out
-    sub_shape = tuple(int(h - l) for l, h in zip(lo, hi))
-    idx = np.indices(sub_shape).reshape(3, -1).T + lo
-    inside = np.zeros(len(idx), bool)
-    for start in range(0, len(idx), chunk):
-        block = idx[start:start + chunk]
-        pts = (affine @ np.c_[block, np.ones(len(block))].T).T[:, :3]
-        inside[start:start + chunk] = mesh.contains(pts)
-    out[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]] = inside.reshape(sub_shape)
+    gx, gy = np.meshgrid(np.arange(x0, x1 + 1), np.arange(y0, y1 + 1), indexing="ij")
+    gx, gy = gx.ravel().astype(float), gy.ravel().astype(float)
+    for k in range(z0, z1 + 1):
+        sec = m.section(plane_origin=[0, 0, float(k)], plane_normal=[0, 0, 1])
+        if sec is None:
+            continue
+        to_2d = np.eye(4)
+        to_2d[2, 3] = -float(k)
+        planar, _ = sec.to_2D(to_2D=to_2d)
+        polys = planar.polygons_full
+        if not len(polys):
+            continue
+        inside = np.zeros(gx.shape, bool)
+        for poly in polys:
+            inside |= shapely.contains_xy(poly, gx, gy)
+        sl = out[x0:x1 + 1, y0:y1 + 1, k]
+        sl |= inside.reshape(sl.shape)
+        out[x0:x1 + 1, y0:y1 + 1, k] = sl
     return out
 
 

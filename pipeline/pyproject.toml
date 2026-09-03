@@ -9,7 +9,7 @@ description = "CT-to-3D reconstruction and planning support for partial nephrect
 requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.26", "scipy>=1.11", "scikit-image>=0.22", "trimesh>=4.4",
-  "fast-simplification>=0.1.9", "rtree>=1.1", "nibabel>=5.2", "pydicom>=2.4", "matplotlib>=3.8",
+  "fast-simplification>=0.1.9", "rtree>=1.1", "shapely>=2.0", "nibabel>=5.2", "pydicom>=2.4", "matplotlib>=3.8",
 ]
 
 [project.scripts]

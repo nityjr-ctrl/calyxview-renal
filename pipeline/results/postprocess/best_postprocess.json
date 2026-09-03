@@ -1,0 +1,8 @@
+{
+  "kidney_max_components": 2,
+  "kidney_min_ml": 0.0,
+  "mass_min_ml": 0.0,
+  "mass_attach_mm": 5.0,
+  "fill_holes": false,
+  "kidney_open_iter": 0
+}

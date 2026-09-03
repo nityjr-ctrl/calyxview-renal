@@ -1,0 +1,529 @@
+{
+  "cases": [
+    "case_00002",
+    "case_00003",
+    "case_00004",
+    "case_00006",
+    "case_00007"
+  ],
+  "results": [
+    {
+      "config": "k2_kmin0_mmin0_att5_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 5.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin0_mmin0_att10_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 10.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin0_mmin0.05_att5_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 5.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin0_mmin0.05_att10_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 10.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin15_mmin0_att5_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 5.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin15_mmin0_att10_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 10.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin15_mmin0.05_att5_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 5.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin15_mmin0.05_att10_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 10.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9944730652921162,
+      "kidney_and_mass_hd95": 1.061433871973185,
+      "kidney_and_mass_sdice": 0.9510224051548937,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982902157578208
+    },
+    {
+      "config": "k2_kmin0_mmin0_att5_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 5.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin0_mmin0_att10_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 10.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin0_mmin0.05_att5_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 5.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin0_mmin0.05_att10_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 10.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin15_mmin0_att5_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 5.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin15_mmin0_att10_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 10.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin15_mmin0.05_att5_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 5.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin15_mmin0.05_att10_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 10.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9942038318559897,
+      "kidney_and_mass_hd95": 1.3199558670815819,
+      "kidney_and_mass_sdice": 0.9463576491174974,
+      "mass_dice": 0.8603174544521032,
+      "mass_hd95": 2.463197779795086,
+      "mass_sdice": 0.6212979168879994,
+      "tumour_dice": 0.8400801275292429,
+      "tumour_hd95": 2.528915249912843,
+      "tumour_sdice": 0.5692653679996681,
+      "objective": 0.8982004712791118
+    },
+    {
+      "config": "k2_kmin0_mmin0.05_att0_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 0.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9935228204695727,
+      "kidney_and_mass_hd95": 1.4333980899686412,
+      "kidney_and_mass_sdice": 0.9457800396619556,
+      "mass_dice": 0.8409836667148378,
+      "mass_hd95": 71.03206758967934,
+      "mass_sdice": 0.593054864377303,
+      "tumour_dice": 0.8199180108310286,
+      "tumour_hd95": 71.2969463148001,
+      "tumour_sdice": 0.5386058024054674,
+      "objective": 0.8848081660051464
+    },
+    {
+      "config": "k2_kmin15_mmin0.05_att0_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 0.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9935228204695727,
+      "kidney_and_mass_hd95": 1.4333980899686412,
+      "kidney_and_mass_sdice": 0.9457800396619556,
+      "mass_dice": 0.8409836667148378,
+      "mass_hd95": 71.03206758967934,
+      "mass_sdice": 0.593054864377303,
+      "tumour_dice": 0.8199180108310286,
+      "tumour_hd95": 71.2969463148001,
+      "tumour_sdice": 0.5386058024054674,
+      "objective": 0.8848081660051464
+    },
+    {
+      "config": "k2_kmin0_mmin0.05_att0_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 0.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9932537496183829,
+      "kidney_and_mass_hd95": 1.911572980477605,
+      "kidney_and_mass_sdice": 0.9410935870150826,
+      "mass_dice": 0.8409836667148378,
+      "mass_hd95": 71.03206758967934,
+      "mass_sdice": 0.593054864377303,
+      "tumour_dice": 0.8199180108310286,
+      "tumour_hd95": 71.2969463148001,
+      "tumour_sdice": 0.5386058024054674,
+      "objective": 0.8847184757214164
+    },
+    {
+      "config": "k2_kmin15_mmin0.05_att0_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.05,
+        "mass_attach_mm": 0.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9932537496183829,
+      "kidney_and_mass_hd95": 1.911572980477605,
+      "kidney_and_mass_sdice": 0.9410935870150826,
+      "mass_dice": 0.8409836667148378,
+      "mass_hd95": 71.03206758967934,
+      "mass_sdice": 0.593054864377303,
+      "tumour_dice": 0.8199180108310286,
+      "tumour_hd95": 71.2969463148001,
+      "tumour_sdice": 0.5386058024054674,
+      "objective": 0.8847184757214164
+    },
+    {
+      "config": "k2_kmin0_mmin0_att0_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 0.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9924467393459654,
+      "kidney_and_mass_hd95": 2.5285291213696204,
+      "kidney_and_mass_sdice": 0.9384493799806519,
+      "mass_dice": 0.8199093991902678,
+      "mass_hd95": 105.5624204064134,
+      "mass_sdice": 0.5468332255794851,
+      "tumour_dice": 0.7972083126391765,
+      "tumour_hd95": 130.85571414045614,
+      "tumour_sdice": 0.485080135127245,
+      "objective": 0.8698548170584699
+    },
+    {
+      "config": "k2_kmin15_mmin0_att0_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 0.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9924467393459654,
+      "kidney_and_mass_hd95": 2.5285291213696204,
+      "kidney_and_mass_sdice": 0.9384493799806519,
+      "mass_dice": 0.8199093991902678,
+      "mass_hd95": 105.5624204064134,
+      "mass_sdice": 0.5468332255794851,
+      "tumour_dice": 0.7972083126391765,
+      "tumour_hd95": 130.85571414045614,
+      "tumour_sdice": 0.485080135127245,
+      "objective": 0.8698548170584699
+    },
+    {
+      "config": "k2_kmin0_mmin0_att0_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 0.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9921769418902713,
+      "kidney_and_mass_hd95": 3.4123056481378127,
+      "kidney_and_mass_sdice": 0.9337104733005231,
+      "mass_dice": 0.8199093991902678,
+      "mass_hd95": 105.5624204064134,
+      "mass_sdice": 0.5468332255794851,
+      "tumour_dice": 0.7972083126391765,
+      "tumour_hd95": 130.85571414045614,
+      "tumour_sdice": 0.485080135127245,
+      "objective": 0.8697648845732386
+    },
+    {
+      "config": "k2_kmin15_mmin0_att0_fill1_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 15.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 0.0,
+        "fill_holes": true,
+        "kidney_open_iter": 0
+      },
+      "kidney_and_mass_dice": 0.9921769418902713,
+      "kidney_and_mass_hd95": 3.4123056481378127,
+      "kidney_and_mass_sdice": 0.9337104733005231,
+      "mass_dice": 0.8199093991902678,
+      "mass_hd95": 105.5624204064134,
+      "mass_sdice": 0.5468332255794851,
+      "tumour_dice": 0.7972083126391765,
+      "tumour_hd95": 130.85571414045614,
+      "tumour_sdice": 0.485080135127245,
+      "objective": 0.8697648845732386
+    },
+    {
+      "config": "none",
+      "params": null,
+      "kidney_and_mass_dice": 0.9882440906704956,
+      "kidney_and_mass_hd95": 3.3909260070710188,
+      "kidney_and_mass_sdice": 0.937092010154301,
+      "mass_dice": 0.8199093991902678,
+      "mass_hd95": 105.5624204064134,
+      "mass_sdice": 0.5468332255794851,
+      "tumour_dice": 0.7972083126391765,
+      "tumour_hd95": 130.85571414045614,
+      "tumour_sdice": 0.485080135127245,
+      "objective": 0.8684539341666465
+    }
+  ]
+}
