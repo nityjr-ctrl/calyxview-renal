@@ -12,7 +12,7 @@
     "preview": "vite preview --config vite.netlify.config.ts",
     "lint": "oxlint components lib src vite.netlify.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "node --test test/benchmark-results.test.mjs",
+    "test": "node --experimental-strip-types --test test/benchmark-results.test.mjs test/benchmark-results-contract.test.mjs",
     "scan:bundle": "node test/deploy-bundle-scan.mjs",
     "format": "oxfmt"
   },

@@ -1876,7 +1876,7 @@ def build_public_summary(
         "status": "complete",
         "researchOnly": True,
         "clinicalUse": RESEARCH_ONLY_WORDING,
-        "title": "20-study preregistered KiTS23 script-blinded evaluation",
+        "title": "20-study protocol-frozen KiTS23 script-blinded evaluation",
         "generatedAtUtc": aggregates["generated_at_utc"],
         "evaluation": {
             "mode": "scriptBlinded",

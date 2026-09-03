@@ -1347,7 +1347,12 @@ export function RenalPlatform({
         </nav>
 
         <div className="flex items-center justify-end gap-2">
-          <button type="button" onClick={() => setShowDisclaimer(true)} className="research-chip">
+          <button
+            type="button"
+            onClick={() => setShowDisclaimer(true)}
+            className="research-chip"
+            aria-label="Read research and safety boundary"
+          >
             <ShieldAlert className="size-3" />
             <span className="hidden sm:inline">Research & education</span>
             <span className="sm:hidden">R&D</span>
