@@ -30,7 +30,7 @@ const forbiddenNames = [
   /(?:^|[._-])predictions?(?:[._-]|$)/i,
 ];
 const forbiddenText = [
-  /case_00(?:40[0-9]|41[0-9])/i,
+  /case_\d{5}/i,
   /(?:^|["'\s(])(?:[a-z]:[\\/])|file:\/\/|\/(?:users|home|mnt|tmp)\//i,
   /(?:patientname|patientid|studyinstanceuid|seriesinstanceuid)/i,
 ];
@@ -48,7 +48,11 @@ async function walk(directory) {
 
 const rootPath = fileURLToPath(deployRoot);
 const rootStats = await stat(rootPath);
-assert.equal(rootStats.isDirectory(), true, 'netlify-dist must exist before scanning');
+assert.equal(
+  rootStats.isDirectory(),
+  true,
+  'netlify-dist must exist before scanning',
+);
 const files = await walk(rootPath);
 assert.ok(files.length > 0, 'Deployment bundle must not be empty');
 
@@ -57,7 +61,7 @@ for (const path of files) {
   const lower = relativePath.toLowerCase();
   assert.doesNotMatch(
     relativePath,
-    /case_00(?:40[0-9]|41[0-9])/i,
+    /case_\d{5}/i,
     `Cohort identifier in deploy pathname: ${relativePath}`,
   );
   assert.equal(
@@ -69,10 +73,16 @@ for (const path of files) {
     assert.doesNotMatch(relativePath, pattern);
   }
 
-  if (['.html', '.js', '.json', '.css', '.txt', '.xml'].includes(extname(lower))) {
+  if (
+    ['.html', '.js', '.json', '.css', '.txt', '.xml'].includes(extname(lower))
+  ) {
     const contents = await readFile(path, 'utf8');
     for (const pattern of forbiddenText) {
-      assert.doesNotMatch(contents, pattern, `Forbidden content in ${relativePath}`);
+      assert.doesNotMatch(
+        contents,
+        pattern,
+        `Forbidden content in ${relativePath}`,
+      );
     }
   }
 }
