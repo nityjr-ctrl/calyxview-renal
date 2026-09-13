@@ -752,7 +752,7 @@ function PlanningInspector({
               <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/6">
                 <div className="h-full rounded-full bg-emerald-300/70" style={{ width: `${illustrativeResidual}%` }} />
               </div>
-              <p className="mt-2 text-xs leading-5 text-white/70">Formula-driven illustration — not a volumetric calculation</p>
+              <p className="mt-2 text-xs leading-5 text-white/70">Formula-driven illustration, not a volumetric calculation</p>
             </div>
           </div>
 
@@ -1369,7 +1369,7 @@ export function RenalPlatform({
       </header>
 
       <div className="safety-ribbon" role="note">
-        <span className="font-semibold">RESEARCH & EDUCATION PROTOTYPE — NOT FOR PATIENT CARE</span>
+        <span className="font-semibold">RESEARCH & EDUCATION PROTOTYPE. NOT FOR PATIENT CARE</span>
         <button type="button" onClick={() => setShowDisclaimer(true)}>Read safety boundary</button>
       </div>
 

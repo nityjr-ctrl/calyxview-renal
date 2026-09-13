@@ -126,7 +126,7 @@ export function FeasibilityBenchmark() {
               nnU-Net model on a fixed set of 20 public KiTS23 CT studies. The
               selected cohort does not
               overlap the model&apos;s KiTS21 training studies, making this a
-              bounded, non-overlapping, within-KiTS feasibility check—not
+              bounded, non-overlapping, within-KiTS feasibility check, not
               clinical validation.
             </p>
             <p>

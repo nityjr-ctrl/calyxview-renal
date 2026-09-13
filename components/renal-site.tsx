@@ -220,26 +220,18 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
     <main className="site-page" id="top">
       <a className="skip-link" href="#main-content">Skip to content</a>
       <div className="prototype-strip" role="note">
-        RESEARCH &amp; EDUCATION PROTOTYPE — NOT FOR PATIENT CARE
+        RESEARCH &amp; EDUCATION PROTOTYPE. NOT FOR PATIENT CARE
       </div>
       <SiteHeader openDemo={openDemo} />
 
       <div id="main-content">
         <section className="hero-section" aria-labelledby="hero-title">
-          {/* oxlint-disable-next-line next/no-img-element -- Vite serves this generated local hero asset directly. */}
-          <img
-            src="/calyxview-renal-hero.webp"
-            alt="Illustrative 3D-printed kidney model with a small tumour and branching anatomy"
-            width="1586"
-            height="992"
-            fetchPriority="high"
-          />
-          <div className="hero-shade" />
-          <div className="site-shell hero-content">
+          <div className="site-shell hero-inner">
+            <div className="hero-content">
             <p className="hero-eyebrow">Partial nephrectomy · research &amp; education</p>
             <h1 id="hero-title">A clearer way to explore renal anatomy.</h1>
             <p className="hero-copy">
-              A hands-on prototype for seeing kidney, tumour, vessel and collecting-system relationships in 3D—using a built-in synthetic teaching case.
+              A hands-on prototype for seeing kidney, tumour, vessel and collecting-system relationships in 3D, using a built-in synthetic teaching case.
             </p>
             <div className="hero-actions">
               <button type="button" className="button button-mint" onClick={() => openDemo()}>
@@ -249,7 +241,18 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
                 See how it works <ArrowDown />
               </a>
             </div>
-            <p className="hero-footnote">It does not analyse patient scans.</p>
+              <p className="hero-footnote">It does not analyse patient scans.</p>
+            </div>
+            <figure className="hero-figure">
+              {/* oxlint-disable-next-line next/no-img-element -- Vite serves this generated local hero asset directly. */}
+              <img
+                src="/calyxview-renal-hero.webp"
+                alt="Illustrative 3D-printed kidney model with a small tumour and branching anatomy"
+                width="1586"
+                height="992"
+                fetchPriority="high"
+              />
+            </figure>
           </div>
         </section>
 
@@ -328,7 +331,7 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
               <p className="eyebrow">Guided learning</p>
               <h2 id="learning-title">Learn one relationship at a time.</h2>
               <p>
-                Each lesson gives you one goal, one observation and one short knowledge check. The rationale appears immediately, so the model becomes a place to think—not just something to look at.
+                Each lesson gives you one goal, one observation and one short knowledge check. The rationale appears immediately, so the model becomes a place to think, not just something to look at.
               </p>
               <button type="button" className="text-link" onClick={() => openDemo('learn')}>
                 Open the guided lesson <ArrowRight />
@@ -357,7 +360,7 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
           <div className="site-shell">
             <div className="section-heading">
               <p className="eyebrow">The safety boundary</p>
-              <h2 id="safety-title">Know what is real—and what is not.</h2>
+              <h2 id="safety-title">Know what is real, and what is not.</h2>
               <p>The distinction stays visible everywhere in the experience.</p>
             </div>
             <div className="safety-grid">
