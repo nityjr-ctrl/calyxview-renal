@@ -37,6 +37,7 @@ import {
   X,
 } from 'lucide-react';
 import {
+  useCallback,
   useMemo,
   useRef,
   useState,
@@ -50,6 +51,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { AnatomyLayers, ViewPreset } from '@/components/kidney-scene';
+import { referenceCases, type ReferenceCase } from '@/lib/reference-cases';
 import {
   PROTOTYPE_STAGES,
   createLocalStudyManifest,
@@ -58,6 +60,12 @@ import {
 
 type WorkspaceMode = 'plan' | 'import' | 'learn';
 type InspectorTab = 'source' | 'anatomy' | 'plan' | 'qa';
+
+const ReferenceCaseScene = lazy(() =>
+  import('@/components/reference-case-scene').then((module) => ({
+    default: module.ReferenceCaseScene,
+  })),
+);
 
 const KidneyScene = lazy(() =>
   import('@/components/kidney-scene').then((module) => ({
@@ -220,6 +228,9 @@ function Metric({
 
 function CaseSidebar({
   mode,
+  activeCase,
+  referenceVisible,
+  setReferenceVisible,
   layers,
   setLayers,
   kidneyOpacity,
@@ -229,6 +240,9 @@ function CaseSidebar({
   importedManifest,
 }: {
   mode: WorkspaceMode;
+  activeCase: ReferenceCase | null;
+  referenceVisible: Record<string, boolean>;
+  setReferenceVisible: (name: string) => void;
   layers: AnatomyLayers;
   setLayers: React.Dispatch<React.SetStateAction<AnatomyLayers>>;
   kidneyOpacity: number;
@@ -342,15 +356,29 @@ function CaseSidebar({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="section-label">Case workspace</p>
-          <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">Left renal mass</h1>
-          <p className="mt-1 text-xs text-white/38">CVR-SYN-001 • Synthetic adult anatomy</p>
+          <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">
+            {activeCase ? activeCase.label : 'Left renal mass'}
+          </h1>
+          <p className="mt-1 text-xs text-white/38">
+            {activeCase
+              ? 'KiTS23 reference labels • meshed by the pipeline'
+              : 'CVR-SYN-001 • Synthetic adult anatomy'}
+          </p>
         </div>
-        <span className="status-dot" title="Synthetic case ready" />
+        <span className="status-dot" title={activeCase ? 'Reference case ready' : 'Synthetic case ready'} />
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <Metric label="Laterality" value="LEFT" />
-        <Metric label="Complexity" value="MOD" />
+        <Metric
+          label="R.E.N.A.L."
+          value={activeCase ? activeCase.nephrometry.renalLabel : 'N/A'}
+          detail={activeCase ? activeCase.nephrometry.renalComplexity : 'Synthetic'}
+        />
+        <Metric
+          label="PADUA"
+          value={activeCase ? String(activeCase.nephrometry.paduaTotal) : 'N/A'}
+          detail={activeCase ? activeCase.nephrometry.paduaComplexity : 'Synthetic'}
+        />
       </div>
 
       <div className="mt-4 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
@@ -359,7 +387,9 @@ function CaseSidebar({
           Provenance explicit
         </div>
         <p className="mt-2 text-xs leading-5 text-white/64">
-          Built-in procedural teaching model. No patient scan and no AI segmentation.
+          {activeCase
+            ? `Real kidney from the open KiTS23 dataset, meshed from the expert reference labels. Scores were computed from this geometry in ${activeCase.runtimeSeconds.toFixed(0)} seconds. No patient data and no AI segmentation.`
+            : 'Built-in procedural teaching model. No patient scan and no AI segmentation.'}
         </p>
       </div>
 
@@ -368,16 +398,27 @@ function CaseSidebar({
         <Layers3 className="size-3.5 text-white/30" />
       </div>
       <div className="mt-2 space-y-0.5">
-        {layerConfig.map((layer) => (
-          <LayerButton
-            key={layer.key}
-            active={layers[layer.key]}
-            color={layer.color}
-            label={layer.label}
-            provenance={layer.provenance}
-            onClick={() => setLayers((current) => ({ ...current, [layer.key]: !current[layer.key] }))}
-          />
-        ))}
+        {activeCase
+          ? activeCase.structures.map((structure) => (
+              <LayerButton
+                key={structure.name}
+                active={referenceVisible[structure.name] !== false}
+                color={structure.colour}
+                label={structure.label}
+                provenance="Source"
+                onClick={() => setReferenceVisible(structure.name)}
+              />
+            ))
+          : layerConfig.map((layer) => (
+              <LayerButton
+                key={layer.key}
+                active={layers[layer.key]}
+                color={layer.color}
+                label={layer.label}
+                provenance={layer.provenance}
+                onClick={() => setLayers((current) => ({ ...current, [layer.key]: !current[layer.key] }))}
+              />
+            ))}
       </div>
 
       <div className="mt-5 border-t border-white/8 pt-5">
@@ -454,6 +495,8 @@ function ViewToolbar({
 
 function ModelWorkspace({
   mode,
+  activeCase,
+  referenceVisible,
   layers,
   kidneyOpacity,
   marginMm,
@@ -465,6 +508,8 @@ function ModelWorkspace({
   trainingStep,
 }: {
   mode: WorkspaceMode;
+  activeCase: ReferenceCase | null;
+  referenceVisible: Record<string, boolean>;
   layers: AnatomyLayers;
   kidneyOpacity: number;
   marginMm: number;
@@ -491,7 +536,7 @@ function ModelWorkspace({
           <Box className="size-3.5" />
           Interactive anatomy
           <Badge className="border-emerald-200/10 bg-emerald-200/[.045] text-[9px] uppercase tracking-[.1em] text-emerald-100/65" variant="outline">
-            Synthetic
+            {activeCase ? 'KiTS23' : 'Synthetic'}
           </Badge>
         </div>
         <div className="hidden items-center gap-2 text-[10px] text-white/32 sm:flex">
@@ -508,14 +553,25 @@ function ModelWorkspace({
             </div>
           }
         >
-          <KidneyScene
-            layers={layers}
-            kidneyOpacity={kidneyOpacity}
-            marginMm={marginMm}
-            clipPercent={clipPercent}
-            preset={preset}
-            trainingStep={mode === 'learn' ? trainingStep : -1}
-          />
+          {activeCase ? (
+            <ReferenceCaseScene
+              key={activeCase.id}
+              referenceCase={activeCase}
+              visible={referenceVisible}
+              parenchymaOpacity={kidneyOpacity}
+              clipPercent={clipPercent}
+              preset={preset}
+            />
+          ) : (
+            <KidneyScene
+              layers={layers}
+              kidneyOpacity={kidneyOpacity}
+              marginMm={marginMm}
+              clipPercent={clipPercent}
+              preset={preset}
+              trainingStep={mode === 'learn' ? trainingStep : -1}
+            />
+          )}
         </Suspense>
 
         <ViewToolbar preset={preset} setPreset={setPreset} onSnapshot={snapshot} />
@@ -523,7 +579,7 @@ function ModelWorkspace({
         <div className="absolute left-4 top-4 flex flex-col gap-1.5">
           <div className="viewer-chip">
             <span className="size-1.5 rounded-full bg-emerald-300" />
-            SIMULATED OUTPUT
+            {activeCase ? 'REFERENCE LABELS' : 'SIMULATED OUTPUT'}
           </div>
           <div className="viewer-chip text-white/35">
             <LockKeyhole className="size-3" />
@@ -582,7 +638,9 @@ function ModelWorkspace({
         <p>
           <strong>Research & education prototype.</strong> Anatomy, measurements and planning controls are illustrative and may be wrong.
         </p>
-        <span className="hidden font-mono text-[9px] text-white/24 sm:inline">CVR/SYN/001 · WEBGL</span>
+        <span className="hidden font-mono text-[9px] text-white/24 sm:inline">
+          {activeCase ? `${activeCase.id.toUpperCase()} · WEBGL` : 'CVR/SYN/001 · WEBGL'}
+        </span>
       </div>
     </section>
   );
@@ -591,6 +649,7 @@ function ModelWorkspace({
 function PlanningInspector({
   tab,
   setTab,
+  activeCase,
   marginMm,
   setMarginMm,
   approach,
@@ -600,6 +659,7 @@ function PlanningInspector({
 }: {
   tab: InspectorTab;
   setTab: (tab: InspectorTab) => void;
+  activeCase: ReferenceCase | null;
   marginMm: number;
   setMarginMm: (value: number) => void;
   approach: 'transperitoneal' | 'retroperitoneal';
@@ -670,28 +730,77 @@ function PlanningInspector({
 
       {tab === 'anatomy' ? (
         <div className="inspector-content">
-          <p className="section-label">Illustrative measurements</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <Metric label="Tumour" value="2.8 cm" detail="Max diameter" />
-            <Metric label="R.E.N.A.L." value="7a" detail="Illustrative" />
-            <Metric label="Artery" value="4.2 mm" detail="Nearest branch" />
-            <Metric label="Collecting" value="3.6 mm" detail="Nearest point" />
-          </div>
-          <div className="mt-5 rounded-xl border border-amber-200/10 bg-amber-200/[.03] p-3.5">
-            <div className="flex items-center gap-2 text-xs text-amber-100/72">
-              <Info className="size-3.5" />
-              Example values only
-            </div>
-            <p className="mt-2 text-xs leading-5 text-white/64">
-              These numbers are hard-coded to demonstrate layout. They are not calculated from geometry or imaging.
-            </p>
-          </div>
-          <dl className="definition-list mt-5">
-            <div><dt>Polarity</dt><dd>Interpolar</dd></div>
-            <div><dt>Surface</dt><dd>Lateral</dd></div>
-            <div><dt>Exophytic</dt><dd>~45% example</dd></div>
-            <div><dt>Hilar contact</dt><dd>Not shown</dd></div>
-          </dl>
+          <p className="section-label">
+            {activeCase ? 'Computed from this geometry' : 'Illustrative measurements'}
+          </p>
+          {activeCase ? (
+            <>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Metric
+                  label="Tumour"
+                  value={`${activeCase.nephrometry.radiusCm.toFixed(1)} cm`}
+                  detail="Max diameter"
+                />
+                <Metric
+                  label="R.E.N.A.L."
+                  value={activeCase.nephrometry.renalLabel}
+                  detail={`${activeCase.nephrometry.renalTotal} points, ${activeCase.nephrometry.renalComplexity}`}
+                />
+                <Metric
+                  label="Exophytic"
+                  value={`${Math.round(activeCase.nephrometry.exophyticFraction * 100)}%`}
+                  detail="Outside the kidney"
+                />
+                <Metric
+                  label="To sinus"
+                  value={`${activeCase.nephrometry.nearnessMm.toFixed(1)} mm`}
+                  detail="Nearest point"
+                />
+              </div>
+              <div className="mt-5 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
+                <div className="flex items-center gap-2 text-xs text-emerald-100/80">
+                  <ShieldCheck className="size-3.5" />
+                  Computed, not typed in
+                </div>
+                <p className="mt-2 text-xs leading-5 text-white/64">
+                  Every value here was derived by the pipeline from the mesh you are looking at. It
+                  scores geometry, so it is not a clinical assessment and has not been compared with
+                  surgeon-assigned scores.
+                </p>
+              </div>
+              <dl className="definition-list mt-5">
+                <div><dt>Polar location</dt><dd>{activeCase.nephrometry.polarLocation}</dd></div>
+                <div><dt>Face</dt><dd>{activeCase.nephrometry.face}</dd></div>
+                <div><dt>Rim</dt><dd>{activeCase.nephrometry.rim}</dd></div>
+                <div><dt>Hilar contact</dt><dd>{activeCase.nephrometry.hilar ? 'Yes' : 'No'}</dd></div>
+              </dl>
+            </>
+          ) : (
+            <>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Metric label="Tumour" value="2.8 cm" detail="Max diameter" />
+                <Metric label="R.E.N.A.L." value="7a" detail="Illustrative" />
+                <Metric label="Artery" value="4.2 mm" detail="Nearest branch" />
+                <Metric label="Collecting" value="3.6 mm" detail="Nearest point" />
+              </div>
+              <div className="mt-5 rounded-xl border border-amber-200/10 bg-amber-200/[.03] p-3.5">
+                <div className="flex items-center gap-2 text-xs text-amber-100/72">
+                  <Info className="size-3.5" />
+                  Example values only
+                </div>
+                <p className="mt-2 text-xs leading-5 text-white/64">
+                  These numbers are hard-coded to demonstrate layout. Switch to a reference kidney to
+                  see values the pipeline computed.
+                </p>
+              </div>
+              <dl className="definition-list mt-5">
+                <div><dt>Polarity</dt><dd>Interpolar</dd></div>
+                <div><dt>Surface</dt><dd>Lateral</dd></div>
+                <div><dt>Exophytic</dt><dd>~45% example</dd></div>
+                <div><dt>Hilar contact</dt><dd>Not shown</dd></div>
+              </dl>
+            </>
+          )}
         </div>
       ) : null}
 
@@ -1248,6 +1357,37 @@ export function RenalPlatform({
     veins: true,
     collecting: true,
   });
+  // 'synthetic' is the procedural teaching model; the rest are real kidneys
+  // meshed by the pipeline from the KiTS23 reference labels.
+  const [caseId, setCaseId] = useState<string>('synthetic');
+  const activeCase = useMemo(
+    () => referenceCases.find((item) => item.id === caseId) ?? null,
+    [caseId],
+  );
+  // Visibility is stored per case, so each case falls back to its own defaults
+  // and remembers what you toggled if you come back to it.
+  const [visibleByCase, setVisibleByCase] = useState<Record<string, Record<string, boolean>>>({});
+  const referenceVisible = useMemo(() => {
+    if (!activeCase) return {};
+    const defaults = Object.fromEntries(
+      activeCase.structures.map((structure) => [structure.name, structure.visible]),
+    );
+    return { ...defaults, ...visibleByCase[activeCase.id] };
+  }, [activeCase, visibleByCase]);
+  const setReferenceVisible = useCallback(
+    (name: string) => {
+      if (!activeCase) return;
+      setVisibleByCase((current) => {
+        const defaults = Object.fromEntries(
+          activeCase.structures.map((structure) => [structure.name, structure.visible]),
+        );
+        const now = { ...defaults, ...current[activeCase.id] };
+        return { ...current, [activeCase.id]: { ...now, [name]: !now[name] } };
+      });
+    },
+    [activeCase],
+  );
+
   const [kidneyOpacity, setKidneyOpacity] = useState(72);
   const [marginMm, setMarginMm] = useState(5);
   const [clipPercent, setClipPercent] = useState(0);
@@ -1269,8 +1409,9 @@ export function RenalPlatform({
   const caseLabel = useMemo(() => {
     if (mode === 'import') return 'Local intake';
     if (mode === 'learn') return `Training · ${trainingSteps[trainingStep].short}`;
+    if (activeCase) return `${activeCase.label} · KiTS23`;
     return 'Synthetic case · CVR-SYN-001';
-  }, [mode, trainingStep]);
+  }, [mode, trainingStep, activeCase]);
 
   const onFiles = (files: File[]) => {
     setUploadError(null);
@@ -1363,13 +1504,28 @@ export function RenalPlatform({
               <span className="hidden sm:inline">Overview</span>
             </button>
           ) : null}
-          <output className="case-switcher case-indicator" aria-live="polite">
-            <span className="hidden max-w-44 truncate sm:block">{caseLabel}</span>
-            <span className="sm:hidden">
-              {mode === 'import' ? 'Local intake' : mode === 'learn' ? 'Training' : 'Synthetic'}
-            </span>
-            <CircleCheck className="size-3" aria-hidden="true" />
-          </output>
+          <label className="case-switcher" htmlFor="case-select">
+            <span className="sr-only">Case</span>
+            <select
+              id="case-select"
+              value={caseId}
+              onChange={(event) => setCaseId(event.target.value)}
+            >
+              <option value="synthetic">Synthetic teaching kidney</option>
+              {referenceCases.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} · KiTS23
+                </option>
+              ))}
+            </select>
+          </label>
+          {mode === 'plan' ? null : (
+            <output className="case-switcher case-indicator" aria-live="polite">
+              <span className="hidden max-w-44 truncate sm:block">{caseLabel}</span>
+              <span className="sm:hidden">{mode === 'import' ? 'Local intake' : 'Training'}</span>
+              <CircleCheck className="size-3" aria-hidden="true" />
+            </output>
+          )}
         </div>
       </header>
 
@@ -1381,6 +1537,9 @@ export function RenalPlatform({
       <div className="workspace-grid">
         <CaseSidebar
           mode={mode}
+          activeCase={activeCase}
+          referenceVisible={referenceVisible}
+          setReferenceVisible={setReferenceVisible}
           layers={layers}
           setLayers={setLayers}
           kidneyOpacity={kidneyOpacity}
@@ -1407,6 +1566,8 @@ export function RenalPlatform({
         ) : (
           <ModelWorkspace
             mode={mode}
+            activeCase={activeCase}
+            referenceVisible={referenceVisible}
             layers={layers}
             kidneyOpacity={kidneyOpacity}
             marginMm={marginMm}
@@ -1423,6 +1584,7 @@ export function RenalPlatform({
           <PlanningInspector
             tab={inspectorTab}
             setTab={setInspectorTab}
+            activeCase={activeCase}
             marginMm={marginMm}
             setMarginMm={setMarginMm}
             approach={approach}
