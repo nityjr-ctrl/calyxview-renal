@@ -243,10 +243,13 @@ export function PlanningPipeline() {
             <div>
               <h3>Research and teaching software, published as aggregates</h3>
               <p>
-                No CT voxels, label volumes, predictions or file paths reach this site: it reads one
-                small summary file. The pipeline refuses DICOM that still carries identifiers, keeps
-                source images on the workstation, and writes every assumption into each report. KiTS23
-                is used under CC BY-NC-SA 4.0. The companion CalyxView endourology viewer provides the
+                What is published here: five kidney meshes built from the KiTS23 reference labels,
+                and the numbers the pipeline computed from them. What is not: CT voxels, label
+                volumes, model predictions, file paths and the cohort identifiers themselves, which is
+                why the cases carry letters rather than their dataset numbers. The pipeline refuses
+                DICOM that still carries identifiers, keeps source images on the workstation, and
+                writes every assumption into each report. KiTS23 is used under CC BY-NC-SA 4.0, so
+                these meshes carry the same non-commercial share-alike terms. The companion CalyxView endourology viewer provides the
                 browser 3D viewer, DICOM intake with an identity audit, and the PCNL and URS planning
                 modules that load these bundles.
               </p>

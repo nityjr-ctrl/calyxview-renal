@@ -36,28 +36,28 @@ type EntryMode = 'plan' | 'import' | 'learn';
 
 const routeSteps = [
   {
-    title: 'Choose your route',
-    body: 'Start with the built-in synthetic kidney. If you want, you can also try the local file-flow demonstration.',
+    title: 'Pick where to start',
+    body: "The built-in synthetic kidney is the default. If you'd rather see the local file flow, that's there too.",
     icon: <Target />,
   },
   {
     title: 'Confirm the safety boundary',
-    body: 'If you select files, use only synthetic data or data de-identified under your organisation’s approved process.',
+    body: "If you do select files, use synthetic ones, or data de-identified under your organisation's approved process. Nothing else.",
     icon: <ShieldCheck />,
   },
   {
-    title: 'Run the local check',
-    body: 'The prototype counts files, recognised extensions and total size. It does not read metadata or pixels.',
+    title: 'Run the local count',
+    body: "It counts files, recognised extensions and total size. It doesn't read metadata or pixels.",
     icon: <ScanLine />,
   },
   {
-    title: 'Explore the 3D anatomy',
-    body: 'Rotate the model, change the view and reveal the tumour, vessels and collecting system.',
+    title: 'Turn the model',
+    body: "Drag to rotate it and change the view. The tumour, vessels and collecting system each show or hide on their own.",
     icon: <Rotate3d />,
   },
   {
-    title: 'Complete the guided review',
-    body: 'Answer five short questions, read the explanations and check which information is simulated.',
+    title: 'Finish with the lesson',
+    body: "Five short questions, and a note on which information is simulated.",
     icon: <GraduationCap />,
   },
 ];
@@ -65,36 +65,36 @@ const routeSteps = [
 const outcomes = [
   {
     number: '01',
-    title: 'See the anatomy',
-    body: 'Turn the kidney in space and bring each structure into view without opening a patient study.',
+    title: 'Turn the kidney round',
+    body: "Rotate it, and bring each structure into view on its own.",
     icon: <Eye />,
   },
   {
     number: '02',
-    title: 'Explore an example',
-    body: 'Compare illustrative approach, clamping and margin choices in a deliberately synthetic case.',
+    title: 'A worked example',
+    body: "Compare approach, clamping and margin choices. The case is synthetic on purpose, so every number is an illustration.",
     icon: <Layers3 />,
   },
   {
     number: '03',
-    title: 'Learn by doing',
-    body: 'Work through five focused checks with immediate explanations and visible progress.',
+    title: 'Short checks with the reasoning',
+    body: "Five of them, with the explanation straight after each answer, and you can see how far through you are.",
     icon: <BookOpen />,
   },
 ];
 
 const prototypeIncludes = [
-  'A built-in synthetic kidney, tumour and branching anatomy',
-  'Interactive rotation, view presets, layers, opacity and cutaway',
-  'A local file inventory and simulated processing sequence',
-  'Illustrative planning controls and a five-step lesson',
+  "A built-in synthetic kidney, tumour and branching anatomy",
+  "Rotation, view presets, layers, opacity and a cutaway",
+  "A local file count, and a processing sequence that only pretends to run",
+  "Planning controls that are illustrations only, plus the five-step lesson",
 ];
 
 const clinicalNeeds = [
-  'Secure medical-data handling and validated de-identification',
-  'CT protocol checks, calibration and multi-phase registration',
-  'Validated segmentation, uncertainty and expert correction',
-  'Clinical evidence, quality management and regulatory authorisation',
+  "Handle medical data securely and validate the de-identification.",
+  "Check CT protocols and calibration, and register the phases.",
+  "Validate the segmentation, show where it is uncertain and let an expert correct it.",
+  "Build the clinical evidence, put a quality management system in place, and obtain regulatory authorisation.",
 ];
 
 const previewLayerConfig: Array<{ key: keyof AnatomyLayers; label: string; color: string }> = [
@@ -162,9 +162,12 @@ function EditorialPreview({ openDemo }: { openDemo: (mode?: EntryMode) => void }
     <section id="demo" className="demo-section">
       <div className="site-shell">
         <div className="section-heading section-heading-light">
-          <p className="eyebrow">Interactive synthetic case</p>
-          <h2>Bring the important relationships into view.</h2>
-          <p>Try the model here, then open the full workspace when you are ready. No files are required.</p>
+          <p className="eyebrow">Synthetic case, running in this page</p>
+          <h2>Show the tumour against the vessels and collecting system.</h2>
+          <p>
+            Turn the model here, or open the full workspace, where the five real KiTS23 kidneys are.
+            Neither needs any files.
+          </p>
         </div>
 
         <div className="demo-stage">
@@ -187,8 +190,8 @@ function EditorialPreview({ openDemo }: { openDemo: (mode?: EntryMode) => void }
           </div>
 
           <aside className="demo-control-panel">
-            <p className="eyebrow">What you can reveal</p>
-            <h3>One model. Five relationships.</h3>
+            <p className="eyebrow">Structures you can show and hide</p>
+            <h3>Five layers on the one model.</h3>
             <div className="preview-layers">
               {previewLayerConfig.map((layer) => (
                 <button
@@ -209,7 +212,10 @@ function EditorialPreview({ openDemo }: { openDemo: (mode?: EntryMode) => void }
             <button type="button" className="demo-secondary" onClick={() => openDemo('import')}>
               Try the local file flow <FileUp />
             </button>
-            <p className="demo-note">All structures and measurements are authored illustrations, not patient results.</p>
+            <p className="demo-note">
+              Every structure and measurement here is an authored illustration. None of it is a patient
+              result.
+            </p>
           </aside>
         </div>
       </div>
@@ -230,12 +236,13 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
         <section className="hero-section" aria-labelledby="hero-title">
           <div className="site-shell hero-inner">
             <div className="hero-content">
-            <p className="hero-eyebrow">Partial nephrectomy · research &amp; education</p>
-            <h1 id="hero-title">From CT to a measured 3D kidney.</h1>
+            <p className="hero-eyebrow">Partial nephrectomy, research and education</p>
+            <h1 id="hero-title">A CT outline becomes a measured 3D kidney.</h1>
             <p className="hero-copy">
-              A research prototype for partial nephrectomy: a 3D teaching case you can explore in the
-              browser, and a tested pipeline that turns a CT outline into a 3D model with computed
-              nephrometry and resection geometry.
+              CalyxView Renal is a research prototype for partial nephrectomy. One part is a 3D
+              teaching case you can open and turn in the browser. The other is a Python pipeline that
+              takes a CT with the kidney, tumour and cyst outlined and computes the nephrometry and
+              resection geometry from the model it builds.
             </p>
             <div className="hero-actions">
               <button type="button" className="button button-mint" onClick={() => openDemo()}>
@@ -246,7 +253,8 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
               </a>
             </div>
               <p className="hero-footnote">
-                The browser demo does not analyse patient scans. The pipeline runs on the workstation, on anonymised data only.
+                The browser demo doesn&apos;t touch patient scans. The pipeline runs on the workstation, on
+                anonymised data only.
               </p>
             </div>
             <figure className="hero-figure">
@@ -265,20 +273,22 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
         <section className="intro-section">
           <div className="site-shell intro-grid">
             <div>
-              <p className="eyebrow">CalyxView Renal</p>
-              <h2>Complex anatomy, made easier to see and discuss.</h2>
+              <p className="eyebrow">Demo in the browser, pipeline on the workstation</p>
+              <h2>The anatomy is easier to discuss when you can turn it around.</h2>
             </div>
             <div className="intro-copy">
               <p>
-                CT data contains spatial information. This prototype shows two halves of turning it into a
-                reviewed 3D planning experience: a browser demo built on authored anatomy, and a Python
-                pipeline that has already produced measured 3D cases from real, expert-outlined kidneys.
+                The browser demo carries two kinds of case. One is a synthetic kidney I authored, so
+                there&apos;s no patient data in it at all. The other five are real kidneys from the open
+                KiTS23 set, meshed by the pipeline, with the nephrometry worked out from the geometry
+                rather than typed in.
               </p>
               <p>
-                The browser demo never touches patient scans. The pipeline runs on the workstation, refuses
-                identified data, and publishes only aggregate results here. Neither is a medical device.
+                The pipeline stays on the workstation and refuses identified data. What reaches this
+                site is the meshes and the numbers computed from them, never the scans. Neither half is
+                validated, and neither is a medical device.
               </p>
-              <a className="text-link" href="#how-it-works">Follow the five steps <ArrowRight /></a>
+              <a className="text-link" href="#how-it-works">See the five steps <ArrowRight /></a>
             </div>
           </div>
         </section>
@@ -286,8 +296,8 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
         <section className="outcomes-section" aria-labelledby="outcomes-title">
           <div className="site-shell">
             <div className="section-heading">
-              <p className="eyebrow">What it helps you do</p>
-              <h2 id="outcomes-title">See more. Understand more. Learn in context.</h2>
+              <p className="eyebrow">What you can do in the browser demo</p>
+              <h2 id="outcomes-title">The demo opens on a synthetic kidney and carries five real ones.</h2>
             </div>
             <div className="outcome-grid">
               {outcomes.map((outcome) => (
@@ -307,9 +317,12 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
         <section id="how-it-works" className="steps-section" aria-labelledby="steps-title">
           <div className="site-shell">
             <div className="steps-intro">
-              <p className="eyebrow">Your route through the demo</p>
-              <h2 id="steps-title">Five steps. One clear path.</h2>
-              <p>Start with the synthetic case. The optional file flow is there only to demonstrate the future intake journey.</p>
+              <p className="eyebrow">The route I&apos;d take through the demo</p>
+              <h2 id="steps-title">Five steps, ending with the guided lesson.</h2>
+              <p>
+                Start with the synthetic case. The optional file flow is only there to show how intake
+                would work later, so skip it if you&apos;d rather go straight to the model.
+              </p>
             </div>
             <ol className="steps-list">
               {routeSteps.map((step, index) => (
@@ -327,7 +340,7 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
               <button type="button" className="button button-ink" onClick={() => openDemo()}>
                 Start with the synthetic case <ArrowRight />
               </button>
-              <p>No sign-in and no upload required.</p>
+              <p>No sign-in, nothing to upload.</p>
             </div>
           </div>
         </section>
@@ -337,10 +350,11 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
         <section id="learning" className="learning-section" aria-labelledby="learning-title">
           <div className="site-shell learning-grid">
             <div className="learning-copy">
-              <p className="eyebrow">Guided learning</p>
+              <p className="eyebrow">How the lesson works</p>
               <h2 id="learning-title">Learn one relationship at a time.</h2>
               <p>
-                Each lesson gives you one goal, one observation and one short knowledge check. The rationale appears immediately, so the model becomes a place to think, not just something to look at.
+                Each step sets one goal and asks one question about it. The reasoning comes with the
+                answer.
               </p>
               <button type="button" className="text-link" onClick={() => openDemo('learn')}>
                 Open the guided lesson <ArrowRight />
@@ -349,15 +363,24 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
             <div className="learning-ladder">
               <article>
                 <span>01</span>
-                <div><h3>Build orientation</h3><p>Orient the kidney and locate the tumour.</p></div>
+                <div><h3>Orientation first</h3><p>Orient the kidney and find the tumour.</p></div>
               </article>
               <article>
                 <span>02</span>
-                <div><h3>Read the relationships</h3><p>Trace arterial supply and inspect the collecting system.</p></div>
+                <div>
+                  <h3>Arteries and collecting system</h3>
+                  <p>Follow the arterial supply in, then look at the collecting system.</p>
+                </div>
               </article>
               <article>
                 <span>03</span>
-                <div><h3>Review the example</h3><p>Explore assumptions, then confirm that every output is synthetic.</p></div>
+                <div>
+                  <h3>Check what&apos;s simulated</h3>
+                  <p>
+                    Read the assumptions behind the example, then confirm that every output is
+                    synthetic.
+                  </p>
+                </div>
               </article>
             </div>
           </div>
@@ -371,18 +394,18 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
           <div className="site-shell">
             <div className="section-heading">
               <p className="eyebrow">The safety boundary</p>
-              <h2 id="safety-title">Know what is real, and what is not.</h2>
-              <p>The distinction stays visible everywhere in the experience.</p>
+              <h2 id="safety-title">What the prototype does, and what clinical use would need.</h2>
+              <p>The demo carries the same labels on the model and in the lesson.</p>
             </div>
             <div className="safety-grid">
               <article className="safety-card safety-card-ready">
-                <div className="safety-card-heading"><FileCheck /><span>Available in this prototype</span></div>
+                <div className="safety-card-heading"><FileCheck /><span>In the prototype now</span></div>
                 <ul>
                   {prototypeIncludes.map((item) => <li key={item}><Check />{item}</li>)}
                 </ul>
               </article>
               <article className="safety-card safety-card-future">
-                <div className="safety-card-heading"><CircleAlert /><span>Required before clinical use</span></div>
+                <div className="safety-card-heading"><CircleAlert /><span>Required before any clinical use</span></div>
                 <ul>
                   {clinicalNeeds.map((item) => <li key={item}><span className="future-dot" />{item}</li>)}
                 </ul>
@@ -393,7 +416,9 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
               <div>
                 <h3>About the optional file flow</h3>
                 <p>
-                  The prototype does not anonymise or inspect DICOM content. It counts files, recognised extensions and total size locally, then opens the built-in synthetic model. No metadata or pixel data is read, uploaded, stored or segmented.
+                  It doesn&apos;t anonymise anything and it doesn&apos;t look inside the DICOM. It counts the
+                  files on your own machine, then opens the built-in synthetic model. No metadata or
+                  pixel data is read, uploaded, stored or segmented.
                 </p>
               </div>
             </div>
@@ -403,8 +428,8 @@ function Overview({ openDemo }: { openDemo: (mode?: EntryMode) => void }) {
         <section className="closing-section">
           <div className="site-shell closing-inner">
             <div>
-              <p className="eyebrow">Ready when you are</p>
-              <h2>Explore the model in three dimensions.</h2>
+              <p className="eyebrow">Synthetic and real cases, no sign-in</p>
+              <h2>Have a look, and tell me what&apos;s wrong with it.</h2>
             </div>
             <button type="button" className="button button-mint" onClick={() => openDemo()}>
               Open the 3D demo <ArrowRight />
