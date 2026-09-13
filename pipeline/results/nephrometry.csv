@@ -1,0 +1,9 @@
+case_id,A,E_exophytic_frac,L_pts,N_mm,R_cm,contact_cm2,contra_kidney_ml,ipsi_kidney_ml,padua_complexity,padua_total,preserved_pct,renal,renal_complexity,renal_total,resection_ml,runtime_s,status,tumour_ml,tumour_to_sinus_mm
+case_00000,p,0.226,1,39.8,3.11,20.8,171.7,189.8,low,7,95.8,5p,low,5,16.6,46.7,ok,8.7,39.78613912859922
+case_00001,a,0.0,3,1.1,2.58,20.9,226.2,221.9,high,10,96.8,10a,high,10,9.8,77.2,ok,2.9,1.12971356838007
+case_00002,p,0.282,3,36.1,4.9,54.3,240.0,245.8,intermediate,9,93.6,8p,moderate,8,52.6,30.1,ok,37.0,36.08864699451243
+case_00003,x,0.025,1,27.3,3.25,33.6,189.1,184.1,intermediate,8,94.3,6x,low,6,21.8,23.6,ok,11.4,27.317833979741632
+case_00004,x,0.163,2,28.2,4.26,35.0,198.5,231.6,intermediate,9,95.2,7x,moderate,7,31.4,3.2,ok,20.2,28.185292362620725
+case_00005,a,0.169,2,0.5,6.17,68.3,0.4,394.8,high,10,95.5,9a,moderate,9,82.3,39.9,ok,64.4,0.5
+case_00006,a,0.001,2,0.7,3.59,34.7,207.7,176.8,high,11,94.8,9a,moderate,9,20.5,8.4,ok,11.3,0.7421875
+case_00007,a,0.522,2,26.3,3.9,21.0,282.3,249.9,low,7,96.8,5a,low,5,27.2,5.5,ok,19.2,26.334697068389413

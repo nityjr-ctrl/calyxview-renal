@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "researchOnly": true,
+  "generatedAtUtc": "2026-09-03T10:52:00.490039+00:00",
+  "tool": "renalplan 0.1.0",
+  "dataset": "KiTS23 reference segmentations (CC BY-NC-SA 4.0)",
+  "note": "Aggregate, identifier-free summary. No CT voxels, label volumes, predictions or paths.",
+  "nephrometry": {
+    "cases": [
+      {
+        "case": 1,
+        "renal": "5p",
+        "renalTotal": 5,
+        "renalComplexity": "low",
+        "padua": 7,
+        "paduaComplexity": "low",
+        "tumourMl": 8.7,
+        "diameterCm": 3.1,
+        "exophyticFraction": 0.23,
+        "tumourToSinusMm": 39.8,
+        "ipsilateralKidneyMl": 190,
+        "preservedFraction": 0.958,
+        "runtimeSeconds": 46.7
+      },
+      {
+        "case": 2,
+        "renal": "10a",
+        "renalTotal": 10,
+        "renalComplexity": "high",
+        "padua": 10,
+        "paduaComplexity": "high",
+        "tumourMl": 2.9,
+        "diameterCm": 2.6,
+        "exophyticFraction": 0.0,
+        "tumourToSinusMm": 1.1,
+        "ipsilateralKidneyMl": 222,
+        "preservedFraction": 0.968,
+        "runtimeSeconds": 77.2
+      },
+      {
+        "case": 3,
+        "renal": "8p",
+        "renalTotal": 8,
+        "renalComplexity": "moderate",
+        "padua": 9,
+        "paduaComplexity": "intermediate",
+        "tumourMl": 37.0,
+        "diameterCm": 4.9,
+        "exophyticFraction": 0.28,
+        "tumourToSinusMm": 36.1,
+        "ipsilateralKidneyMl": 246,
+        "preservedFraction": 0.936,
+        "runtimeSeconds": 30.1
+      },
+      {
+        "case": 4,
+        "renal": "6x",
+        "renalTotal": 6,
+        "renalComplexity": "low",
+        "padua": 8,
+        "paduaComplexity": "intermediate",
+        "tumourMl": 11.4,
+        "diameterCm": 3.2,
+        "exophyticFraction": 0.03,
+        "tumourToSinusMm": 27.3,
+        "ipsilateralKidneyMl": 184,
+        "preservedFraction": 0.943,
+        "runtimeSeconds": 23.6
+      },
+      {
+        "case": 5,
+        "renal": "7x",
+        "renalTotal": 7,
+        "renalComplexity": "moderate",
+        "padua": 9,
+        "paduaComplexity": "intermediate",
+        "tumourMl": 20.2,
+        "diameterCm": 4.3,
+        "exophyticFraction": 0.16,
+        "tumourToSinusMm": 28.2,
+        "ipsilateralKidneyMl": 232,
+        "preservedFraction": 0.952,
+        "runtimeSeconds": 3.2
+      },
+      {
+        "case": 6,
+        "renal": "9a",
+        "renalTotal": 9,
+        "renalComplexity": "moderate",
+        "padua": 10,
+        "paduaComplexity": "high",
+        "tumourMl": 64.4,
+        "diameterCm": 6.2,
+        "exophyticFraction": 0.17,
+        "tumourToSinusMm": 0.5,
+        "ipsilateralKidneyMl": 395,
+        "preservedFraction": 0.955,
+        "runtimeSeconds": 39.9
+      },
+      {
+        "case": 7,
+        "renal": "9a",
+        "renalTotal": 9,
+        "renalComplexity": "moderate",
+        "padua": 11,
+        "paduaComplexity": "high",
+        "tumourMl": 11.3,
+        "diameterCm": 3.6,
+        "exophyticFraction": 0.0,
+        "tumourToSinusMm": 0.7,
+        "ipsilateralKidneyMl": 177,
+        "preservedFraction": 0.948,
+        "runtimeSeconds": 8.4
+      },
+      {
+        "case": 8,
+        "renal": "5a",
+        "renalTotal": 5,
+        "renalComplexity": "low",
+        "padua": 7,
+        "paduaComplexity": "low",
+        "tumourMl": 19.2,
+        "diameterCm": 3.9,
+        "exophyticFraction": 0.52,
+        "tumourToSinusMm": 26.3,
+        "ipsilateralKidneyMl": 250,
+        "preservedFraction": 0.968,
+        "runtimeSeconds": 5.5
+      }
+    ],
+    "casesEvaluated": 8,
+    "medianRuntimeSeconds": 30.1
+  },
+  "postprocess": {
+    "casesEvaluated": 5,
+    "configurationsTried": 24,
+    "inputNote": "Reference labels degraded with simulated errors (boundary noise, holes, one-voxel tumour erosion, three far spurious components per case). Not model output.",
+    "rows": [
+      {
+        "rules": "None (simulated input)",
+        "kidneyAndMassDice": 0.988,
+        "massDice": 0.82,
+        "tumourDice": 0.797,
+        "tumourHd95Mm": 130.9
+      },
+      {
+        "rules": "Drop masses smaller than 0.05 ml",
+        "kidneyAndMassDice": 0.994,
+        "massDice": 0.841,
+        "tumourDice": 0.82,
+        "tumourHd95Mm": 71.3
+      },
+      {
+        "rules": "Keep masses within 5 mm of the kidney",
+        "kidneyAndMassDice": 0.994,
+        "massDice": 0.86,
+        "tumourDice": 0.84,
+        "tumourHd95Mm": 2.5
+      }
+    ],
+    "best": {
+      "name": "k2_kmin0_mmin0_att5_fill0_open0",
+      "params": {
+        "kidney_max_components": 2,
+        "kidney_min_ml": 0.0,
+        "mass_min_ml": 0.0,
+        "mass_attach_mm": 5.0,
+        "fill_holes": false,
+        "kidney_open_iter": 0
+      },
+      "meanDice": 0.8983
+    },
+    "baselineMeanDice": 0.8685
+  },
+  "evaluation": {
+    "raw": {
+      "kidney_and_mass": {
+        "dice": {
+          "mean": 0.9882,
+          "ci95": [
+            0.9796,
+            0.9927
+          ]
+        },
+        "surface_dice": {
+          "mean": 0.9371,
+          "ci95": [
+            0.9191,
+            0.9509
+          ]
+        },
+        "hd95_mm": {
+          "mean": 3.3909,
+          "ci95": [
+            1.0601,
+            6.5158
+          ]
+        },
+        "volume_error_ml": {
+          "mean": 4.1276,
+          "ci95": [
+            1.4467,
+            8.3133
+          ]
+        }
+      },
+      "mass": {
+        "dice": {
+          "mean": 0.8199,
+          "ci95": [
+            0.7356,
+            0.9044
+          ]
+        },
+        "surface_dice": {
+          "mean": 0.5468,
+          "ci95": [
+            0.3197,
+            0.7835
+          ]
+        },
+        "hd95_mm": {
+          "mean": 105.5624,
+          "ci95": [
+            43.5121,
+            172.2568
+          ]
+        },
+        "volume_error_ml": {
+          "mean": 3.0513,
+          "ci95": [
+            1.6185,
+            4.484
+          ]
+        }
+      },
+      "tumour": {
+        "dice": {
+          "mean": 0.7972,
+          "ci95": [
+            0.7222,
+            0.8698
+          ]
+        },
+        "surface_dice": {
+          "mean": 0.4851,
+          "ci95": [
+            0.2758,
+            0.7045
+          ]
+        },
+        "hd95_mm": {
+          "mean": 130.8557,
+          "ci95": [
+            94.2163,
+            184.3566
+          ]
+        },
+        "volume_error_ml": {
+          "mean": 3.0513,
+          "ci95": [
+            1.6185,
+            4.484
+          ]
+        }
+      }
+    },
+    "postprocessed": {
+      "kidney_and_mass": {
+        "dice": {
+          "mean": 0.9945,
+          "ci95": [
+            0.9929,
+            0.9959
+          ]
+        },
+        "surface_dice": {
+          "mean": 0.951,
+          "ci95": [
+            0.9435,
+            0.958
+          ]
+        },
+        "hd95_mm": {
+          "mean": 1.0615,
+          "ci95": [
+            0.4368,
+            1.686
+          ]
+        },
+        "volume_error_ml": {
+          "mean": 5.2016,
+          "ci95": [
+            3.6333,
+            6.5578
+          ]
+        }
+      },
+      "mass": {
+        "dice": {
+          "mean": 0.8603,
+          "ci95": [
+            0.8092,
+            0.9197
+          ]
+        },
+        "surface_dice": {
+          "mean": 0.6213,
+          "ci95": [
+            0.373,
+            0.8696
+          ]
+        },
+        "hd95_mm": {
+          "mean": 2.4632,
+          "ci95": [
+            1.4632,
+            3.4
+          ]
+        },
+        "volume_error_ml": {
+          "mean": 4.8998,
+          "ci95": [
+            3.3892,
+            6.2844
+          ]
+        }
+      },
+      "tumour": {
+        "dice": {
+          "mean": 0.8401,
+          "ci95": [
+            0.7917,
+            0.8912
+          ]
+        },
+        "surface_dice": {
+          "mean": 0.5693,
+          "ci95": [
+            0.329,
+            0.8095
+          ]
+        },
+        "hd95_mm": {
+          "mean": 2.5289,
+          "ci95": [
+            1.6553,
+            3.4
+          ]
+        },
+        "volume_error_ml": {
+          "mean": 4.8998,
+          "ci95": [
+            3.3892,
+            6.2844
+          ]
+        }
+      }
+    }
+  },
+  "mesh": {
+    "casesEvaluated": 3,
+    "criteria": {
+      "min_dice": 0.97,
+      "max_abs_volume_error_pct": 3.0
+    },
+    "recommended": {
+      "kidney": {
+        "taubin_iter": 0,
+        "target_faces": 4000,
+        "mean_dice": 0.9809,
+        "mean_hd95_mm": 1.608,
+        "mean_abs_volume_error_pct": 1.2
+      },
+      "tumour": {
+        "taubin_iter": 0,
+        "target_faces": 4000,
+        "mean_dice": 0.9885,
+        "mean_hd95_mm": 0.894,
+        "mean_abs_volume_error_pct": 2.33
+      }
+    },
+    "table": [
+      {
+        "structure": "kidney",
+        "taubinIterations": 0,
+        "targetFaces": 4000,
+        "dice": 0.9809,
+        "hd95Mm": 1.61,
+        "absVolumeErrorPct": 1.2
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 0,
+        "targetFaces": 10000,
+        "dice": 0.9877,
+        "hd95Mm": 1.34,
+        "absVolumeErrorPct": 1.34
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 0,
+        "targetFaces": 20000,
+        "dice": 0.9901,
+        "hd95Mm": 1.4,
+        "absVolumeErrorPct": 1.57
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 0,
+        "targetFaces": 40000,
+        "dice": 0.9916,
+        "hd95Mm": 1.5,
+        "absVolumeErrorPct": 1.54
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 10,
+        "targetFaces": 4000,
+        "dice": 0.9821,
+        "hd95Mm": 1.66,
+        "absVolumeErrorPct": 1.25
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 10,
+        "targetFaces": 10000,
+        "dice": 0.9875,
+        "hd95Mm": 1.99,
+        "absVolumeErrorPct": 1.31
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 10,
+        "targetFaces": 20000,
+        "dice": 0.9907,
+        "hd95Mm": 1.49,
+        "absVolumeErrorPct": 1.66
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 10,
+        "targetFaces": 40000,
+        "dice": 0.9916,
+        "hd95Mm": 1.49,
+        "absVolumeErrorPct": 1.33
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 25,
+        "targetFaces": 4000,
+        "dice": 0.9801,
+        "hd95Mm": 4.01,
+        "absVolumeErrorPct": 1.36
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 25,
+        "targetFaces": 10000,
+        "dice": 0.9885,
+        "hd95Mm": 1.38,
+        "absVolumeErrorPct": 1.33
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 25,
+        "targetFaces": 20000,
+        "dice": 0.9898,
+        "hd95Mm": 1.38,
+        "absVolumeErrorPct": 1.52
+      },
+      {
+        "structure": "kidney",
+        "taubinIterations": 25,
+        "targetFaces": 40000,
+        "dice": 0.9895,
+        "hd95Mm": 3.11,
+        "absVolumeErrorPct": 1.19
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 0,
+        "targetFaces": 4000,
+        "dice": 0.9885,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.33
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 0,
+        "targetFaces": 10000,
+        "dice": 0.9885,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.33
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 0,
+        "targetFaces": 20000,
+        "dice": 0.9885,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.33
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 0,
+        "targetFaces": 40000,
+        "dice": 0.9885,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.33
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 10,
+        "targetFaces": 4000,
+        "dice": 0.9884,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.33
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 10,
+        "targetFaces": 10000,
+        "dice": 0.9885,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.33
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 10,
+        "targetFaces": 20000,
+        "dice": 0.9885,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.32
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 10,
+        "targetFaces": 40000,
+        "dice": 0.9885,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.32
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 25,
+        "targetFaces": 4000,
+        "dice": 0.9854,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.19
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 25,
+        "targetFaces": 10000,
+        "dice": 0.9855,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.19
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 25,
+        "targetFaces": 20000,
+        "dice": 0.9855,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.19
+      },
+      {
+        "structure": "tumour",
+        "taubinIterations": 25,
+        "targetFaces": 40000,
+        "dice": 0.9855,
+        "hd95Mm": 0.89,
+        "absVolumeErrorPct": 2.19
+      }
+    ],
+    "minDice": 0.9801,
+    "maxAbsVolumeErrorPct": 2.33
+  }
+}

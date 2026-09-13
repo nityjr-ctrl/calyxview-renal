@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "min_dice": 0.97,
+    "max_abs_volume_error_pct": 3.0
+  },
+  "recommended": {
+    "kidney": {
+      "taubin_iter": 0,
+      "target_faces": 4000,
+      "mean_dice": 0.9809,
+      "mean_hd95_mm": 1.608,
+      "mean_abs_volume_error_pct": 1.2
+    },
+    "tumour": {
+      "taubin_iter": 0,
+      "target_faces": 4000,
+      "mean_dice": 0.9885,
+      "mean_hd95_mm": 0.894,
+      "mean_abs_volume_error_pct": 2.33
+    }
+  }
+}

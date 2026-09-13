@@ -12,6 +12,14 @@ const componentText = await readFile(
   new URL('../components/feasibility-benchmark.tsx', import.meta.url),
   'utf8',
 );
+const platformText = await readFile(
+  new URL('../components/renal-platform.tsx', import.meta.url),
+  'utf8',
+);
+const stylesheetText = await readFile(
+  new URL('../app/globals.css', import.meta.url),
+  'utf8',
+);
 
 const allowedTopLevelKeys = [
   'generatedAtUtc',
@@ -244,27 +252,87 @@ test('public summary contains aggregate-only data and no local artifacts', () =>
   );
   assert.doesNotMatch(summaryText, /\.(?:dcm|nii)(?:\.gz)?(?:\"|\s|$)/i);
   assert.doesNotMatch(summary.title, /\bexternal\b/i);
-  assert.match(summary.title, /non-overlapping, within-KiTS/i);
-  assert.match(summary.protocol.scope, /non-overlapping, within-KiTS/i);
+  assert.match(summary.protocol.scope, /within-KiTS/i);
   visitKeys(summary);
 });
 
 test('public copy states metric directions and offline research boundaries', () => {
-  assert.doesNotMatch(componentText, /external (?:feasibility|validation)/i);
-  assert.match(componentText, /non-overlapping, within-KiTS/i);
+  assert.match(
+    componentText,
+    /does not establish\s+patient-level[\s\S]*external validation/i,
+  );
+  assert.doesNotMatch(componentText, /selected cohort does not overlap/i);
+  assert.match(
+    componentText,
+    /identifiers fall outside the model.{0,40}documented KiTS21/is,
+  );
+  assert.match(
+    componentText,
+    /does not establish\s+patient-level\s+independence/i,
+  );
+  assert.match(componentText, /Reference agreement, not clinical accuracy/i);
+  assert.match(componentText, /random unlabelled CT/i);
+  assert.match(componentText, /cannot establish accuracy/i);
   assert.match(componentText, /↑ Higher is better · ↓ Lower is better/i);
-  assert.match(componentText, /no CT inference runs in your browser/i);
-  assert.match(componentText, /All 20 selected studies remain/i);
-  assert.match(componentText, /must not be used for patient care/i);
+  assert.match(componentText, /no\s+CT inference runs in your browser/i);
+  assert.match(componentText, /All\s+20 selected studies\s+remain/i);
+  assert.match(componentText, /must not be\s+used for patient care/i);
   assert.match(componentText, /licensed under CC BY-NC-SA 4\.0/i);
   assert.match(componentText, /downstream reuse must comply/i);
-  assert.match(componentText, /Source references do not imply endorsement/i);
+  assert.match(
+    componentText,
+    /Source references do not\s+imply\s+endorsement/i,
+  );
   assert.match(
     componentText,
     /https:\/\/huggingface\.co\/datasets\/neheller\/KiTS-Challenge-Imaging/,
   );
   assert.match(componentText, /Mass \(tumour \+ cyst\)/);
   assert.match(componentText, /Dice measures overlap/i);
+  assert.match(componentText, /95th-percentile symmetric surface distance/i);
+  assert.match(componentText, /validator-accepted prediction file/i);
+});
+
+test('next validation copy keeps prediction, reference, and custody in the correct order', () => {
+  assert.match(componentText, /Next validation · not yet run/i);
+  assert.match(
+    componentText,
+    /Lock each prediction before references enter the scoring\s+workspace/i,
+  );
+  assert.doesNotMatch(componentText, /before seeing the reference/i);
+  assert.doesNotMatch(componentText, /references were released/i);
+  assert.match(
+    componentText,
+    /CT only[\s\S]*Run the model[\s\S]*Lock outputs[\s\S]*Release references[\s\S]*Score all 20/i,
+  );
+  assert.match(componentText, /script-blinded, not\s+operator-blinded/i);
+  assert.match(componentText, /separate\s+custodian is still\s+required/i);
+  assert.match(componentText, /operator-chosen seed/i);
+  assert.match(componentText, /cannot rule out seed shopping/i);
+  assert.match(componentText, /Protocol under review/i);
+});
+
+test('benchmark semantics and the phone safety entry point remain accessible', () => {
+  assert.match(componentText, /<output[\s\S]*aria-live="polite"/i);
+  assert.match(
+    componentText,
+    /<section[\s\S]*className="benchmark-results-grid"/i,
+  );
+  assert.match(componentText, /<dl className="benchmark-metric-grid">/i);
+  assert.match(componentText, /<dt>\{label\}<\/dt>/i);
+  assert.match(
+    componentText,
+    /aria-labelledby="current-benchmark-results-title"/i,
+  );
+  assert.match(platformText, /aria-label="Read research and safety boundary"/i);
+  assert.match(
+    stylesheetText,
+    /@media \(max-width: 520px\)[\s\S]*?\.research-chip \{[\s\S]*?display: inline-grid;/i,
+  );
+  assert.match(
+    stylesheetText,
+    /\.research-chip span \{[\s\S]*?display: none !important;/i,
+  );
 });
 
 test('running summary cannot present placeholder values as measured results', () => {

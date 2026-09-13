@@ -564,6 +564,10 @@ class BlindedPublicSummaryGateTests(unittest.TestCase):
         public = self.fixture.build()
         digest = public_gate.write_public_summary(self.fixture.output, public)
         self.assertEqual(public["schemaVersion"], 3)
+        self.assertEqual(
+            public["title"],
+            "20-study protocol-frozen KiTS23 script-blinded evaluation",
+        )
         self.assertEqual(public["completion"]["evaluatedCases"], 20)
         self.assertEqual(public["completion"]["failedCases"], 1)
         public_gate.assert_public_privacy(public)

@@ -87,6 +87,39 @@ The current site does **not** implement any of the following:
 
 The detailed production work programme is in [`docs/production-segmentation-roadmap.md`](docs/production-segmentation-roadmap.md).
 
+## Companion project and the PACS request
+
+The endourology sibling, **CalyxView** ([github.com/nityjr-ctrl/CalyxView](https://github.com/nityjr-ctrl/CalyxView)),
+reconstructs kidney parenchyma, collecting system and stones from CT for URS and
+PCNL teaching, and carries a local-only DICOM intake check plus a tested
+DICOM-to-3D pipeline. Both projects need the same thing next: an anonymised DICOM
+export of CT urograms and stone CTs from PACS. The request, with the exact series,
+format, anonymisation and handover specification, is in
+[`docs/PACS-DICOM-EXPORT-REQUEST.md`](docs/PACS-DICOM-EXPORT-REQUEST.md).
+
+## CT-to-3D planning pipeline (`pipeline/`)
+
+The Python side of the project. `renalplan` takes a CT (NIfTI or a de-identified
+DICOM export) plus a kidney / tumour / cyst label map and produces a 3D case
+bundle (named meshes, viewer manifest entry), computed R.E.N.A.L. and PADUA
+components with every assumption stated, resection geometry (margin envelope,
+residual parenchyma, contact surface, distances to sinus, vessels and collecting
+system), and per-case reports. It also carries the evaluation tools (Dice,
+surface Dice, HD95, volume error, bootstrap CIs, KiTS23 regions), a grid search
+over explainable post-processing rules for model output, and a mesh fidelity
+sweep. Results on eight real KiTS23 cases are in [`pipeline/results/`](pipeline/results/).
+
+```bash
+cd pipeline && pip install -r requirements.txt && pip install -e . && pytest
+renalplan batch --kits ~/CalyxView-data/kits --out out/kits
+```
+
+See [`pipeline/README.md`](pipeline/README.md), the proposal in
+[`docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md`](docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md)
+and the PACS request in [`docs/PACS-DICOM-EXPORT-REQUEST.md`](docs/PACS-DICOM-EXPORT-REQUEST.md).
+The pipeline is research and teaching software: not a medical device, not for
+patient care.
+
 ## Development
 
 Requirements: Node.js 22.13 or newer.

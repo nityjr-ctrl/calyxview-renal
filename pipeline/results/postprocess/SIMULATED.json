@@ -1,0 +1,46 @@
+{
+  "warning": "These label maps are reference labels with SIMULATED errors (boundary noise, holes, tumour erosion, spurious far components). They are not model predictions.",
+  "seed": 1,
+  "cases": [
+    {
+      "case_id": "case_00000",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    },
+    {
+      "case_id": "case_00001",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    },
+    {
+      "case_id": "case_00002",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    },
+    {
+      "case_id": "case_00003",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    },
+    {
+      "case_id": "case_00004",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    },
+    {
+      "case_id": "case_00005",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    },
+    {
+      "case_id": "case_00006",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    },
+    {
+      "case_id": "case_00007",
+      "spurious_components": 3,
+      "holes_voxels": 0
+    }
+  ]
+}

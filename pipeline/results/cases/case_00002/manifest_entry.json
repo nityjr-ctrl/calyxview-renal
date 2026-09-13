@@ -1,0 +1,63 @@
+{
+  "id": "case_00002",
+  "label": "KiTS23 case_00002",
+  "source": "KiTS23 reference labels",
+  "glb": "models/case_00002.glb",
+  "axes": "RAS",
+  "structures": [
+    {
+      "name": "parenchyma",
+      "label": "Kidney (tumour side)",
+      "colour": "#c4aa8c",
+      "opacity": 0.35,
+      "visible": true
+    },
+    {
+      "name": "contralateral",
+      "label": "Contralateral kidney",
+      "colour": "#c4aa8c",
+      "opacity": 0.24,
+      "visible": true
+    },
+    {
+      "name": "tumour",
+      "label": "Tumour",
+      "colour": "#d85c60",
+      "opacity": 1.0,
+      "visible": true
+    },
+    {
+      "name": "cyst",
+      "label": "Cyst",
+      "colour": "#60a8d6",
+      "opacity": 0.92,
+      "visible": true
+    },
+    {
+      "name": "sinus",
+      "label": "Renal sinus (approx.)",
+      "colour": "#e6c878",
+      "opacity": 0.35,
+      "visible": false
+    },
+    {
+      "name": "margin_envelope",
+      "label": "Resection margin envelope",
+      "colour": "#ffcd28",
+      "opacity": 0.43,
+      "visible": false
+    },
+    {
+      "name": "residual_parenchyma",
+      "label": "Residual parenchyma",
+      "colour": "#78be8c",
+      "opacity": 0.55,
+      "visible": false
+    }
+  ],
+  "planning": {
+    "renal": "8p",
+    "padua": 9,
+    "marginMm": 5.0
+  }
+}
