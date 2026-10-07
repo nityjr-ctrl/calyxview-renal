@@ -192,17 +192,11 @@ export function PlanningPipeline() {
           </div>
           <div className="benchmark-intro">
             <p>
-              The pipeline is a Python package I wrote called <code>renalplan</code>. Give it the
-              kidney, tumour and cyst outlines from a CT, and the CT itself if you have it. It builds
-              the 3D model, works out R.E.N.A.L. and PADUA, measures the volumes around a margin and
-              writes a one-page report. It runs on a CPU. It can also call TotalSegmentator and
-              nnU-Net on a GPU to draw the outlines, but I haven&apos;t run either through it yet. The
-              builder at the top of this page is a port of its meshing and scoring to the browser.
-            </p>
-            <p>
-              The numbers below come from {count(nephrometry.casesEvaluated)} kidneys in KiTS23, a
-              public set of de-identified CT scans. These runs used the KiTS expert outlines only, with
-              no CT. They show the pipeline works end to end on real anatomy.
+              <code>renalplan</code> is the Python package I wrote behind the scores: from the kidney,
+              tumour and cyst outlines of a CT it builds the 3D model, scores R.E.N.A.L. and PADUA and
+              measures the kidney kept round a margin, on a CPU. The numbers below are from{' '}
+              {count(nephrometry.casesEvaluated)} KiTS23 kidneys run on the expert outlines alone; its
+              hooks for TotalSegmentator and nnU-Net haven&apos;t been run yet.
             </p>
           </div>
         </div>
@@ -446,14 +440,15 @@ export function PlanningPipeline() {
             <div>
               <h3>What&apos;s published, and what stays offline</h3>
               <p>
-                Published here: the five kidney meshes (Kidneys A to E in the 3D viewer) and the numbers
-                renalplan worked out from the KiTS23 outlines. Kidney C&apos;s file also has the ribs,
-                psoas, colon, spleen, liver and body outline, drawn on the KiTS23 CT by
+                Published here: the five kidney meshes (Kidneys A to E in the 3D viewer), the numbers
+                renalplan worked out from the KiTS23 outlines, and cropped, windowed axial CT slices
+                round each of those kidneys with their KiTS outlines. Kidney C&apos;s file also has the
+                ribs, psoas, colon, spleen, liver and body outline, drawn on the KiTS23 CT by
                 TotalSegmentator, an AI model (Wasserthal et al., Radiology: AI 2023).
               </p>
               <p>
-                Not published: the CT images, the outline files and model output. The KiTS case numbers
-                are in the repository, so anyone can check a case against the source.
+                Not published: the full CT volumes, the label volumes and model output. The KiTS case
+                numbers are in the repository, so anyone can check a case against the source.
               </p>
               <p>
                 For hospital scans, the pipeline&apos;s DICOM loader stops a series if its first file
@@ -462,7 +457,10 @@ export function PlanningPipeline() {
                 it&apos;s a tripwire, not a de-identification check. The anonymising has to happen
                 first.
               </p>
-              <p>The meshes are adapted from KiTS23, so they carry its CC BY-NC-SA 4.0 licence.</p>
+              <p>
+                The meshes and CT slices are adapted from KiTS23, so they carry its CC BY-NC-SA 4.0
+                licence.
+              </p>
               <div className="benchmark-source-links">
                 <a href={repoFolder('pipeline')} target="_blank" rel="noreferrer">
                   Pipeline source <ExternalLink aria-hidden="true" />

@@ -235,40 +235,15 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
             </h2>
           </div>
           <div className="benchmark-intro">
-            {isScriptBlinded ? (
-              <p>
-                The pipeline needs outlines, and contouring every case by hand
-                doesn&apos;t scale. So I ran a published model from the
-                KiTS21 challenge, built with nnU-Net (an open-source tool for
-                building models that draw outlines on scans), unchanged on {cohortSize} KiTS23
-                scans.
-                This time each output was locked before the expert outlines
-                were copied in for scoring.
-              </p>
-            ) : (
-              <p>
-                The pipeline needs outlines, and contouring every case by hand
-                doesn&apos;t scale. So I took a published model from the
-                KiTS21 challenge, built with nnU-Net (an open-source tool for
-                building models that draw outlines on scans), and ran it unchanged on{' '}
-                {cohortSize} KiTS23 scans it wasn&apos;t trained on. It was
-                trained on KiTS cases 0 to 299, and these are cases 400 to 419.
-                I used its standard setting, which averages five trained copies
-                of the model. I left out test-time augmentation, which also
-                averages over mirrored copies of each scan, so it wasn&apos;t
-                running at its strongest.
-              </p>
-            )}
             <p>
-              The scans come from the same collection the model was trained on,
-              so this is a check within KiTS, not external validation. The
-              patients were all treated in one US hospital system, so it says
-              nothing yet about how the model does on our scanners.
+              Contouring every case by hand doesn&apos;t scale, so I ran a published KiTS21 model, built
+              with nnU-Net, unchanged on {cohortSize} KiTS23 scans
               {isScriptBlinded
-                ? ''
-                : " It wasn't blinded either: the expert outlines were on the same machine when the model ran."}{' '}
-              The numbers measure agreement with the KiTS expert outlines, not
-              clinical accuracy, and none of it is for patient care.
+                ? ', locking each output before the expert outlines were copied in.'
+                : " it wasn't trained on (cases 400 to 419), without test-time augmentation."}{' '}
+              It&apos;s a check within KiTS, from one US hospital system, not external validation
+              {isScriptBlinded ? '' : ", and it wasn't blinded"}: the numbers measure agreement with the
+              expert outlines, not clinical accuracy, and none of it is for patient care.
             </p>
           </div>
         </div>

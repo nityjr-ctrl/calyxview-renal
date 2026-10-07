@@ -41,3 +41,30 @@ Where each part comes from:
 
 KiTS23 imaging and labels are CC BY-NC-SA 4.0, so these meshes carry the same
 non-commercial share-alike terms.
+
+## CT slices
+
+The CT tab in the viewer and the stills on the overview come from
+`scripts/make-ct-slices.py`, run on the KiTS23 imaging and labels of the same
+five cases (not by the script above):
+
+```
+python scripts/make-ct-slices.py --data C:\Users\nityj\CalyxView-data\kits23-renal
+```
+
+What's published, in `public/ct/reference-<letter>/`, for each kidney: the
+axial slices through a box round the tumour-bearing kidney and its largest
+tumour (found as renalplan does), padded by 25 mm. Thin-slice scans are
+averaged into slabs of about 3 mm so no slice is skipped; Kidney E's 4 mm
+slices are kept as they are. Soft-tissue window (40/400 HU), 8-bit WebP,
+about 384 px on the long edge, anterior up and the patient's left on the
+right. `slices.json` holds the KiTS kidney, tumour and cyst outlines as
+polylines in image pixels, each slab's height in the 3D model's frame, and the
+slab through the tumour's centre; `key.webp` is that slab at 640 px with the
+outlines drawn on. The full CT volumes and label volumes are not published,
+and nothing in the output names a case. The CT slices carry KiTS23's
+CC BY-NC-SA 4.0 terms.
+
+Kidney C's crop includes a small KiTS cyst inside that kidney, level with the lower part of the tumour, that the mesh
+leaves out (the mesher kept only the largest cyst, which is in the other
+kidney), so the CT tab outlines a cyst that the 3D model doesn't show.

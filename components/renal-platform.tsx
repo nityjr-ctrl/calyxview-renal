@@ -51,11 +51,21 @@ import {
   sceneCaseFor,
   useKidneyBuilder,
 } from '@/components/kidney-builder';
+import { CtPanel, slicePlaneFor, useCtSlices, type CtSliceSet, type SlicePlane } from '@/components/ct-slices';
 import { ApproachNotes, LayerButton, Metric } from '@/components/viewer-ui';
 import { referenceCases, type ReferenceCase } from '@/lib/reference-cases';
 
 export type WorkspaceMode = 'plan' | 'build' | 'learn';
-type InspectorTab = 'source' | 'scores' | 'plan' | 'limits';
+type InspectorTab = 'source' | 'scores' | 'plan' | 'limits' | 'ct';
+/** What the CT tab needs from the platform, which keeps the slice in step with the 3D plane. */
+type CtControls = {
+  status: 'idle' | 'loading' | 'ready' | 'failed';
+  data: CtSliceSet | null;
+  index: number;
+  setIndex: (value: number) => void;
+  outlines: boolean;
+  setOutlines: (value: boolean) => void;
+};
 
 /** The hand-made teaching kidney. Every other case id is one of Kidneys A to E. */
 const TEACHING_CASE_ID = 'synthetic';
@@ -540,6 +550,7 @@ function ModelWorkspace({
   handRotated,
   onUserRotate,
   trainingStep,
+  slicePlane,
 }: {
   mode: WorkspaceMode;
   activeCase: ReferenceCase | null;
@@ -565,6 +576,7 @@ function ModelWorkspace({
   handRotated: boolean;
   onUserRotate: () => void;
   trainingStep: number;
+  slicePlane: SlicePlane | null;
 }) {
   const building = mode === 'build' && builtCase !== null;
   const sceneCase: SceneCase | null = building ? builtCase : activeCase;
@@ -643,6 +655,7 @@ function ModelWorkspace({
               resetNonce={resetNonce}
               zoomRequest={zoomRequest}
               onUserRotate={onUserRotate}
+              slicePlane={building ? null : slicePlane}
             />
           ) : (
             <KidneyScene
@@ -759,21 +772,26 @@ function ModelWorkspace({
 }
 
 function PlanningInspector({
-  tab,
+  tab: requestedTab,
   setTab,
   activeCase,
   marginMm,
   setMarginMm,
+  ct,
 }: {
   tab: InspectorTab;
   setTab: (tab: InspectorTab) => void;
   activeCase: ReferenceCase | null;
   marginMm: number;
   setMarginMm: (value: number) => void;
+  ct: CtControls;
 }) {
+  // Only Kidneys A to E have a CT. The teaching kidney falls back to its scores.
+  const tab: InspectorTab = requestedTab === 'ct' && !activeCase ? 'scores' : requestedTab;
   const tabs: Array<{ id: InspectorTab; label: string }> = [
     { id: 'source', label: 'About' },
     { id: 'scores', label: 'Scores' },
+    ...(activeCase ? [{ id: 'ct' as const, label: 'CT' }] : []),
     { id: 'plan', label: 'Plan' },
     { id: 'limits', label: 'Limits' },
   ];
@@ -832,8 +850,8 @@ function PlanningInspector({
                   </Badge>
                 </div>
                 <p className="mt-2 text-xs leading-5 text-white/75">
-                  From a de-identified CT of a real patient in the public KiTS23 dataset. Only the 3D model and
-                  the numbers come to your browser, not the CT.
+                  From a de-identified CT of a real patient in the public KiTS23 dataset. Your browser gets the
+                  3D model, the numbers and cropped CT slices round this kidney, not the whole scan.
                 </p>
               </div>
               <dl className="definition-list mt-5">
@@ -997,6 +1015,19 @@ function PlanningInspector({
               </div>
             </>
           )
+        ) : null}
+
+        {tab === 'ct' && activeCase ? (
+          <CtPanel
+            caseId={activeCase.id}
+            label={activeCase.label}
+            status={ct.status}
+            data={ct.data}
+            index={ct.index}
+            setIndex={ct.setIndex}
+            outlines={ct.outlines}
+            setOutlines={ct.setOutlines}
+          />
         ) : null}
 
         {tab === 'plan' ? (
@@ -1286,8 +1317,10 @@ function knownCaseId(id: string | undefined) {
   return id && referenceCases.some((item) => item.id === id) ? id : TEACHING_CASE_ID;
 }
 
-function caseHash(id: string) {
-  return id === TEACHING_CASE_ID ? '#workspace' : `#workspace/${id}`;
+/** The viewer's address for a kidney. `?ct` opens Kidneys A to E on the CT tab. */
+function caseHash(id: string, ct = false) {
+  if (id === TEACHING_CASE_ID) return '#workspace';
+  return ct ? `#workspace/${id}?ct` : `#workspace/${id}`;
 }
 
 export function RenalPlatform({
@@ -1295,6 +1328,7 @@ export function RenalPlatform({
   initialMode = 'plan',
   initialCaseId = TEACHING_CASE_ID,
   startWithSample = false,
+  startOnCt = false,
 }: {
   onExit?: () => void;
   initialMode?: WorkspaceMode;
@@ -1302,6 +1336,8 @@ export function RenalPlatform({
   initialCaseId?: string;
   /** Build the synthetic sample as soon as the builder opens. */
   startWithSample?: boolean;
+  /** Open a KiTS23 kidney on its CT tab. */
+  startOnCt?: boolean;
 }) {
   const [mode, setMode] = useState<WorkspaceMode>(initialMode);
   const [layers, setLayers] = useState<AnatomyLayers>(ALL_LAYERS);
@@ -1344,8 +1380,14 @@ export function RenalPlatform({
   const [viewNonce, setViewNonce] = useState(0);
   const [resetNonce, setResetNonce] = useState(0);
   const [handRotated, setHandRotated] = useState(false);
-  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('scores');
-  const [builtTab, setBuiltTab] = useState<InspectorTab>('scores');
+  const [inspectorTab, setInspectorTabState] = useState<InspectorTab>(() =>
+    startOnCt && initialMode === 'plan' && knownCaseId(initialCaseId) !== TEACHING_CASE_ID ? 'ct' : 'scores',
+  );
+  // The CT: one slice remembered per kidney, starting on the tumour.
+  const [ctIndexByCase, setCtIndexByCase] = useState<Record<string, number>>({});
+  const [ctOutlines, setCtOutlines] = useState(true);
+  // A built kidney has no CT, so its panel has no CT tab.
+  const [builtTab, setBuiltTab] = useState<Exclude<InspectorTab, 'ct'>>('scores');
   const [trainingStep, setTrainingStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -1425,6 +1467,32 @@ export function RenalPlatform({
 
   const onUserRotate = useCallback(() => setHandRotated(true), []);
 
+  const ctOpen = mode === 'plan' && activeCase !== null && inspectorTab === 'ct';
+  const ctSlices = useCtSlices(activeCase?.id ?? null, ctOpen);
+  const ctIndex = activeCase ? (ctIndexByCase[activeCase.id] ?? ctSlices.data?.tumourSlice ?? 0) : 0;
+  const setCtIndex = useCallback(
+    (value: number) => {
+      if (activeCase) setCtIndexByCase((current) => ({ ...current, [activeCase.id]: value }));
+    },
+    [activeCase],
+  );
+  const slicePlane = useMemo(
+    () => (ctOpen && ctSlices.data ? slicePlaneFor(ctSlices.data, ctIndex) : null),
+    [ctOpen, ctSlices.data, ctIndex],
+  );
+
+  // The CT tab is part of the address, so "See the CT" links and reloads land on it.
+  const setInspectorTab = useCallback(
+    (next: InspectorTab) => {
+      setInspectorTabState(next);
+      const hash = caseHash(caseId, next === 'ct');
+      if (window.location.hash.startsWith('#workspace') && window.location.hash !== hash) {
+        window.history.replaceState(window.history.state, '', hash);
+      }
+    },
+    [caseId],
+  );
+
   const zoom = useCallback((direction: 1 | -1) => {
     setZoomRequest((current) => ({ nonce: current.nonce + 1, direction }));
   }, []);
@@ -1436,14 +1504,17 @@ export function RenalPlatform({
     // Keep the address in step, so a reload or a shared link opens the same kidney.
     // replaceState keeps history.state (the overview's close button needs it) and
     // fires no hashchange.
-    const hash = caseHash(id);
+    const hash = caseHash(id, inspectorTab === 'ct');
     if (window.location.hash.startsWith('#workspace') && window.location.hash !== hash) {
       window.history.replaceState(window.history.state, '', hash);
     }
-  }, []);
+  }, [inspectorTab]);
 
   const changeMode = (next: WorkspaceMode) => {
-    rememberMode(next, next === 'build' ? BUILD_HASH : caseHash(next === 'learn' ? TEACHING_CASE_ID : caseId));
+    rememberMode(
+      next,
+      next === 'build' ? BUILD_HASH : caseHash(next === 'learn' ? TEACHING_CASE_ID : caseId, inspectorTab === 'ct'),
+    );
     if (next === 'learn') {
       // The lesson needs the teaching kidney's vessels and collecting system.
       chooseCase(TEACHING_CASE_ID);
@@ -1577,6 +1648,7 @@ export function RenalPlatform({
             handRotated={handRotated}
             onUserRotate={onUserRotate}
             trainingStep={trainingStep}
+            slicePlane={slicePlane}
           />
         )}
 
@@ -1587,6 +1659,14 @@ export function RenalPlatform({
             activeCase={activeCase}
             marginMm={marginMm}
             setMarginMm={setMarginMm}
+            ct={{
+              status: ctSlices.status,
+              data: ctSlices.data,
+              index: ctIndex,
+              setIndex: setCtIndex,
+              outlines: ctOutlines,
+              setOutlines: setCtOutlines,
+            }}
           />
         ) : building ? (
           builtOutput ? (

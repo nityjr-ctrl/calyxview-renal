@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import type { SlicePlane } from '@/components/ct-slices';
 import type { ReferenceStructure } from '@/lib/reference-cases';
 import type { ViewPreset, ZoomRequest } from '@/components/kidney-scene';
 
@@ -44,6 +45,8 @@ type ReferenceCaseSceneProps = {
   zoomRequest?: ZoomRequest;
   /** Called when someone turns the model by hand. */
   onUserRotate?: () => void;
+  /** The CT slice on show, drawn as a thin axial plane through the model. Null hides it. */
+  slicePlane?: SlicePlane | null;
 };
 
 type Status = 'loading' | 'ready' | 'failed' | 'no-webgl';
@@ -95,18 +98,19 @@ export function ReferenceCaseScene({
   resetNonce = 0,
   zoomRequest = NO_ZOOM,
   onUserRotate,
+  slicePlane = null,
 }: ReferenceCaseSceneProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<Status>('loading');
   const [progress, setProgress] = useState<number | null>(null);
 
   // Live values the animation loop reads without re-running the whole effect.
-  const stateRef = useRef({ visible, parenchymaOpacity, clipPercent, preset, viewNonce, resetNonce, zoomRequest });
+  const stateRef = useRef({ visible, parenchymaOpacity, clipPercent, preset, viewNonce, resetNonce, zoomRequest, slicePlane });
   const onUserRotateRef = useRef(onUserRotate);
 
   useEffect(() => {
-    stateRef.current = { visible, parenchymaOpacity, clipPercent, preset, viewNonce, resetNonce, zoomRequest };
-  }, [visible, parenchymaOpacity, clipPercent, preset, viewNonce, resetNonce, zoomRequest]);
+    stateRef.current = { visible, parenchymaOpacity, clipPercent, preset, viewNonce, resetNonce, zoomRequest, slicePlane };
+  }, [visible, parenchymaOpacity, clipPercent, preset, viewNonce, resetNonce, zoomRequest, slicePlane]);
 
   useEffect(() => {
     onUserRotateRef.current = onUserRotate;
@@ -175,6 +179,40 @@ export function ReferenceCaseScene({
     const parts = new Map<string, THREE.Mesh>();
     let disposed = false;
 
+    // The CT slice on show: one unit square in the model's own millimetres
+    // (RAS, so its normal is superior), scaled to the crop and moved up and
+    // down. It lives inside the loaded model, so it shares its framing.
+    const planeGeometry = new THREE.PlaneGeometry(1, 1);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xbff5e3,
+      transparent: true,
+      opacity: 0.16,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      clippingPlanes: [clipPlane],
+    });
+    const planeEdgeGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-0.5, -0.5, 0),
+      new THREE.Vector3(0.5, -0.5, 0),
+      new THREE.Vector3(0.5, 0.5, 0),
+      new THREE.Vector3(-0.5, 0.5, 0),
+    ]);
+    const planeEdgeMaterial = new THREE.LineBasicMaterial({
+      color: 0xd6fff0,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+      clippingPlanes: [clipPlane],
+    });
+    const slice = new THREE.Group();
+    const sliceFill = new THREE.Mesh(planeGeometry, planeMaterial);
+    sliceFill.renderOrder = 3;
+    const sliceEdge = new THREE.LineLoop(planeEdgeGeometry, planeEdgeMaterial);
+    sliceEdge.renderOrder = 3;
+    slice.add(sliceFill, sliceEdge);
+    slice.visible = false;
+    let sliceSize = '';
+
     // Colour, frame and show the model, whichever way it arrived.
     const install = (loaded: THREE.Object3D) => {
       if (disposed) return;
@@ -222,6 +260,8 @@ export function ReferenceCaseScene({
       // up at the origin whatever its position in the patient coordinates.
       loaded.scale.setScalar(scale);
       loaded.position.copy(centre).multiplyScalar(-scale);
+      // Added after framing, so the plane never changes the camera's box.
+      loaded.add(slice);
       model.add(loaded);
 
       setStatus('ready');
@@ -423,6 +463,17 @@ export function ReferenceCaseScene({
       // The cutaway sweeps a plane through the model along the view axis.
       clipPlane.constant = 2.6 - (current.clipPercent / 100) * 5.2;
 
+      const plane = current.slicePlane;
+      slice.visible = plane !== null;
+      if (plane) {
+        const size = `${plane.xMin},${plane.xMax},${plane.yMin},${plane.yMax}`;
+        if (size !== sliceSize) {
+          sliceSize = size;
+          slice.scale.set(plane.xMax - plane.xMin, plane.yMax - plane.yMin, 1);
+        }
+        slice.position.set((plane.xMin + plane.xMax) / 2, (plane.yMin + plane.yMax) / 2, plane.z);
+      }
+
       renderer.render(scene, camera);
     };
     animate();
@@ -439,6 +490,13 @@ export function ReferenceCaseScene({
       renderer.domElement.removeEventListener('pointerup', stopPointer);
       renderer.domElement.removeEventListener('pointercancel', stopPointer);
       renderer.domElement.removeEventListener('wheel', onWheel);
+      planeEdgeGeometry.dispose();
+      planeEdgeMaterial.dispose();
+      // The fill is a Mesh, so the traverse below disposes it, unless it was never added.
+      if (!slice.parent) {
+        planeGeometry.dispose();
+        planeMaterial.dispose();
+      }
       scene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.geometry.dispose();

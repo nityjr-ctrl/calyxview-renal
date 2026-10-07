@@ -36,7 +36,7 @@ const RenalPlatform = lazy(() =>
 );
 
 type EntryMode = 'plan' | 'build' | 'learn';
-type OpenDemo = (mode?: EntryMode, caseId?: string, options?: { sample?: boolean }) => void;
+type OpenDemo = (mode?: EntryMode, caseId?: string, options?: { sample?: boolean; ct?: boolean }) => void;
 /** What this site keeps in a viewer history entry. The viewer updates mode as you switch. */
 type ViewerHistoryState = { calyxViewer?: boolean; mode?: EntryMode | 'import' } | null;
 
@@ -53,6 +53,8 @@ const OVERVIEW_TITLE = 'CalyxView Renal: partial nephrectomy planning research p
 const VIEWER_TITLE = 'CalyxView Renal: 3D viewer';
 const PROPOSAL_URL = repoFile('docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md');
 const CONTACT_EMAIL = 'nity@uroref.com';
+// Kidney C shows the most anatomy round the tumour.
+const HERO_SCAN = '/ct/reference-c/key.webp';
 
 const navLinks = [
   { href: '#build', label: 'Make a 3D kidney' },
@@ -113,7 +115,7 @@ const studyNeeds = [
 
 const prototypeIncludes = [
   'The builder: a 3D kidney, R.E.N.A.L. and PADUA from your own outline, in the browser',
-  'Five real KiTS23 kidneys with computed R.E.N.A.L. and PADUA scores',
+  'Five real KiTS23 kidneys: 3D models, computed R.E.N.A.L. and PADUA, and cropped CT slices with the expert outlines',
   'The teaching kidney and the lesson',
   'The offline pipeline and its results on 8 KiTS23 kidneys',
   'A benchmark of a published kidney and tumour segmentation model on 20 KiTS23 scans',
@@ -134,7 +136,8 @@ const previewLayerConfig: Array<{ key: keyof AnatomyLayers; label: string; color
   { key: 'collecting', label: 'Collecting system', color: '#9bded7' },
 ];
 
-const WORKSPACE_HASH = /^#workspace(?:\/([a-z0-9-]+))?$/i;
+// #workspace, #workspace/reference-c, or #workspace/reference-c?ct for its CT tab.
+const WORKSPACE_HASH = /^#workspace(?:\/([a-z0-9-]+))?(\?ct)?$/i;
 const BUILD_ROUTE = 'build';
 const knownCaseIds = new Set(['synthetic', ...referenceCases.map((item) => item.id)]);
 
@@ -149,21 +152,19 @@ function kidneyLetters(letters: string[]): string {
   return `Kidneys ${letters.slice(0, -1).join(', ')} and ${letters[letters.length - 1]}`;
 }
 
-function readRoute(): { view: 'overview' | 'workspace'; caseId: string; build: boolean } {
+function readRoute(): { view: 'overview' | 'workspace'; caseId: string; build: boolean; ct: boolean } {
   const match = WORKSPACE_HASH.exec(window.location.hash);
-  if (!match) return { view: 'overview', caseId: 'synthetic', build: false };
+  if (!match) return { view: 'overview', caseId: 'synthetic', build: false, ct: false };
   const requested = match[1]?.toLowerCase();
-  if (requested === BUILD_ROUTE) return { view: 'workspace', caseId: 'synthetic', build: true };
-  return {
-    view: 'workspace',
-    caseId: requested && knownCaseIds.has(requested) ? requested : 'synthetic',
-    build: false,
-  };
+  if (requested === BUILD_ROUTE) return { view: 'workspace', caseId: 'synthetic', build: true, ct: false };
+  const caseId = requested && knownCaseIds.has(requested) ? requested : 'synthetic';
+  return { view: 'workspace', caseId, build: false, ct: Boolean(match[2]) && caseId !== 'synthetic' };
 }
 
-function workspaceHash(caseId: string, mode?: EntryMode) {
+function workspaceHash(caseId: string, mode?: EntryMode, ct = false) {
   if (mode === 'build') return `#workspace/${BUILD_ROUTE}`;
-  return caseId === 'synthetic' ? '#workspace' : `#workspace/${caseId}`;
+  if (caseId === 'synthetic') return '#workspace';
+  return ct ? `#workspace/${caseId}?ct` : `#workspace/${caseId}`;
 }
 
 // An unknown or oddly cased kidney id opens the teaching kidney, so put the
@@ -171,7 +172,7 @@ function workspaceHash(caseId: string, mode?: EntryMode) {
 // no hashchange.
 function canonicaliseWorkspaceHash() {
   const route = readRoute();
-  const hash = workspaceHash(route.caseId, route.build ? 'build' : undefined);
+  const hash = workspaceHash(route.caseId, route.build ? 'build' : undefined, route.ct);
   if (route.view === 'workspace' && window.location.hash !== hash) {
     window.history.replaceState(window.history.state, '', hash);
   }
@@ -271,10 +272,8 @@ function HeroSection({ openDemo }: { openDemo: OpenDemo }) {
           <h1 id="hero-title">Renal tumours in 3D, with the nephrometry scored from the outline.</h1>
           <p className="hero-copy">
             I built this to look at a small renal mass the way we plan one: in three dimensions, with
-            R.E.N.A.L. and PADUA scored by stated rules rather than by eye. Load a kidney and tumour
-            outline and the builder makes the 3D model and the scores in your browser. There are also
-            five real kidneys from the public KiTS23 dataset, a teaching kidney with a short lesson, and
-            renalplan, the Python pipeline behind the scoring.
+            R.E.N.A.L. and PADUA scored by stated rules rather than by eye. Load your own outline, or
+            scroll through five real KiTS23 CTs beside their 3D models.
           </p>
           <div className="hero-actions">
             <button type="button" className="button button-mint" data-return-focus="hero" onClick={() => openDemo('build')}>
@@ -289,15 +288,18 @@ function HeroSection({ openDemo }: { openDemo: OpenDemo }) {
           </p>
         </div>
         <figure className="hero-figure">
-          {/* oxlint-disable-next-line next/no-img-element -- Vite serves this local hero asset directly. */}
-          <img
-            src="/calyxview-renal-hero.webp"
-            alt="AI-generated illustration of a translucent kidney model with a small tumour. Not a real print or a real patient."
-            width="1586"
-            height="992"
-            fetchPriority="high"
-          />
-          <figcaption className="hero-caption">AI-generated illustration, not a real print.</figcaption>
+          <div className="hero-scan">
+            {/* oxlint-disable-next-line next/no-img-element -- Vite serves this local CT still directly. */}
+            <img
+              src={HERO_SCAN}
+              alt="Axial CT through Kidney C, a left kidney with a tumour on its posterolateral surface. The kidney is outlined in beige and the tumour in red."
+              width="640"
+              height="635"
+              fetchPriority="high"
+            />
+            <span className="hero-scan-tag" aria-hidden="true">Kidney C</span>
+          </div>
+          <figcaption className="hero-caption">KiTS23 CT, de-identified, CC BY-NC-SA 4.0</figcaption>
         </figure>
       </div>
     </section>
@@ -312,11 +314,9 @@ function BuildSection({ openDemo }: { openDemo: OpenDemo }) {
           <p className="eyebrow">Make a 3D kidney</p>
           <h2 id="build-title">Load an outline, get a 3D kidney and its scores.</h2>
           <p>
-            Give the builder a kidney and tumour label map (.nii or .nii.gz). It meshes each structure,
-            scores R.E.N.A.L. and PADUA with the same rules as renalplan, works out how much kidney a
-            margin keeps, and lets you download the model (GLB or STL) and a report. It runs in your
-            browser: the file is read into the tab&apos;s memory, nothing is uploaded, and it&apos;s
-            gone when you close the tab.
+            Give it a kidney and tumour label map (.nii or .nii.gz) and it makes the 3D model, R.E.N.A.L.,
+            PADUA and the kidney kept at your margin, with the same rules as renalplan. It runs in your
+            browser: nothing is uploaded, and it&apos;s gone when you close the tab.
           </p>
         </div>
 
@@ -348,17 +348,13 @@ function BuildSection({ openDemo }: { openDemo: OpenDemo }) {
               </button>
             </div>
             <p>
-              The sample is renalplan&apos;s own synthetic test kidney, made in your browser. On it the
-              builder and the pipeline agree on every score and volume. For a real outline, the{' '}
+              The sample is renalplan&apos;s synthetic test kidney; on it the builder and the pipeline
+              agree on every score and volume. For a real outline, the{' '}
               <a href="https://github.com/neheller/kits23" target="_blank" rel="noreferrer">
-                KiTS23 dataset on GitHub
+                KiTS23 dataset
                 <span className="sr-only"> (opens in a new tab)</span>
               </a>{' '}
-              has expert label maps from de-identified CTs (CC BY-NC-SA 4.0).
-            </p>
-            <p>
-              Step 1, outlining the CT, still needs you and a free tool. The builder does steps 2 and
-              3. Not validated, and not a medical device.
+              has expert label maps (CC BY-NC-SA 4.0). Not validated, and not a medical device.
             </p>
           </div>
         </div>
@@ -373,12 +369,12 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
       <div className="site-shell">
         <div className="section-heading section-heading-light">
           <p className="eyebrow">Five real kidneys</p>
-          <h2 id="kidneys-title">KiTS23 kidneys A to E, scored by the pipeline.</h2>
+          <h2 id="kidneys-title">Five real CTs, each beside its 3D model.</h2>
           <p>
-            De-identified CTs of real patients from the public KiTS23 dataset (CC BY-NC-SA 4.0).
-            renalplan scored each one from the KiTS expert outlines. The meshes came from my separate
-            CalyxView endourology project (not public yet), built from the same outlines, not from the
-            browser builder.
+            De-identified KiTS23 CTs, scored by renalplan from the KiTS expert outlines. The sinus is
+            estimated from the outline, so L and the PADUA pole are approximate
+            {polarLinesAssumed.length > 0 ? `, more so for ${kidneyLetters(polarLinesAssumed)}` : ''}. Vessels and
+            the collecting system weren&apos;t outlined, so the hilar and collecting-system items weren&apos;t assessed.
           </p>
         </div>
 
@@ -387,6 +383,17 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
             const { nephrometry } = item;
             return (
               <li key={item.id} className="kidney-card">
+                <div className="kidney-scan">
+                  {/* oxlint-disable-next-line next/no-img-element -- Vite serves these local CT stills directly. */}
+                  <img
+                    src={`/ct/${item.id}/key.webp`}
+                    alt={`Axial CT through ${item.label} at the tumour's centre, kidney and tumour outlined`}
+                    width="640"
+                    height="640"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
                 <h3>{item.label}</h3>
                 <dl className="kidney-facts">
                   <div>
@@ -406,34 +413,30 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
                     <dd>{formatShare(nephrometry.exophyticFraction)}</dd>
                   </div>
                 </dl>
-                <button
-                  type="button"
-                  className="button button-glass kidney-open"
-                  data-return-focus={`kidney-${item.id}`}
-                  onClick={() => openDemo('plan', item.id)}
-                >
-                  Open {item.label} in 3D
-                </button>
+                <div className="kidney-actions">
+                  <button
+                    type="button"
+                    className="button button-mint kidney-open"
+                    data-return-focus={`kidney-${item.id}`}
+                    onClick={() => openDemo('plan', item.id)}
+                  >
+                    Open {item.label} in 3D
+                  </button>
+                  <button
+                    type="button"
+                    className="button button-glass kidney-open"
+                    data-return-focus={`kidney-ct-${item.id}`}
+                    onClick={() => openDemo('plan', item.id, { ct: true })}
+                  >
+                    See the CT
+                  </button>
+                </div>
               </li>
             );
           })}
         </ul>
 
-        <p className="kidneys-note">
-          Kidneys A to E are cases 1 to 5 of the 8 in the pipeline table below. Vessels and the
-          collecting system weren&apos;t outlined, so the hilar suffix and PADUA&apos;s
-          collecting-system item weren&apos;t assessed. L and the PADUA pole are approximate for every
-          kidney, because the polar lines come from an estimated sinus
-          {polarLinesAssumed.length > 0
-            ? `, and more so for ${kidneyLetters(polarLinesAssumed)}, where that estimate was too small to use and the lines were assumed.`
-            : '.'}{' '}
-          The notes under the pipeline table explain why.
-        </p>
-        <p className="kidneys-note">
-          In Kidney C you can also switch on the surrounding organs. An AI model outlined those, and
-          nobody has checked them. The cyst in Kidney C&apos;s file belongs to the contralateral
-          kidney, which isn&apos;t in the file.
-        </p>
+        <p className="kidneys-caption">KiTS23 CT, kidney and tumour outlined</p>
       </div>
     </section>
   );
@@ -482,9 +485,8 @@ function TeachingSection({ openDemo }: { openDemo: OpenDemo }) {
           <p className="eyebrow">The teaching kidney</p>
           <h2 id="teaching-title">A right kidney with an interpolar tumour, for teaching.</h2>
           <p>
-            I built this one by hand in code, with arteries, veins and a collecting system, so there&apos;s
-            no patient data in it. Turn it round and switch each part on or off. The lesson runs on it in
-            the 3D viewer.
+            I built this one in code, with arteries, veins and a collecting system, so there&apos;s no
+            patient data in it. The lesson runs on it.
           </p>
         </div>
 
@@ -547,8 +549,8 @@ function TeachingSection({ openDemo }: { openDemo: OpenDemo }) {
           <div className="teaching-lesson-copy">
             <h3 id="lesson-title">The lesson</h3>
             <p className="teaching-lesson-intro">
-              Five questions on the teaching kidney, pitched at a registrar preparing for a partial
-              nephrectomy. The reasoning shows as soon as you answer, with a running score.
+              Five questions for a registrar preparing for a partial nephrectomy, with the reasoning
+              shown as soon as you answer.
             </p>
             <button type="button" className="button button-mint" data-return-focus="lesson" onClick={() => openDemo('learn')}>
               Start the lesson <ArrowRight />
@@ -575,11 +577,9 @@ function NextStepSection() {
           <p className="eyebrow">Next step</p>
           <h2 id="next-title">The first study I&apos;d like to run.</h2>
           <p>
-            None of the scores here has been compared with clinicians&apos; scoring. I&apos;d like to
-            do that retrospectively, on our own partial nephrectomies, with two questions. Do the
-            computed R.E.N.A.L. and PADUA scores agree with clinicians as well as two clinicians agree
-            with each other? And how well does the research model outline kidney and tumour on our
-            scanners?
+            None of these scores has been compared with clinicians&apos; scoring. On our own partial
+            nephrectomies, I&apos;d like to ask whether the computed scores agree with clinicians as well
+            as two clinicians agree with each other, and how well the research model outlines our scans.
           </p>
         </div>
         <div className="next-needs">
@@ -703,6 +703,8 @@ export function RenalSite() {
   const [view, setView] = useState<'overview' | 'workspace'>(() => readRoute().view);
   const [workspaceMode, setWorkspaceMode] = useState<EntryMode>(savedMode);
   const [workspaceCase, setWorkspaceCase] = useState(() => readRoute().caseId);
+  // Set by "See the CT", or a #workspace/reference-x?ct address, so the viewer opens on the CT tab.
+  const [workspaceCt, setWorkspaceCt] = useState(() => readRoute().ct);
   // Set by "Try the sample", so the builder starts on it. Not kept in the address.
   const [startSample, setStartSample] = useState(false);
   // Where the reader was on the overview, so closing the viewer puts them back there.
@@ -717,6 +719,7 @@ export function RenalSite() {
       if (route.view === 'workspace') {
         setWorkspaceMode(savedMode());
         setWorkspaceCase(route.caseId);
+        setWorkspaceCt(route.ct);
       }
       setView(route.view);
     };
@@ -764,8 +767,9 @@ export function RenalSite() {
     };
     setWorkspaceMode(mode);
     setWorkspaceCase(caseId);
+    setWorkspaceCt(Boolean(options.ct));
     setStartSample(Boolean(options.sample));
-    window.history.pushState({ calyxViewer: true, mode }, '', workspaceHash(caseId, mode));
+    window.history.pushState({ calyxViewer: true, mode }, '', workspaceHash(caseId, mode, Boolean(options.ct)));
     setView('workspace');
   };
 
@@ -788,6 +792,7 @@ export function RenalSite() {
           initialMode={workspaceMode}
           initialCaseId={workspaceCase}
           startWithSample={startSample}
+          startOnCt={workspaceCt}
           onExit={closeDemo}
         />
       </Suspense>

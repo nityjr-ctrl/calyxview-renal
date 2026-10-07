@@ -3006,3 +3006,334 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
     padding-inline: .875rem;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Real CT on the overview: the hero still and the five kidney cards.
+   Appy's language: big Red Hat Display headings, generous space, the image
+   doing the talking, one accent.
+   --------------------------------------------------------------------------- */
+
+.hero-figure {
+  isolation: isolate;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.hero-scan {
+  position: relative;
+  max-width: 30rem;
+  margin-inline: auto;
+  padding: .75rem;
+  border-radius: 6px;
+  background: var(--paper-deep);
+  box-shadow: 0 30px 60px -20px rgb(0 0 0 / .35), 0 0 0 1px rgb(0 0 0 / .04);
+}
+
+.hero-scan::before {
+  content: '';
+  position: absolute;
+  inset: 1.5rem -1rem -1rem 1.5rem;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--accent-tint);
+}
+
+.hero-scan img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+}
+
+.hero-scan-tag {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  padding: .25rem .625rem;
+  border-radius: 2px;
+  background: rgb(0 0 0 / .55);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+.site-page .hero-caption {
+  max-width: 30rem;
+  margin: 1.5rem auto 0;
+  padding: 0;
+  background: none;
+  color: var(--ink-muted);
+  font-size: .8125rem;
+  text-align: center;
+}
+
+.kidney-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (width >= 48rem) {
+  .kidney-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 60rem) {
+  .kidney-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .kidney-open {
+    padding-inline: .5rem;
+    font-size: .8125rem;
+  }
+}
+
+.kidney-card {
+  gap: .875rem;
+  padding: 0 0 1rem;
+  overflow: hidden;
+}
+
+.kidney-card > :not(.kidney-scan) {
+  margin-inline: .875rem;
+}
+
+.kidney-scan {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #000;
+}
+
+.kidney-scan img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+}
+
+.kidney-card:hover .kidney-scan img {
+  transform: scale(1.03);
+}
+
+.kidney-actions {
+  display: grid;
+  gap: .5rem;
+  margin-top: auto;
+}
+
+.kidney-actions .kidney-open {
+  margin-top: 0;
+}
+
+.site-page .kidneys-caption {
+  margin-top: 1.5rem;
+  color: var(--ink-muted);
+  font-size: .875rem;
+  text-align: center;
+}
+
+@media (width < 40rem) {
+  .kidney-card > :not(.kidney-scan) {
+    margin-inline: .625rem;
+  }
+
+  .site-page .kidney-card h3 {
+    font-size: 1rem;
+  }
+
+  .kidney-facts div {
+    font-size: .8125rem;
+  }
+
+  .kidney-open {
+    padding: .5rem .5rem;
+    font-size: .8125rem;
+  }
+}
+
+@media (width >= 48rem) {
+  .hero-section {
+    padding-top: 5rem;
+    padding-bottom: 6rem;
+  }
+
+  .kidneys-section {
+    padding-block: 6rem;
+  }
+}
+
+@media (width >= 60rem) {
+  .hero-inner {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 5rem;
+  }
+
+  .hero-scan {
+    margin-inline: auto 0;
+  }
+
+  .site-page .hero-caption {
+    margin-inline: auto 0;
+  }
+}
+
+@media (width >= 72rem) {
+  .site-page .hero-content h1 {
+    font-size: 3.75rem;
+    line-height: 1.1;
+  }
+
+  .hero-copy {
+    font-size: 1.25rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The CT tab in the 3D viewer.
+   --------------------------------------------------------------------------- */
+
+.inspector-tabs {
+  grid-template-columns: none;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+}
+
+.ct-stage {
+  position: relative;
+  width: 100%;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / .08);
+  border-radius: 10px;
+  background: #000;
+  cursor: ns-resize;
+  touch-action: pan-y;
+}
+
+.ct-stage:focus-visible {
+  outline: 2px solid rgb(134 239 190 / .8);
+  outline-offset: 2px;
+}
+
+.ct-stage img,
+.ct-stage svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.ct-stage svg {
+  pointer-events: none;
+}
+
+.ct-loading {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  color: rgb(255 255 255 / .7);
+  font-size: 12px;
+}
+
+.ct-orient {
+  position: absolute;
+  color: rgb(255 255 255 / .62);
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.ct-orient-top {
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ct-orient-left {
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+}
+
+.ct-orient-right {
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+}
+
+.ct-chip {
+  display: inline-flex;
+  height: 26px;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: 7px;
+  background: rgb(255 255 255 / .03);
+  padding: 0 8px;
+  color: rgb(255 255 255 / .78);
+  font-size: 11px;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.ct-chip:hover:not(:disabled) {
+  background: rgb(255 255 255 / .07);
+  color: #fff;
+}
+
+.ct-chip[aria-pressed='true'] {
+  border-color: rgb(138 235 195 / .3);
+  background: rgb(108 219 174 / .12);
+  color: rgb(225 255 241);
+}
+
+.ct-chip:disabled {
+  opacity: .5;
+}
+
+.ct-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  color: rgb(255 255 255 / .72);
+  font-size: 11px;
+}
+
+.ct-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ct-legend span {
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+@media (pointer: coarse) {
+  .ct-chip {
+    height: 40px;
+    padding-inline: 12px;
+  }
+}
+
+/* Under the 3D view on narrow screens, the slice is as wide as the panel. */
+@media (max-width: 1180px) {
+  .right-sidebar .ct-panel {
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 760px) {
+  .right-sidebar .ct-panel {
+    max-width: none;
+  }
+}

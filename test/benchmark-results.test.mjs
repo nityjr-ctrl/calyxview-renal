@@ -376,6 +376,7 @@ test('the rest of the site copy avoids en and em dashes too', async () => {
     '../components/reference-case-scene.tsx',
     '../components/kidney-builder.tsx',
     '../components/viewer-ui.tsx',
+    '../components/ct-slices.tsx',
     '../lib/export-model.ts',
     '../lib/reference-cases.ts',
     '../lib/prototype-pipeline.ts',
