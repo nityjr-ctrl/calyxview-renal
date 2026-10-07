@@ -4,9 +4,10 @@ A `Volume` is a numpy array `data[i, j, k]` with `affine` mapping voxel
 indices to RAS millimetres and `spacing` in mm. Everything downstream works in
 this frame so that DICOM exports, NIfTI files and reference labels line up.
 
-DICOM handling fails closed on identified data: populated identifier headers
-without PatientIdentityRemoved=YES are refused. Identifier values are never
-printed or stored.
+DICOM handling has a tripwire, not a de-identification check. A series stops
+if its first file has any of 13 identifying header fields filled in and
+PatientIdentityRemoved isn't YES. It doesn't look at private tags, other
+header fields or burned-in text. Identifier values are never printed or stored.
 """
 from __future__ import annotations
 
@@ -131,7 +132,7 @@ def lps_grid_to_ras_affine(ipp0, iop, pixel_spacing, dz) -> np.ndarray:
 
 def load_dicom_series(files: list[str]) -> Volume:
     """Stack one series into a Hounsfield-unit Volume with a patient-space affine.
-    Refuses identified data."""
+    Stops if the first file trips the identity check in the module note."""
     import pydicom
     slices = [pydicom.dcmread(f) for f in files]
     first = slices[0]

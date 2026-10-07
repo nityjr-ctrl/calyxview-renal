@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renalplan"
-version = "0.1.0"
-description = "CT-to-3D reconstruction and planning support for partial nephrectomy (research and teaching prototype)"
+version = "0.2.0"
+description = "3D models and computed nephrometry from kidney and tumour outlines (research and teaching prototype)"
 requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.26", "scipy>=1.11", "scikit-image>=0.22", "trimesh>=4.4",
@@ -20,3 +20,6 @@ include = ["renalplan*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Import renalplan from this folder, even when an older copy is pip-installed
+# elsewhere, so the tests always run the code they sit next to.
+pythonpath = ["."]

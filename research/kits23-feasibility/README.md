@@ -1,13 +1,13 @@
-# CalyxView Renal — frozen 20-case segmentation feasibility run
+# CalyxView Renal: frozen 20-case segmentation feasibility run
 
-> **RESEARCH PROTOTYPE ONLY — NOT A MEDICAL DEVICE.** Do not use this pipeline or its outputs for diagnosis, treatment selection, surgical planning, margin selection, or patient care. Model outputs may be incomplete or wrong.
+> **Research prototype only. Not a medical device.** Do not use this pipeline or its outputs for diagnosis, treatment selection, surgical planning, margin selection, or patient care. Model outputs may be incomplete or wrong.
 
 This folder reproduces one deliberately small **non-overlapping, within-KiTS feasibility check**. It applies the official KiTS21 nnU-Net v1 `Task135_KiTS2021` model, without retraining, to 20 later KiTS23 cases. It is a research benchmark for the CalyxView Renal prototype; it is not the website's future CT-processing service.
 
 The important truth in plain language is:
 
 - The 20 source images are public research **NIfTI volumes, not DICOM studies**.
-- The model's documented training identifiers are `case_00000`–`case_00299`; this benchmark uses `case_00400`–`case_00419`, so the identifiers do not overlap.
+- The model's documented training identifiers are `case_00000` to `case_00299`; this benchmark uses `case_00400` to `case_00419`, so the identifiers do not overlap.
 - Both sets still belong to the KiTS programme. This is therefore **not** an independent external, prospective, multicentre, or clinical validation cohort.
 - Raw images, labels, predictions, weights, detailed case rows, logs, and quality-control images stay local. Only reviewed aggregate statistics may be published.
 
@@ -16,7 +16,7 @@ The important truth in plain language is:
 | Stage | What you do | The pass condition |
 | --- | --- | --- |
 | 1. Prepare | Keep website code and research data in separate folders. Qualify WSL2, memory, swap, and the GPU. | WSL shows about 25 GiB usable memory, 16 GiB swap, and the NVIDIA GPU. |
-| 2. Freeze | Fetch exactly `case_00400`–`case_00419` and the exact model archive. | The cohort, revisions, byte counts, and checksums below all match. |
+| 2. Freeze | Fetch exactly `case_00400` to `case_00419` and the exact model archive. | The cohort, revisions, byte counts, and checksums below all match. |
 | 3. Prove | Capture provenance and smoke-load the checksum-verified fold-0 checkpoint in the isolated research environment. | The provenance and checkpoint smoke gates pass. |
 | 4. Run | Smoke-test case 400, then strictly resume across the full 20-case manifest. | Every retained prediction passes the NIfTI and geometry validator. |
 | 5. Review | Evaluate all 20 rows, including failures, then inspect the worst cases. | Counts are reconciled from disk and the report contains no source-image pixels. |
@@ -34,7 +34,7 @@ If a pass condition fails, stop at that stage. Do not swap in another case, mode
 | Data licence | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) |
 | Canonical portable manifest SHA-256 | `bc529b7e5edfa9c5ac0979de1d38a027735b741760e3e82c14acc78ec900c561` |
 | Source byte totals | Images `1,030,320,853`; labels `3,669,644` |
-| Model | Official `Task135_KiTS2021`, `3d_fullres`, folds 0–4 |
+| Model | Official `Task135_KiTS2021`, `3d_fullres`, folds 0 to 4 |
 | Model source | [Zenodo record 5126443](https://zenodo.org/records/5126443), DOI `10.5281/zenodo.5126443` |
 | Model archive bytes | `3,505,803,654` |
 | Model archive MD5 | `b27ab702742083080b95baac00ba186f` |
@@ -167,7 +167,7 @@ python "$PIPELINE_ROOT/build_portable_manifest.py" \
   --output "$RUN_ROOT/manifests/manifest.portable.json"
 ```
 
-The script downloads only `case_00400`–`case_00419` from imaging revision `65f1f295873a326230153c7e1de0c7dba10f0b29`. It validates image/reference geometry and labels, writes per-file SHA-256 values, and creates nnU-Net input names ending in `_0000.nii.gz`.
+The script downloads only `case_00400` to `case_00419` from imaging revision `65f1f295873a326230153c7e1de0c7dba10f0b29`. It validates image/reference geometry and labels, writes per-file SHA-256 values, and creates nnU-Net input names ending in `_0000.nii.gz`.
 
 Before continuing, confirm the manifest has exactly 20 ordered data rows and its metadata reports:
 
@@ -336,8 +336,8 @@ line endings even when its original checkout was clean. The gate does not call
 such a copy clean: it records its **tracked source** as commit-equivalent only when there are no
 unignored untracked or staged files and `git diff --ignore-cr-at-eol` is empty.
 Any substantive tracked, permission/mode, staged, or unignored untracked change
-remains a hard failure. Git-ignored artefacts—including generated Python
-bytecode—are separately counted and hashed into a deterministic inventory. That
+remains a hard failure. Git-ignored artefacts, including generated Python
+bytecode, are separately counted and hashed into a deterministic inventory. That
 inventory describes what was present at final capture; it does not make those
 artefacts upstream commit content or prove executable-source purity. The same
 tracked-source scope applies to the KiTS23 checkout; all active source images,
@@ -345,7 +345,7 @@ labels, and nnU-Net inputs are separately re-hashed against the frozen manifest.
 
 Open `report/report.html`, then review `report/worst-cases.html` before interpreting the averages. Recount the manifest rows, timing records, predictions, successes, and failures from disk. A status of `complete_with_failures` means only that all 20 rows were failure-accounted; it does not mean all inferences succeeded.
 
-The local report is mask-only: it must contain no CT pixels, source NIfTI, prediction NIfTI, DICOM, DICOM metadata, or patient identifiers. The fixed public cohort identifiers `case_00400`–`case_00419` may appear publicly as protocol/method metadata. Any row, metric, status, failure reason, timing, log, path, image, or artefact linked to an individual case remains local.
+The local report is mask-only: it must contain no CT pixels, source NIfTI, prediction NIfTI, DICOM, DICOM metadata, or patient identifiers. The fixed public cohort identifiers `case_00400` to `case_00419` may appear publicly as protocol/method metadata. Any row, metric, status, failure reason, timing, log, path, image, or artefact linked to an individual case remains local.
 
 ### 10. Restore the temporary WSL setting
 
@@ -413,7 +413,7 @@ python "$PIPELINE_ROOT/make_public_summary.py" \
   --output "$WORK_ROOT/publication-review/summary.public.json"
 ```
 
-The public site may contain that reviewed, aggregate-only `summary.public.json`: cohort size, success/failure counts, per-region aggregate metrics and confidence intervals, aggregate runtime, and frozen revision/hash identifiers. The fixed cohort range or its 20 public KiTS case IDs may appear only as protocol/method metadata, never joined to a case-level result. The payload must contain no per-case metric, status, failure reason, runtime, log reference, local path, file name, medical-volume reference, image, or downloadable model artefact. The surrounding public page—not hidden metadata—must display the method, limitations, licence notice, and research disclaimer.
+The public site may contain that reviewed, aggregate-only `summary.public.json`: cohort size, success/failure counts, per-region aggregate metrics and confidence intervals, aggregate runtime, and frozen revision/hash identifiers. The fixed cohort range or its 20 public KiTS case IDs may appear only as protocol/method metadata, never joined to a case-level result. The payload must contain no per-case metric, status, failure reason, runtime, log reference, local path, file name, medical-volume reference, image, or downloadable model artefact. The surrounding public page, not hidden metadata, must display the method, limitations, licence notice, and research disclaimer.
 
 Run the repository's aggregate-publication test before every build. Inspect the built site (`netlify-dist` or equivalent), not just the source tree, for forbidden medical and model files. The public summary must say **non-overlapping, within-KiTS feasibility**, never “external validation”.
 
@@ -424,7 +424,7 @@ See `ATTRIBUTION_AND_RESEARCH_NOTICE.md` for source attribution, licence boundar
 This benchmark proves only that one frozen research model can be executed and scored on a small, related public NIfTI cohort. A true partial-nephrectomy planning platform still needs:
 
 1. standards-aware DICOM series selection, de-identification, burned-in-annotation detection, private-tag/UID/date policies, and geometry-preserving conversion;
-2. a secure, authenticated, encrypted GPU service with regional storage, retention/deletion controls, job isolation, audit logs, timeouts, and recovery—outside the static Netlify frontend;
+2. a secure, authenticated, encrypted GPU service with regional storage, retention/deletion controls, job isolation, audit logs, timeouts, and recovery, outside the static Netlify frontend;
 3. representative multicentre training covering scanners, protocols, contrast phases, populations, vascular and collecting-system anatomy, plus uncertainty and out-of-distribution controls;
 4. clinician correction tools and planning-grade, provenance-bearing DICOM SEG/mesh/measurement exports with orientation and spacing fidelity;
 5. locked internal validation followed by genuinely independent external, prospective, subgroup, robustness, repeatability, human-factors, and failure-mode studies;
@@ -449,7 +449,7 @@ Until those controls and evidence exist, the website upload and 3D experience mu
 
 ## Stronger script-blinded successor protocol
 
-The original `case_00400`–`case_00419` experiment above is retained as historical
+The original `case_00400` to `case_00419` experiment above is retained as historical
 feasibility evidence. It used CT-only model inference, but references existed
 locally and were inspected before inference for integrity and geometry. Do not
 retroactively describe it as operationally blinded.

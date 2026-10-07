@@ -9,14 +9,34 @@ the output so a clinician can see what was assumed:
     that is neither parenchyma nor tumour (sinus fat, pelvis, hilum). With an
     excretory phase the real collecting system replaces it for N and for
     PADUA collecting-system involvement.
+    The cavity is opened with a 4 mm ball and cut to its largest piece, so
+    anything narrower than about 8 mm, such as an infundibulum, is dropped and
+    N can read long.
   * Polar lines: the planes, perpendicular to the kidney long axis, at the
-    upper and lower extent of that sinus region (the medial lip of the sinus).
+    5th and 95th percentiles of that sinus region along the axis, standing in
+    for the upper and lower limits of the hilum. A real hilum straddles the
+    kidney's middle, so when the estimate spans less than 20 mm or sits to one
+    side of the centroid, the lines go where 30% of the kidney's volume lies
+    beyond each (its 30th and 70th percentiles along the axis) and the output
+    says so. On the KiTS23 kidneys those planes land roughly a third and two
+    thirds of the way along, not at 30% and 70% of the length.
+    Both scoring systems set their lines on axial CT slices, and differently:
+    R.E.N.A.L. where the medial lip of parenchyma is broken by the hilum,
+    PADUA at the upper and lower margins of the sinus fat. Here one pair of
+    planes across the kidney's own long axis serves both, so L and PADUA's
+    polar item are approximations for every case, and the output says so.
+  * A sinus estimate bigger than a quarter of the kidney, or spanning more
+    than half its length, means the kidney isn't the usual shape (a horseshoe
+    kidney does this). The lines are still taken from it, but the output flags
+    L, N and PADUA's polar, rim and sinus items as unreliable for that kidney.
   * Anterior / posterior: sign of the tumour centroid along the patient's
     anterior axis relative to the kidney's own centroid, after removing the
     component along the kidney long axis.
 
 References: Kutikov & Uzzo, J Urol 2009 (R.E.N.A.L.); Ficarra et al., Eur
-Urol 2009 (PADUA). Research and teaching use only.
+Urol 2009 (PADUA); Wood et al., BJU Int 2024 (the more-than-half rule for
+PADUA's polar item, from their automated PADUA). Research and teaching use
+only.
 """
 from __future__ import annotations
 
@@ -41,9 +61,145 @@ class Geometry:
     long_axis: np.ndarray          # unit vector, pointing superior
     anterior_axis: np.ndarray      # unit vector, patient anterior, orthogonal to long axis
     medial_axis: np.ndarray        # unit vector, from kidney centroid towards the sinus
-    polar_lo: float                # sinus extent along the long axis (mm, relative to centroid)
-    polar_hi: float
+    polar_lo: float                # lower polar line, mm along the long axis from the kidney centroid
+    polar_hi: float                # upper polar line (see polar_lines for where they come from)
     notes: list = field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Score cut-offs and rules. Small pure functions so they can be tested alone.
+# ---------------------------------------------------------------------------
+def renal_r_points(diameter_cm: float) -> int:
+    """R.E.N.A.L. R: 4 cm or less = 1, over 4 and under 7 cm = 2, 7 cm or more = 3.
+    (PADUA's size item is different: over 7 cm = 3.)"""
+    return 1 if diameter_cm <= 4 else (2 if diameter_cm < 7 else 3)
+
+
+def exophytic_points(exophytic_fraction: float) -> int:
+    """R.E.N.A.L. E and PADUA exophytic rate: 50% or more outside = 1, some
+    outside = 2, entirely endophytic = 3. A tumour with 5% or less outside the
+    parenchyma's convex hull is treated as entirely endophytic."""
+    return 1 if exophytic_fraction >= 0.5 else (2 if exophytic_fraction > 0.05 else 3)
+
+
+def nearness_points(nearness_mm: float) -> int:
+    """R.E.N.A.L. N: 7 mm or more = 1, over 4 and under 7 mm = 2, 4 mm or less = 3."""
+    return 1 if nearness_mm >= 7 else (2 if nearness_mm > 4 else 3)
+
+
+def padua_size_points(diameter_cm: float) -> int:
+    """PADUA size: 4 cm or less = 1, over 4 up to 7 cm = 2, over 7 cm = 3."""
+    return 1 if diameter_cm <= 4 else (2 if diameter_cm <= 7 else 3)
+
+
+MIN_POLAR_SPAN_MM = 20.0
+FALLBACK_PERCENTILES = (30, 70)
+# A sinus estimate beyond either limit means the kidney isn't the usual shape.
+# In the eight KiTS23 kidneys run so far, the estimates that passed the polar-line
+# checks were at most 11% of the kidney's volume and 26% of its length; the one
+# horseshoe-shaped kidney came out at 62% and 60%.
+MAX_SINUS_VOLUME_FRACTION = 0.25
+MAX_SINUS_SPAN_FRACTION = 0.5
+
+# Note text. make_public_summary.py sets its summary flags by matching the
+# phrases in the comments, so keep them if the wording changes.
+NOTE_POLAR_LINES = (
+    "Polar lines here are planes across the kidney's own long axis, not axial CT slices, and one "
+    "pair serves both R.E.N.A.L. L and PADUA's polar item, though the two systems define their lines "
+    "differently. PADUA's polar item is middle (2) when more than half the tumour lies between the "
+    "lines, the rule Wood et al. (BJU Int 2024) used to automate PADUA. So L and PADUA's polar item "
+    "are approximations."
+)
+_FALLBACK_LINES = (
+    "polar lines assumed where 30% of the kidney's volume lies beyond each (its 30th and 70th "
+    "percentiles along the long axis), so L and PADUA's polar item are approximate."
+)
+# Both fallback notes contain "polar lines assumed" (summary flag polarLinesAssumed).
+NOTE_NO_SINUS_LINES = "No sinus estimate to set the polar lines; " + _FALLBACK_LINES
+NOTE_SINUS_TOO_SMALL = (
+    "Sinus estimate too short or off-centre to set the polar lines; " + _FALLBACK_LINES
+    + " N and PADUA's rim and renal-sinus items still use that estimate, so they are approximate "
+    "too, and N can read long."
+)
+# Contains "sinus estimate implausibly large" (summary flag sinusEstimateTooLarge).
+NOTE_SINUS_TOO_LARGE = (
+    "Sinus estimate implausibly large ({volume:.0%} of the kidney's volume, spanning {span:.0%} of its "
+    "length): the kidney isn't the usual shape, as with a horseshoe or malrotated kidney. The long "
+    "axis, polar lines and sinus all rest on that shape, so L, N and PADUA's polar, rim and "
+    "renal-sinus items are unreliable for this kidney."
+)
+
+
+def polar_lines(sinus_along: np.ndarray | None, kidney_along: np.ndarray) -> tuple[float, float, bool]:
+    """Polar lines along the long axis, in mm from the kidney centroid, and
+    whether they came from the sinus estimate. The sinus lines are its 5th and
+    95th percentiles. A real hilum straddles the kidney's middle, so an
+    estimate that spans less than 20 mm or doesn't straddle the centroid isn't
+    used. The lines then go where 30% of the kidney's volume lies beyond each:
+    the 30th and 70th percentiles of kidney voxel positions along the axis.
+    That is a volume split, not 30% and 70% of the length. On the KiTS23
+    kidneys it lands roughly a third and two thirds of the way along, close
+    to where the sinus lines sit when the estimate is usable."""
+    if sinus_along is not None and sinus_along.size:
+        lo, hi = float(np.percentile(sinus_along, 5)), float(np.percentile(sinus_along, 95))
+        if hi - lo >= MIN_POLAR_SPAN_MM and lo < 0.0 < hi:
+            return lo, hi, True
+    p_lo, p_hi = FALLBACK_PERCENTILES
+    return float(np.percentile(kidney_along, p_lo)), float(np.percentile(kidney_along, p_hi)), False
+
+
+def sinus_estimate_too_large(sinus_voxels: int, kidney_voxels: int, span_mm: float,
+                             kidney_length_mm: float) -> bool:
+    """True when the sinus estimate is more than a quarter of the kidney's
+    volume or its 5th to 95th percentile span is more than half the kidney's
+    length. A renal sinus is neither, so the kidney isn't the shape the long
+    axis, polar lines and sinus estimate assume (a horseshoe kidney, for one)."""
+    return (sinus_voxels > MAX_SINUS_VOLUME_FRACTION * kidney_voxels
+            or span_mm > MAX_SINUS_SPAN_FRACTION * kidney_length_mm)
+
+
+def renal_location(t_along: np.ndarray, polar_lo: float, polar_hi: float) -> tuple[int, str]:
+    """R.E.N.A.L. L from tumour positions along the long axis (mm from the
+    kidney centroid). The tumour's extent is its 2nd to 98th percentile.
+    The axial renal midline is the plane half-way between the polar lines, as
+    Kutikov and Uzzo define it, not the kidney's centroid.
+    3: entirely between the polar lines, crossing that midline, or more than
+    half between the lines. 1: entirely above or below the lines. 2: otherwise
+    (it crosses a line with half or less between them).
+    With the midline between the lines, no tumour meets a 3-point test and the
+    1-point test at once, so the order of the tests can't change a score."""
+    t_lo, t_hi = float(np.percentile(t_along, 2)), float(np.percentile(t_along, 98))
+    between = float(((t_along >= polar_lo) & (t_along <= polar_hi)).mean())
+    midline = 0.5 * (polar_lo + polar_hi)
+    if t_lo >= polar_lo and t_hi <= polar_hi:
+        return 3, "entirely between the polar lines"
+    if t_lo < midline < t_hi:
+        return 3, "crosses the axial renal midline"
+    if between > 0.5:
+        return 3, "more than half between the polar lines"
+    if t_hi <= polar_lo or t_lo >= polar_hi:
+        return 1, "entirely above or below the polar lines"
+    return 2, "crosses a polar line"
+
+
+def padua_polar(t_along: np.ndarray, polar_lo: float, polar_hi: float) -> tuple[str, int]:
+    """PADUA polar (longitudinal) location: middle (2) when more than half the
+    tumour lies between the lines, otherwise superior or inferior (1), named
+    by the pole that holds more of the tumour. Exactly half is polar.
+    Ficarra et al. 2009 score superior or inferior 1 and middle 2. The
+    more-than-half rule for a tumour that crosses a line is the one Wood et
+    al. (BJU Int 2024) used to automate PADUA, and later descriptions of PADUA
+    also split crossing tumours at 50% (some count exactly half as middle).
+    Ficarra's own wording on crossing tumours
+    hasn't been checked (the paper isn't open access). Wood's lines are the
+    axial extent of sinus fat on CT. Here they're the same planes as
+    R.E.N.A.L. L (see polar_lines), so this is an approximation."""
+    between = float(((t_along >= polar_lo) & (t_along <= polar_hi)).mean())
+    if between > 0.5:
+        return "middle", 2
+    above = float((t_along > polar_hi).mean())
+    below = float((t_along < polar_lo).mean())
+    return ("superior" if above >= below else "inferior"), 1
 
 
 def _coords_mm(mask: np.ndarray, affine: np.ndarray, max_points: int = 60000) -> np.ndarray:
@@ -163,20 +319,27 @@ def build_geometry(labels: np.ndarray, affine: np.ndarray, spacing,
         notes.append("No sinus region found; medial axis assumed towards the midline.")
     med = med - med.dot(long_axis) * long_axis
     med /= np.linalg.norm(med) or 1.0
-    if sinus.any():
-        s_along = (_coords_mm(sinus, affine) - c) @ long_axis
-        polar_lo, polar_hi = float(np.percentile(s_along, 5)), float(np.percentile(s_along, 95))
+    k_along = (pts - c) @ long_axis
+    s_along = ((_coords_mm(sinus, affine) - c) @ long_axis) if sinus.any() else None
+    polar_lo, polar_hi, from_sinus = polar_lines(s_along, k_along)
+    notes.append(NOTE_POLAR_LINES)
+    if not from_sinus:
+        notes.append(NOTE_NO_SINUS_LINES if s_along is None else NOTE_SINUS_TOO_SMALL)
     else:
-        k_along = (pts - c) @ long_axis
-        polar_lo, polar_hi = float(np.percentile(k_along, 30)), float(np.percentile(k_along, 70))
-        notes.append("Polar lines assumed at 30/70% of kidney length.")
+        kidney_length = float(k_along.max() - k_along.min())
+        if sinus_estimate_too_large(int(sinus.sum()), int(kidney.sum()), polar_hi - polar_lo, kidney_length):
+            notes.append(NOTE_SINUS_TOO_LARGE.format(volume=float(sinus.sum()) / float(kidney.sum()),
+                                                     span=(polar_hi - polar_lo) / kidney_length))
     return Geometry(kidney, tumour, sinus, tuple(spacing), affine, c, long_axis, ant, med,
                     polar_lo, polar_hi, notes)
 
 
 def max_diameter_mm(mask: np.ndarray, affine: np.ndarray) -> float:
-    """Longest axis of the mask: extent along its principal component plus the
-    max pairwise distance of hull vertices (the latter is exact for convex shapes)."""
+    """Maximum diameter of the mask, in mm: the largest pairwise distance between
+    surface-voxel centres (up to 8,000 sampled surface voxels, compared over their
+    convex hull vertices). Measured centre to centre, so it can read up to about
+    one voxel short of the outer extent along that chord, which matters most on
+    thick-slice scans."""
     surf = mask & ~ndimage.binary_erosion(mask)
     pts = _coords_mm(surf, affine, max_points=8000)
     if pts.shape[0] < 2:
@@ -242,38 +405,33 @@ def renal_score(g: Geometry, collecting: np.ndarray | None = None,
                 vessels: np.ndarray | None = None) -> RenalScore:
     notes = list(g.notes)
     sp = g.spacing
+    # Each measurement is rounded to the precision it's stored and reported at
+    # before it's scored, so R.E.N.A.L., PADUA (which reuses these values) and
+    # the report can't disagree at a cut-off.
     # R
     dmm = max_diameter_mm(g.tumour, g.affine)
-    r_cm = dmm / 10.0
-    r_pts = 1 if r_cm <= 4 else (2 if r_cm <= 7 else 3)
+    r_cm = round(dmm / 10.0, 2)
+    r_pts = renal_r_points(r_cm)
     # E: fraction of tumour outside the convex hull of the parenchyma alone
     hull_k = convex_hull_mask(g.kidney, g.affine, g.kidney.shape)
     inside = (g.tumour & hull_k).sum()
-    exo = 1.0 - inside / max(1, g.tumour.sum())
-    e_pts = 1 if exo >= 0.5 else (2 if exo > 0.05 else 3)
+    exo = round(float(1.0 - inside / max(1, g.tumour.sum())), 3)
+    e_pts = exophytic_points(exo)
     # N: distance to collecting system if known, else to the sinus region
     target = collecting if (collecting is not None and collecting.any()) else g.sinus
     n_mm = _dist_mm(g.tumour, target, sp)
     if n_mm != n_mm:
         n_pts, notes = 1, notes + ["No sinus or collecting system found; N scored 1."]
     else:
-        n_pts = 1 if n_mm >= 7 else (2 if n_mm > 4 else 3)
+        n_mm = round(n_mm, 1)
+        n_pts = nearness_points(n_mm)
     # A
     tc = _coords_mm(g.tumour, g.affine).mean(0)
     a_off = float((tc - g.kidney_centroid) @ g.anterior_axis)
     ap = "a" if a_off > 5 else ("p" if a_off < -5 else "x")
     # L: tumour extent along the long axis vs polar lines
     t_along = (_coords_mm(g.tumour, g.affine) - g.kidney_centroid) @ g.long_axis
-    t_lo, t_hi = float(np.percentile(t_along, 2)), float(np.percentile(t_along, 98))
-    between = float(((t_along >= g.polar_lo) & (t_along <= g.polar_hi)).mean())
-    crosses_mid = t_lo < 0 < t_hi
-    if t_hi <= g.polar_lo or t_lo >= g.polar_hi:
-        l_pts, l_detail = 1, "entirely above or below the polar lines"
-    elif between > 0.5 or crosses_mid or (t_lo >= g.polar_lo and t_hi <= g.polar_hi):
-        l_pts, l_detail = 3, ("entirely between the polar lines" if (t_lo >= g.polar_lo and t_hi <= g.polar_hi)
-                              else ("crosses the axial renal midline" if crosses_mid else "more than 50% across a polar line"))
-    else:
-        l_pts, l_detail = 2, "crosses a polar line"
+    l_pts, l_detail = renal_location(t_along, g.polar_lo, g.polar_hi)
     hilar = False
     if vessels is not None and vessels.any():
         hilar = _dist_mm(g.tumour, vessels, sp) <= 2.0
@@ -281,19 +439,14 @@ def renal_score(g: Geometry, collecting: np.ndarray | None = None,
         notes.append("No vessel mask; hilar suffix not assessed.")
     total = r_pts + e_pts + n_pts + l_pts
     cx = "low" if total <= 6 else ("moderate" if total <= 9 else "high")
-    return RenalScore(round(r_cm, 2), r_pts, round(exo, 3), e_pts, round(n_mm, 1) if n_mm == n_mm else n_mm,
-                      n_pts, ap, l_pts, l_detail, hilar, total, cx, notes)
+    return RenalScore(r_cm, r_pts, exo, e_pts, n_mm, n_pts, ap, l_pts, l_detail, hilar, total, cx, notes)
 
 
 def padua_score(g: Geometry, renal: RenalScore, collecting: np.ndarray | None = None) -> PaduaScore:
     sp = g.spacing
     t_along = (_coords_mm(g.tumour, g.affine) - g.kidney_centroid) @ g.long_axis
-    t_lo, t_hi = float(np.percentile(t_along, 2)), float(np.percentile(t_along, 98))
-    if t_hi <= g.polar_lo or t_lo >= g.polar_hi:
-        polar, p_pts = ("inferior" if t_hi <= g.polar_lo else "superior"), 1
-    else:
-        polar, p_pts = "middle", 2
-    e_pts = 1 if renal.exophytic_fraction >= 0.5 else (2 if renal.exophytic_fraction > 0.05 else 3)
+    polar, p_pts = padua_polar(t_along, g.polar_lo, g.polar_hi)
+    e_pts = exophytic_points(renal.exophytic_fraction)
     tc = _coords_mm(g.tumour, g.affine).mean(0)
     m_off = float((tc - g.kidney_centroid) @ g.medial_axis)
     rim, rim_pts = ("medial", 2) if m_off > 0 else ("lateral", 1)
@@ -304,7 +457,7 @@ def padua_score(g: Geometry, renal: RenalScore, collecting: np.ndarray | None = 
         c_pts = 2 if cs_inv else 1
     else:
         cs_inv, c_pts = None, 1
-    size_pts = 1 if renal.radius_cm <= 4 else (2 if renal.radius_cm <= 7 else 3)
+    size_pts = padua_size_points(renal.radius_cm)
     total = p_pts + e_pts + rim_pts + s_pts + c_pts + size_pts
     cx = "low" if total <= 7 else ("intermediate" if total <= 9 else "high")
     return PaduaScore(polar, p_pts, e_pts, rim, rim_pts, sinus_inv, s_pts, cs_inv, c_pts, size_pts, total, cx)

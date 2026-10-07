@@ -2,7 +2,7 @@
 
 ## Required public notice
 
-> **RESEARCH PROTOTYPE ONLY — NOT A MEDICAL DEVICE.** This benchmark and the CalyxView Renal prototype are not for diagnosis, treatment selection, surgical planning, margin selection, or patient care. Model outputs may be incomplete or wrong.
+> **Research prototype only. Not a medical device.** This benchmark and the CalyxView Renal prototype are not for diagnosis, treatment selection, surgical planning, margin selection, or patient care. Model outputs may be incomplete or wrong.
 
 The published result is a **non-overlapping, within-KiTS feasibility check** on 20 public research NIfTI cases. It is not an independent external, prospective, multicentre, or clinical validation study. It does not establish safety, efficacy, generalisability, or fitness for partial-nephrectomy planning.
 
@@ -12,7 +12,7 @@ This work uses the following research sources:
 
 - **KiTS23 code, labels, and cohort provenance:** [`neheller/kits23`](https://github.com/neheller/kits23), commit `c1088353084c17b8882a11db71429e7c022b7785`.
 - **KiTS CT image volumes:** [`neheller/KiTS-Challenge-Imaging`](https://huggingface.co/datasets/neheller/KiTS-Challenge-Imaging), revision `65f1f295873a326230153c7e1de0c7dba10f0b29`.
-- **Frozen cohort:** `case_00400`–`case_00419`, fixed before inference. The canonical portable, path-free manifest SHA-256 is `bc529b7e5edfa9c5ac0979de1d38a027735b741760e3e82c14acc78ec900c561`.
+- **Frozen cohort:** `case_00400` to `case_00419`, fixed before inference. The canonical portable, path-free manifest SHA-256 is `bc529b7e5edfa9c5ac0979de1d38a027735b741760e3e82c14acc78ec900c561`.
 - **Official pretrained model:** `Task135_KiTS2021` from [Zenodo record 5126443](https://zenodo.org/records/5126443), DOI `10.5281/zenodo.5126443`. Archive MD5 `b27ab702742083080b95baac00ba186f`; SHA-256 `a9255f78ba05a0f06d7afc638118d131194758f812542508d3a8ae2abaa867d3`.
 - **Inference framework:** [`MIC-DKFZ/nnUNet`](https://github.com/MIC-DKFZ/nnUNet/tree/db16c6cef5fdd5a180159184e46b58bcca670446) v1 commit `db16c6cef5fdd5a180159184e46b58bcca670446`.
 
@@ -30,7 +30,7 @@ When publishing research based on these sources, follow the current citation ins
 
 ## What stays local
 
-The following are local research evidence and must not be committed to GitHub, copied into a Netlify build, placed in browser storage, sent to analytics, or otherwise published through this project:
+For this benchmark (cases 400 to 419), the following are local research evidence and must not be committed to GitHub, copied into a Netlify build, placed in browser storage, sent to analytics, or otherwise published through this project:
 
 - source CT NIfTI, reference labels, nnU-Net inputs, predictions, DICOM, or DICOM metadata;
 - model archives, checkpoints, pickle metadata, virtual environments, caches, or native WSL scratch;
@@ -38,7 +38,9 @@ The following are local research evidence and must not be committed to GitHub, c
 - detailed report HTML, worst-case galleries, screenshots, or segmentation-mask/QC images;
 - credentials, tokens, patient information, or clinical uploads of any kind.
 
-The frozen public KiTS identifiers `case_00400`–`case_00419` are permitted as protocol/method metadata. They must never be joined publicly to an individual metric, prediction status, failure reason, timing, log, path, mask/QC image, or other case-level artefact. Mask-only images omit CT pixels but remain derived study-level research assets and are kept local.
+The frozen public KiTS identifiers `case_00400` to `case_00419` are permitted as protocol/method metadata. They must never be joined publicly to an individual metric, prediction status, failure reason, timing, log, path, mask/QC image, or other case-level artefact. Mask-only images omit CT pixels but remain derived study-level research assets and are kept local.
+
+The renalplan results in `pipeline/results/` are a separate, deliberate exception. They publish per-case scores and mask-only images for KiTS23 cases 0 to 7, from the expert outlines only, under the same CC BY-NC-SA 4.0 terms.
 
 ## What may be published
 

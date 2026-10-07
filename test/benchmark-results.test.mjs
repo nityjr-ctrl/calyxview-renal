@@ -20,6 +20,20 @@ const stylesheetText = await readFile(
   new URL('../app/globals.css', import.meta.url),
   'utf8',
 );
+const pipelineComponentText = await readFile(
+  new URL('../components/planning-pipeline.tsx', import.meta.url),
+  'utf8',
+);
+const pipelineSummaryText = await readFile(
+  new URL('../pipeline/results/summary.public.json', import.meta.url),
+  'utf8',
+);
+const pipelineSummary = JSON.parse(pipelineSummaryText);
+const formatterTexts = await Promise.all(
+  ['../lib/benchmark-results.ts', '../lib/pipeline-results.ts'].map((path) =>
+    readFile(new URL(path, import.meta.url), 'utf8'),
+  ),
+);
 
 const allowedTopLevelKeys = [
   'generatedAtUtc',
@@ -256,64 +270,71 @@ test('public summary contains aggregate-only data and no local artifacts', () =>
   visitKeys(summary);
 });
 
-test('public copy states metric directions and offline research boundaries', () => {
+// The copy is meant to be rewritten in plain words, so these tests check the
+// facts any honest version has to keep, not exact phrases.
+test('benchmark copy keeps the facts a reader needs', () => {
+  // The result is rendered from the data, not typed in.
+  assert.match(componentText, /\bsuccessfulCases\b/);
+  assert.match(componentText, /\bcohortSize\b/);
+  assert.match(componentText, /\bfailedCases\b/);
+
+  // Which model, which data, and what kind of check it is.
+  assert.match(componentText, /KiTS21/);
+  assert.match(componentText, /KiTS23/);
+  assert.match(componentText, /within\s+KiTS/i);
+  assert.match(componentText, /not\s+external\s+validation/i);
+  assert.match(componentText, /not\s+clinical\s+accuracy/i);
+  assert.match(componentText, /(?:not|none of it is)\s+for\s+patient\s+care/i);
+
+  // The failure rule is stated, not just alluded to.
+  assert.match(componentText, /Dice 0/);
+  assert.match(componentText, /stays?[\s\S]{0,30}in\s+every\s+average/i);
+  assert.match(componentText, /diagonal/i);
+
+  // HD95 is described as the larger of the two directed 95th percentiles
+  // (in plain words, leaving out the worst 5% of points), and the surface Dice
+  // tolerance is given.
+  assert.match(componentText, /(?:95th-percentile|worst 5% of points)[\s\S]{0,160}larger/i);
+  assert.doesNotMatch(componentText, /symmetric surface distance/i);
+  assert.match(componentText, /1\.03 mm/);
+
+  // Licences: data CC BY-NC-SA 4.0, model weights CC BY 4.0.
+  assert.match(componentText, /CC BY-NC-SA 4\.0/);
+  assert.match(componentText, /CC BY 4\.0/);
+
+  // Metric direction key.
   assert.match(
     componentText,
-    /does not establish\s+patient-level[\s\S]*external validation/i,
+    /↑\s*higher is better,?\s*↓\s*lower is better/i,
   );
-  assert.doesNotMatch(componentText, /selected cohort does not overlap/i);
-  assert.match(
-    componentText,
-    /identifiers fall outside the model.{0,40}documented KiTS21/is,
-  );
-  assert.match(
-    componentText,
-    /does not establish\s+patient-level\s+independence/i,
-  );
-  assert.match(componentText, /Reference agreement, not clinical accuracy/i);
-  assert.match(componentText, /random unlabelled CT/i);
-  assert.match(componentText, /cannot establish accuracy/i);
-  assert.match(componentText, /↑ Higher is better · ↓ Lower is better/i);
-  assert.match(componentText, /no\s+CT inference runs in your browser/i);
-  assert.match(componentText, /All\s+20 selected studies\s+remain/i);
-  assert.match(componentText, /must not be\s+used for patient care/i);
-  assert.match(componentText, /licensed under CC BY-NC-SA 4\.0/i);
-  assert.match(componentText, /downstream reuse must comply/i);
-  assert.match(
-    componentText,
-    /Source references do not\s+imply\s+endorsement/i,
-  );
+
   assert.match(
     componentText,
     /https:\/\/huggingface\.co\/datasets\/neheller\/KiTS-Challenge-Imaging/,
   );
   assert.match(componentText, /Mass \(tumour \+ cyst\)/);
-  assert.match(componentText, /Dice measures overlap/i);
-  assert.match(componentText, /95th-percentile symmetric surface distance/i);
-  assert.match(componentText, /validator-accepted prediction file/i);
+
+  // Removed on purpose: an instruction file for an AI agent, and jargon.
+  assert.doesNotMatch(componentText, /BENCHMARK_PROMPT/);
+  assert.doesNotMatch(componentText, /validator-accepted/i);
+  assert.doesNotMatch(componentText, /seed shopping/i);
 });
 
-test('next validation copy keeps prediction, reference, and custody in the correct order', () => {
-  assert.match(componentText, /Next validation · not yet run/i);
-  assert.match(
-    componentText,
-    /Lock each prediction before references enter the scoring\s+workspace/i,
-  );
+test('next-run copy keeps prediction, reference and custody in the right order', () => {
+  assert.match(componentText, /<details[\s\S]*How the next run will be done/i);
   assert.doesNotMatch(componentText, /before seeing the reference/i);
   assert.doesNotMatch(componentText, /references were released/i);
   assert.match(
     componentText,
-    /CT only[\s\S]*Run the model[\s\S]*Lock outputs[\s\S]*Release references[\s\S]*Score all 20/i,
+    /CT only[\s\S]*Run the model[\s\S]*Lock the outputs[\s\S]*copy in the outlines[\s\S]*Score all 20/i,
   );
   assert.match(componentText, /script-blinded, not\s+operator-blinded/i);
-  assert.match(componentText, /separate\s+custodian is still\s+required/i);
-  assert.match(componentText, /operator-chosen seed/i);
-  assert.match(componentText, /cannot rule out seed shopping/i);
-  assert.match(componentText, /Protocol under review/i);
+  assert.match(componentText, /separate\s+custodian/i);
+  assert.match(componentText, /seed/i);
 });
 
 test('benchmark semantics and the phone safety entry point remain accessible', () => {
-  assert.match(componentText, /<output[\s\S]*aria-live="polite"/i);
+  assert.doesNotMatch(componentText, /<output[\s\S]*aria-live/i);
   assert.match(
     componentText,
     /<section[\s\S]*className="benchmark-results-grid"/i,
@@ -324,7 +345,11 @@ test('benchmark semantics and the phone safety entry point remain accessible', (
     componentText,
     /aria-labelledby="current-benchmark-results-title"/i,
   );
-  assert.match(platformText, /aria-label="Read research and safety boundary"/i);
+  // The research chip in the 3D viewer keeps an accessible name, whatever it says.
+  assert.match(
+    platformText,
+    /className="research-chip"[\s\S]{0,200}?aria-label="[^"]+"|aria-label="[^"]+"[\s\S]{0,200}?className="research-chip"/,
+  );
   assert.match(
     stylesheetText,
     /@media \(max-width: 520px\)[\s\S]*?\.research-chip \{[\s\S]*?display: inline-grid;/i,
@@ -333,6 +358,96 @@ test('benchmark semantics and the phone safety entry point remain accessible', (
     stylesheetText,
     /\.research-chip span \{[\s\S]*?display: none !important;/i,
   );
+});
+
+test('pipeline and benchmark copy avoid en and em dashes', () => {
+  for (const text of [componentText, pipelineComponentText, ...formatterTexts]) {
+    assert.doesNotMatch(text, /[–—]/);
+  }
+});
+
+// The voice rule covers every page, and lib/reference-cases.ts is regenerated
+// by a script, so guard the rest of the site copy too.
+test('the rest of the site copy avoids en and em dashes too', async () => {
+  const paths = [
+    '../components/renal-site.tsx',
+    '../components/renal-platform.tsx',
+    '../components/kidney-scene.tsx',
+    '../components/reference-case-scene.tsx',
+    '../components/kidney-builder.tsx',
+    '../components/viewer-ui.tsx',
+    '../lib/export-model.ts',
+    '../lib/reference-cases.ts',
+    '../lib/prototype-pipeline.ts',
+    '../index.html',
+  ];
+  for (const path of paths) {
+    const text = await readFile(new URL(path, import.meta.url), 'utf8');
+    assert.doesNotMatch(text, /[–—]/, path);
+  }
+});
+
+test('pipeline section states its limits and links nothing private', () => {
+  assert.doesNotMatch(pipelineComponentText, /under a minute/i);
+  assert.doesNotMatch(pipelineComponentText, /laptop/i);
+  assert.doesNotMatch(pipelineComponentText, /every assumption/i);
+  // The CalyxView endourology repository is private; don't link to it.
+  assert.doesNotMatch(pipelineComponentText, /github\.com\/nityjr-ctrl\/CalyxView(?!-)/);
+  assert.match(pipelineComponentText, /not public yet/i);
+  assert.match(pipelineComponentText, /Kidneys A to E[\s\S]{0,80}cases 1 to 5/);
+  assert.match(pipelineComponentText, /hilar \(h\) suffix/i);
+  assert.match(pipelineComponentText, /collecting-system item/i);
+  assert.match(pipelineComponentText, /5% or less/);
+  assert.match(pipelineComponentText, /not function/i);
+  assert.match(pipelineComponentText, /Kutikov and Uzzo/);
+  assert.match(pipelineComponentText, /Ficarra/);
+  assert.match(pipelineComponentText, /TotalSegmentator/);
+  assert.match(pipelineComponentText, /tripwire/i);
+  assert.match(pipelineComponentText, /CC BY-NC-SA 4\.0/);
+  assert.match(pipelineComponentText, /doesn&apos;t show it\s+helps real model output/i);
+});
+
+test('pipeline summary is aggregate-only and its numbers are computed correctly', () => {
+  assert.doesNotMatch(
+    pipelineSummaryText,
+    /case_\d{5}|(?:^|["'\s(])(?:[a-z]:[\/])|file:\/\/|\/(?:users|home|mnt|tmp|root)\//im,
+  );
+  assert.doesNotMatch(
+    pipelineSummaryText,
+    /patientname|patientid|studyinstanceuid|seriesinstanceuid/i,
+  );
+
+  const { nephrometry, postprocess, evaluation, mesh } = pipelineSummary;
+
+  // Median of an even count is the mean of the two middle values.
+  const runtimes = nephrometry.cases.map((row) => row.runtimeSeconds).sort((a, b) => a - b);
+  const middle = runtimes.length / 2;
+  const median =
+    runtimes.length % 2 === 0
+      ? (runtimes[middle - 1] + runtimes[middle]) / 2
+      : runtimes[Math.floor(middle)];
+  assert.ok(
+    Math.abs(nephrometry.medianRuntimeSeconds - median) <= 0.05,
+    `medianRuntimeSeconds ${nephrometry.medianRuntimeSeconds} should be ${median}`,
+  );
+
+  // Rounded once: the tiles and the table must agree at 3 dp.
+  const bestRow = postprocess.rows[postprocess.rows.length - 1];
+  assert.equal(
+    evaluation.postprocessed.kidney_and_mass.dice.mean.toFixed(3),
+    bestRow.kidneyAndMassDice.toFixed(3),
+  );
+
+  // The always-on rule is named in every row that uses it.
+  for (const row of postprocess.rows.slice(1)) {
+    assert.match(row.rules, /two largest kidney pieces/i);
+  }
+  assert.doesNotMatch(postprocess.inputNote, /boundary noise|holes/i);
+  assert.ok(Number.isInteger(postprocess.tiedForBest) && postprocess.tiedForBest >= 1);
+
+  // Mesh: per-setting means and single-case extremes are both published.
+  assert.ok(mesh.caseMinDice <= mesh.minDice);
+  assert.ok(mesh.caseMaxAbsVolumeErrorPct >= mesh.maxAbsVolumeErrorPct);
 });
 
 test('running summary cannot present placeholder values as measured results', () => {

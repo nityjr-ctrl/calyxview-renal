@@ -31,7 +31,7 @@ const forbiddenNames = [
 ];
 const forbiddenText = [
   /case_\d{5}/i,
-  /(?:^|["'\s(])(?:[a-z]:[\\/])|file:\/\/|\/(?:users|home|mnt|tmp)\//i,
+  /(?:^|["'\s(])(?:[a-z]:[\\/])|file:\/\/|\/(?:users|home|mnt|tmp|root|var|opt|srv)\//i,
   /(?:patientname|patientid|studyinstanceuid|seriesinstanceuid)/i,
 ];
 
@@ -74,7 +74,9 @@ for (const path of files) {
   }
 
   if (
-    ['.html', '.js', '.json', '.css', '.txt', '.xml'].includes(extname(lower))
+    ['.html', '.js', '.json', '.css', '.txt', '.xml', '.svg', '.map', '.webmanifest', '.md'].includes(
+      extname(lower),
+    )
   ) {
     const contents = await readFile(path, 'utf8');
     for (const pattern of forbiddenText) {

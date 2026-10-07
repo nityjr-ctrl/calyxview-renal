@@ -1,32 +1,32 @@
-# case_00003: CT-to-3D partial nephrectomy planning summary
+# case_00003: computed nephrometry and volumes
 
 > Research and teaching prototype. Not a medical device. Not for diagnosis, treatment selection, surgical planning, margin selection or patient care.
 
-Generated 2026-09-03T09:13:48.038759+00:00 by renalplan 0.1.0.
+Generated 2026-09-29T21:06:54.670771+00:00 by renalplan 0.2.0.
 
 ## Nephrometry (computed from masks)
 
 | R.E.N.A.L. component | Value | Points |
 | --- | --- | --- |
 | R: maximal diameter | 3.2 cm | 1 |
-| E: exophytic fraction | 2% outside the parenchymal outline | 3 |
+| E: exophytic fraction | 2.5% outside the parenchymal outline (5% or less counts as entirely endophytic) | 3 |
 | N: nearness to sinus / collecting system | 27.3 mm | 1 |
 | A: anterior / posterior | x | - |
-| L: polar location | entirely above or below the polar lines | 1 |
+| L: polar location | more than half between the polar lines | 3 |
 | Hilar | no / not assessed | - |
-| **Total** | **6x** | low complexity |
+| **Total** | **8x** | moderate complexity |
 
 | PADUA component | Value | Points |
 | --- | --- | --- |
-| Polar location | inferior | 1 |
+| Polar location | middle (more than half of the tumour between the polar lines) | 2 |
 | Exophytic rate | see above | 3 |
 | Renal rim | lateral | 1 |
 | Renal sinus involvement | no | 1 |
 | Collecting system involvement | not assessed (no excretory phase) | 1 |
 | Tumour size | 3.2 cm | 1 |
-| **Total** | **8** | intermediate |
+| **Total** | **9** | intermediate |
 
-Assumptions: Renal sinus approximated as the hull-enclosed space that is not parenchyma or tumour.
+Assumptions: Renal sinus approximated as the hull-enclosed space that is not parenchyma or tumour. Polar lines here are planes across the kidney's own long axis, not axial CT slices, and one pair serves both R.E.N.A.L. L and PADUA's polar item, though the two systems define their lines differently. PADUA's polar item is middle (2) when more than half the tumour lies between the lines, the rule Wood et al. (BJU Int 2024) used to automate PADUA. So L and PADUA's polar item are approximations. Sinus estimate too short or off-centre to set the polar lines; polar lines assumed where 30% of the kidney's volume lies beyond each (its 30th and 70th percentiles along the long axis), so L and PADUA's polar item are approximate. N and PADUA's rim and renal-sinus items still use that estimate, so they are approximate too, and N can read long.
 
 ## Resection geometry (illustrative)
 

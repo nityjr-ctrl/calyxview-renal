@@ -49,8 +49,8 @@
     }
   ],
   "planning": {
-    "renal": "6x",
-    "padua": 8,
+    "renal": "8x",
+    "padua": 9,
     "marginMm": 5.0
   }
 }

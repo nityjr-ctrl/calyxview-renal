@@ -1,8 +1,10 @@
 # Social preview asset
 
-Final project path: `public/og.png`
+Final project path: `public/og.jpg`, a 1,200 by 630 JPEG re-encoded from the original `public/og.png`, which is kept as the source.
 
 Generation mode: built-in image generation, one request.
+
+It's an AI-generated illustration. It isn't made from any scan or from the site's own models.
 
 Exact prompt:
 

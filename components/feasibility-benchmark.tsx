@@ -1,6 +1,5 @@
 import {
   Beaker,
-  CheckCircle2,
   Clock3,
   Database,
   ExternalLink,
@@ -8,47 +7,78 @@ import {
   LoaderCircle,
   ShieldCheck,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import {
   type AggregateMetric,
+  type AvailableBenchmarkResult,
   type BenchmarkMetrics,
   benchmarkResults,
   formatBenchmarkMeasurement,
-  formatBenchmarkPercent,
-  formatConfidenceInterval,
+  formatBenchmarkScore,
   formatMeasurementConfidenceInterval,
   formatRuntime,
+  formatScoreConfidenceInterval,
 } from '@/lib/benchmark-results';
+import { repoFolder } from '@/lib/links';
 
+// The order matters: no outline is copied in until the outputs are locked.
 const nextRunSteps = [
   {
     label: 'CT only',
-    body: 'Select 20 studies under a written rule without using their answer masks.',
+    body: 'Pick 20 scans by a written rule, without looking at their outlines.',
   },
   {
     label: 'Run the model',
-    body: 'Give the frozen model each CT image alone and record every success or failure.',
+    body: 'Give the unchanged model each CT on its own, with at most two tries a scan, and record every success and failure.',
   },
   {
-    label: 'Lock outputs',
-    body: 'Seal predictions, failures, timings, model files and program hashes before scoring.',
+    label: 'Lock the outputs',
+    body: "Seal the outputs, failures, timings and file fingerprints, and post the seal's own fingerprint on GitHub, before any scoring.",
   },
   {
-    label: 'Release references',
-    body: 'Only then copy the matching KiTS reference segmentations into a separate workspace.',
+    label: 'Then copy in the outlines',
+    body: 'Only after the lock, copy the matching KiTS expert outlines into a separate folder.',
   },
   {
     label: 'Score all 20',
-    body: 'Measure reference agreement and keep failed studies in every denominator.',
+    body: 'Compare with the expert outlines, with every failure kept in the averages.',
   },
 ];
 
-function PercentMetricValue({
+const sourceLinks = [
+  {
+    href: repoFolder('research/kits23-feasibility'),
+    label: 'Method and scripts',
+  },
+  { href: 'https://github.com/neheller/kits23', label: 'KiTS23 source' },
+  {
+    href: 'https://huggingface.co/datasets/neheller/KiTS-Challenge-Imaging',
+    label: 'KiTS23 imaging (Hugging Face)',
+  },
+  {
+    href: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+    label: 'Data licence',
+  },
+  { href: 'https://zenodo.org/records/5126443', label: 'Published model' },
+];
+
+// The arrow is for sighted readers. Screen readers hear the words instead.
+function Better({ label, higher = false }: { label: string; higher?: boolean }) {
+  return (
+    <>
+      {label}&nbsp;<span aria-hidden="true">{higher ? '↑' : '↓'}</span>
+      <span className="sr-only">{higher ? ' (higher is better)' : ' (lower is better)'}</span>
+    </>
+  );
+}
+
+function ScoreValue({
   label,
   value,
   interval,
 }: {
-  label: string;
+  label: ReactNode;
   value: number | null;
   interval: [number, number] | null;
 }) {
@@ -56,23 +86,23 @@ function PercentMetricValue({
     <div className="benchmark-metric-value">
       <dt>{label}</dt>
       <dd>
-        <strong>{formatBenchmarkPercent(value)}</strong>
-        <small>{formatConfidenceInterval(interval)}</small>
+        <strong>{formatBenchmarkScore(value)}</strong>
+        <small>{formatScoreConfidenceInterval(interval)}</small>
       </dd>
     </div>
   );
 }
 
-function MeasurementMetricValue({
+function MeasurementValue({
   label,
   value,
   interval,
   unit,
 }: {
-  label: string;
+  label: ReactNode;
   value: number | null;
   interval: [number, number] | null;
-  unit: 'mm' | 'mL';
+  unit: 'mm' | 'ml';
 }) {
   return (
     <div className="benchmark-metric-value">
@@ -104,31 +134,362 @@ function ResultGrid({ metrics }: { metrics: BenchmarkMetrics }) {
             <Beaker aria-hidden="true" />
           </div>
           <dl className="benchmark-metric-grid">
-            <PercentMetricValue
-              label="Mean Dice ↑"
+            <ScoreValue
+              label={<Better label="Mean Dice" higher />}
               value={metric.diceMean}
               interval={metric.diceMeanCi95}
             />
-            <PercentMetricValue
-              label="Mean surface Dice ↑"
+            <ScoreValue
+              label={<Better label="Mean surface Dice" higher />}
               value={metric.surfaceDiceMean}
               interval={metric.surfaceDiceMeanCi95}
             />
-            <MeasurementMetricValue
-              label="Mean HD95 ↓"
+            <MeasurementValue
+              label={<Better label="Mean HD95" />}
               value={metric.hd95MmMean}
               interval={metric.hd95MmMeanCi95}
               unit="mm"
             />
-            <MeasurementMetricValue
-              label="Volume MAE ↓"
+            <MeasurementValue
+              label={<Better label="Mean volume error" />}
               value={metric.volumeMaeMlMean}
               interval={metric.volumeMaeMlMeanCi95}
-              unit="mL"
+              unit="ml"
             />
           </dl>
         </article>
       ))}
+    </section>
+  );
+}
+
+function runMonth(generatedAtUtc: string | null): string | null {
+  if (!generatedAtUtc) return null;
+  const date = new Date(generatedAtUtc);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('en-GB', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
+function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
+  const { protocol, metrics, runtime, evaluation } = result;
+  const { cohortSize, successfulCases, failedCases } = protocol;
+  const isComplete = result.state !== 'runningV2';
+  const isScriptBlinded = result.state === 'completeV3';
+  const month = runMonth(result.generatedAtUtc);
+
+  const failed = failedCases ?? 0;
+  const ran = successfulCases ?? 0;
+  const kidneyDice = metrics.kidneyAndMass.diceMean;
+  // A failed scan scores Dice 0, so the mean over the scans that ran is the
+  // full-cohort mean scaled by cohort / successes.
+  const kidneyDiceOverRan =
+    kidneyDice !== null && ran > 0 ? (kidneyDice * cohortSize) / ran : null;
+
+  const hd95Means = [metrics.kidneyAndMass, metrics.mass, metrics.tumour]
+    .map((metric) => metric.hd95MmMean)
+    .filter((value): value is number => value !== null);
+
+  let resultHeading: string;
+  if (!isComplete) {
+    resultHeading = `Scores stay hidden until all ${cohortSize} have run.`;
+  } else if (failed === 0) {
+    resultHeading = `All ${cohortSize} ran.`;
+  } else if (failed === 1) {
+    resultHeading = `${ran} of ${cohortSize} ran. The one that failed still counts.`;
+  } else {
+    resultHeading = `${ran} of ${cohortSize} ran. The ${failed} that failed still count.`;
+  }
+
+  let failureRule: string;
+  if (!isComplete) {
+    failureRule = 'Nothing partial is shown.';
+  } else if (failed === 0) {
+    failureRule = 'Every average below covers all of them.';
+  } else {
+    failureRule =
+      `${failed === 1 ? 'It stays' : 'They stay'} in every average, scored as a complete miss: Dice 0, surface Dice 0, an HD95 equal to the scan's full diagonal (or 1,000 mm if that can't be worked out), and a volume error equal to the whole reference volume.` +
+      (kidneyDiceOverRan !== null
+        ? ` Leave ${failed === 1 ? 'it' : 'them'} out and kidney + mass Dice over the ${ran} that ran is about ${kidneyDiceOverRan.toFixed(2)}.`
+        : '');
+  }
+
+  return (
+    <section
+      id="research"
+      className="benchmark-section"
+      aria-labelledby="benchmark-title"
+    >
+      <div className="site-shell">
+        <div className="benchmark-heading-grid">
+          <div>
+            <p className="eyebrow">The benchmark</p>
+            <h2 id="benchmark-title">
+              Can a published model draw the outlines?{' '}
+              {isScriptBlinded
+                ? `A blinded check on ${cohortSize} scans.`
+                : `A first check on ${cohortSize} scans.`}
+            </h2>
+          </div>
+          <div className="benchmark-intro">
+            {isScriptBlinded ? (
+              <p>
+                The pipeline needs outlines, and contouring every case by hand
+                doesn&apos;t scale. So I ran a published model from the
+                KiTS21 challenge, built with nnU-Net (an open-source tool for
+                building models that draw outlines on scans), unchanged on {cohortSize} KiTS23
+                scans.
+                This time each output was locked before the expert outlines
+                were copied in for scoring.
+              </p>
+            ) : (
+              <p>
+                The pipeline needs outlines, and contouring every case by hand
+                doesn&apos;t scale. So I took a published model from the
+                KiTS21 challenge, built with nnU-Net (an open-source tool for
+                building models that draw outlines on scans), and ran it unchanged on{' '}
+                {cohortSize} KiTS23 scans it wasn&apos;t trained on. It was
+                trained on KiTS cases 0 to 299, and these are cases 400 to 419.
+                I used its standard setting, which averages five trained copies
+                of the model. I left out test-time augmentation, which also
+                averages over mirrored copies of each scan, so it wasn&apos;t
+                running at its strongest.
+              </p>
+            )}
+            <p>
+              The scans come from the same collection the model was trained on,
+              so this is a check within KiTS, not external validation. The
+              patients were all treated in one US hospital system, so it says
+              nothing yet about how the model does on our scanners.
+              {isScriptBlinded
+                ? ''
+                : " It wasn't blinded either: the expert outlines were on the same machine when the model ran."}{' '}
+              The numbers measure agreement with the KiTS expert outlines, not
+              clinical accuracy, and none of it is for patient care.
+            </p>
+          </div>
+        </div>
+
+        <div className="benchmark-current-heading">
+          <div>
+            <p className="eyebrow">
+              {isScriptBlinded
+                ? 'Blinded by the scripts'
+                : `First run${month ? `, ${month}` : ''}, not blinded`}
+            </p>
+            <h3 id="current-benchmark-results-title">{resultHeading}</h3>
+          </div>
+          <p>{failureRule}</p>
+        </div>
+
+        {isComplete ? null : (
+          <div className="benchmark-status" role="note">
+            <span className="benchmark-status-icon">
+              <LoaderCircle aria-hidden="true" />
+            </span>
+            <span className="benchmark-status-copy">
+              <strong>Still running</strong>
+              <span>
+                No score is shown until all {cohortSize} scans have been through
+                the model and been checked.
+              </span>
+            </span>
+            <span className="benchmark-status-tag">Not blinded</span>
+          </div>
+        )}
+
+        <div className="benchmark-protocol-grid">
+          <article>
+            <Database aria-hidden="true" />
+            <div>
+              <span>Dataset</span>
+              <strong>{protocol.dataset} (public)</strong>
+            </div>
+          </article>
+          <article>
+            <Beaker aria-hidden="true" />
+            <div>
+              <span>Scans</span>
+              <strong>{cohortSize} contrast CTs</strong>
+            </div>
+          </article>
+          <article>
+            <GitCommitHorizontal aria-hidden="true" />
+            <div>
+              <span>Model</span>
+              <strong>nnU-Net, trained for KiTS21</strong>
+            </div>
+          </article>
+          <article>
+            <Clock3 aria-hidden="true" />
+            <div>
+              <span>
+                {isScriptBlinded
+                  ? 'Median time per scan'
+                  : 'Median time per scan, 16 GB GPU'}
+              </span>
+              <strong>{formatRuntime(runtime.medianSecondsPerCase)}</strong>
+            </div>
+          </article>
+        </div>
+
+        {isComplete ? (
+          <>
+            <ResultGrid metrics={metrics} />
+            <p className="benchmark-metric-key">
+              ↑ higher is better, ↓ lower is better. Each value is the mean over
+              all {cohortSize} scans. The 95% confidence interval with it is a
+              percentile bootstrap from 10,000 resamples of the {cohortSize} scans.
+              With {cohortSize} scans and a few very large values, these intervals
+              are rough. The HD95 and volume ones mostly show how many of those
+              few land in a resample.
+            </p>
+          </>
+        ) : null}
+
+        <div className="benchmark-method-grid">
+          <article className="benchmark-method-card">
+            <div>
+              <h3>What the numbers mean</h3>
+              <p>
+                Dice is the overlap between the model&apos;s outline and the
+                expert one, where 1.0 means identical. Surface Dice is the share
+                of both surfaces that sit within about 1 mm of each other, at
+                the KiTS23 tolerances (1.03 mm for kidney + mass, 1.13 mm for
+                the mass, 1.15 mm for tumour). HD95 is how far apart the two
+                surfaces are, leaving out the worst 5% of points. It&apos;s
+                measured from each surface to the other, and the larger figure
+                is kept. It isn&apos;t one of the official KiTS23 measures.
+                Volume error is the average absolute difference in volume, in
+                ml. The mass is tumour + cyst, and kidney + mass is all three
+                taken as one outline.
+              </p>
+            </div>
+          </article>
+          {isComplete ? (
+            <article className="benchmark-method-card">
+              <div>
+                <h3>Why the HD95 averages are so high</h3>
+                <p>
+                  {hd95Means.length > 0
+                    ? `A mean HD95 of ${Math.round(Math.min(...hd95Means))} to ${Math.round(Math.max(...hd95Means))} mm doesn't mean the model is usually centimetres out. `
+                    : ''}
+                  {failed > 0
+                    ? `Two things pull it up. ${failed === 1 ? 'The failed scan counts' : 'The failed scans count'} at the full scan diagonal, which is hundreds of mm, and so does any region a scan that ran left empty, such as a missed tumour. And a few of the others have stray false positives far from the kidney.`
+                    : 'Any region the model left empty, such as a missed tumour, counts at the full scan diagonal, which is hundreds of mm. And a few scans have stray false positives far from the kidney, which pull the average up.'}{' '}
+                  {isScriptBlinded
+                    ? ''
+                    : "This run's public file only has means, so there are no medians to show. "}
+                  The clean-up rules in the pipeline section are aimed at those
+                  stray bits, but I haven&apos;t run them on these outputs yet.
+                </p>
+              </div>
+            </article>
+          ) : null}
+          <article className="benchmark-method-card benchmark-method-card-wide">
+            <ShieldCheck aria-hidden="true" />
+            <div>
+              <h3>What&apos;s published</h3>
+              <p>
+                Only the averages from my offline run, in a small JSON file. No
+                scans, outlines, per-scan results or file paths. KiTS23 imaging
+                and outlines are CC BY-NC-SA 4.0.
+                The model weights are Fabian Isensee&apos;s pretrained nnU-Net
+                for KiTS21 (DKFZ), published on Zenodo under CC BY 4.0. They
+                were trained on KiTS data, which is non-commercial, so I treat
+                them as non-commercial too.
+              </p>
+              <div className="benchmark-source-links">
+                {sourceLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {link.label} <ExternalLink aria-hidden="true" />
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </article>
+        </div>
+
+        {isScriptBlinded ? (
+          <div
+            className="benchmark-next-run benchmark-next-run-complete"
+            aria-labelledby="evaluation-custody-title"
+          >
+            <div className="benchmark-next-run-heading">
+              <div>
+                <p className="eyebrow">How this run was done</p>
+                <h3 id="evaluation-custody-title">
+                  Each output was locked before the expert outlines were copied
+                  in.
+                </h3>
+              </div>
+              <span>
+                {evaluation.operatorBlinded
+                  ? 'Operator-blinded'
+                  : 'Script-blinded only'}
+              </span>
+            </div>
+            <div className="benchmark-blinding-limit" role="note">
+              <strong>Who could see what</strong>
+              <p>{evaluation.custodyStatement}</p>
+            </div>
+          </div>
+        ) : (
+          <details className="benchmark-next-run">
+            <summary className="cursor-pointer">
+              <h3 id="next-run-title" className="inline text-[1.375rem]">
+                How the next run will be done
+              </h3>
+              <span className="ml-3 inline-block rounded-[2px] border border-[var(--rule)] bg-[var(--paper-alt)] px-2 py-1 align-middle text-[.6875rem] font-bold uppercase tracking-[.12em] text-[var(--ink-muted)]">
+                Draft, not run yet
+              </span>
+            </summary>
+            <div className="mt-5">
+              <p className="benchmark-next-run-intro">
+                The next {cohortSize} scans will be blinded by the scripts, in
+                this order:
+              </p>
+              <ol
+                className="benchmark-validation-flow"
+                aria-label="Order of the next run"
+              >
+                {nextRunSteps.map((step, index) => (
+                  <li key={step.label}>
+                    <span className="benchmark-flow-number">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <h4>{step.label}</h4>
+                      <p>{step.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="benchmark-blinding-limit" role="note">
+                <strong>What it doesn&apos;t cover</strong>
+                <p>
+                  It&apos;s script-blinded, not operator-blinded. The
+                  model&apos;s scripts can&apos;t see the outlines before the
+                  lock, but I&apos;m running it myself and my account can open
+                  the KiTS files. I also pick the 20 with a random seed I set.
+                  That makes the pick repeatable, but it doesn&apos;t prove I
+                  didn&apos;t try a few seeds first. A separate custodian
+                  holding the data and the seed would close both gaps.
+                </p>
+              </div>
+            </div>
+          </details>
+        )}
+      </div>
     </section>
   );
 }
@@ -144,351 +505,23 @@ export function FeasibilityBenchmark() {
         <div className="site-shell">
           <div className="benchmark-heading-grid">
             <div>
-              <p className="eyebrow">Research evidence</p>
+              <p className="eyebrow">The benchmark</p>
               <h2 id="benchmark-title">
-                Benchmark result temporarily unavailable.
+                The benchmark numbers aren&apos;t showing right now.
               </h2>
             </div>
             <div className="benchmark-intro">
-              <p>{benchmarkResults.reason}</p>
               <p>
-                No stale or partially verified score is substituted. The rest of
-                this training prototype remains available without processing or
-                uploading medical images.
+                The results file didn&apos;t pass the site&apos;s checks, so
+                it&apos;s hidden rather than shown half right. The rest of the
+                site works as normal.
               </p>
             </div>
           </div>
-          <output className="benchmark-status" aria-live="polite">
-            <span className="benchmark-status-icon">
-              <ShieldCheck aria-hidden="true" />
-            </span>
-            <span className="benchmark-status-copy">
-              <strong>Aggregate result withheld safely</strong>
-              <span>
-                The published data must match a supported, privacy-checked
-                contract before any measurement can appear here.
-              </span>
-            </span>
-            <span className="benchmark-status-tag">Research only</span>
-          </output>
         </div>
       </section>
     );
   }
 
-  const isComplete = benchmarkResults.state !== 'runningV2';
-  const isScriptBlinded = benchmarkResults.state === 'completeV3';
-  const resultLabel = isScriptBlinded
-    ? 'Protocol-frozen script-blinded result'
-    : 'Historical within-KiTS feasibility result';
-
-  return (
-    <section
-      id="research"
-      className="benchmark-section"
-      aria-labelledby="benchmark-title"
-    >
-      <div className="site-shell">
-        <div className="benchmark-heading-grid">
-          <div>
-            <p className="eyebrow">Current 20-study result</p>
-            <h2 id="benchmark-title">
-              Reference agreement, not clinical accuracy.
-            </h2>
-          </div>
-          <div className="benchmark-intro">
-            {isScriptBlinded ? (
-              <p>
-                The numbers below compare prediction-locked outputs from a
-                published KiTS21 nnU-Net model with KiTS23 references copied
-                into the scoring workspace only after that lock. The model run
-                was script-blinded. This is still a small within-KiTS
-                feasibility check, not external clinical validation.
-              </p>
-            ) : (
-              <p>
-                The numbers below compare outputs from a published KiTS21
-                nnU-Net model with KiTS23 reference segmentations on 20 studies.
-                Selected KiTS23 identifiers fall outside the model&apos;s
-                documented KiTS21 training identifier range, but this remains a
-                small within-KiTS feasibility check. It does not establish
-                patient-level independence or external validation. This earlier
-                result was not prediction-locked before its references were
-                available locally.
-              </p>
-            )}
-            <p>
-              A random unlabelled CT can show whether a frozen pipeline runs and
-              produces a mask. It cannot establish accuracy because there is no
-              reference segmentation to compare with the prediction. These
-              values measure agreement with the KiTS research references, not
-              clinical accuracy, patient safety or performance across hospitals.
-            </p>
-            <p>
-              Only cohort-wide measurements appear here. Source scans,
-              predictions and study-level results remain outside the website; no
-              CT inference runs in your browser.
-            </p>
-          </div>
-        </div>
-
-        <div className="benchmark-current-heading">
-          <div>
-            <p className="eyebrow">{resultLabel}</p>
-            <h3 id="current-benchmark-results-title">
-              {isComplete
-                ? `All ${benchmarkResults.protocol.cohortSize} studies remain visible in the denominator.`
-                : 'Scores stay hidden until the full denominator is complete.'}
-            </h3>
-          </div>
-          <p>
-            {isComplete
-              ? `${benchmarkResults.protocol.successfulCases} studies produced a validator-accepted prediction file. ${benchmarkResults.protocol.failedCases} failed after the predefined attempts and is scored conservatively rather than removed.`
-              : 'No provisional or partial result is presented as a completed benchmark.'}
-          </p>
-        </div>
-
-        <output
-          className={`benchmark-status ${isComplete ? 'benchmark-status-complete' : ''}`}
-          aria-live="polite"
-        >
-          <span className="benchmark-status-icon">
-            {isComplete ? (
-              <CheckCircle2 aria-hidden="true" />
-            ) : (
-              <LoaderCircle aria-hidden="true" />
-            )}
-          </span>
-          <span className="benchmark-status-copy">
-            <strong>
-              {isComplete
-                ? 'Reference-agreement benchmark complete'
-                : 'Reference-agreement benchmark in progress'}
-            </strong>
-            <span>
-              {isComplete
-                ? `${benchmarkResults.protocol.evaluatedCases} of ${benchmarkResults.protocol.cohortSize} studies were evaluated: ${benchmarkResults.protocol.successfulCases} produced a valid output and ${benchmarkResults.protocol.failedCases} failed. This is a ${benchmarkResults.evaluation.completionLabel}, not an accuracy rate. Every study remains in the aggregate denominator.`
-                : 'No measured score is shown until all 20 studies have been processed and checked under the fixed full-denominator policy.'}
-            </span>
-          </span>
-          <span className="benchmark-status-tag">
-            {isScriptBlinded ? 'Script-blinded' : 'Not blinded'}
-          </span>
-        </output>
-
-        <div className="benchmark-protocol-grid">
-          <article>
-            <Database aria-hidden="true" />
-            <div>
-              <span>Public dataset</span>
-              <strong>{benchmarkResults.protocol.dataset}</strong>
-            </div>
-          </article>
-          <article>
-            <Beaker aria-hidden="true" />
-            <div>
-              <span>Fixed protocol</span>
-              <strong>{benchmarkResults.protocol.cohortSize} CT studies</strong>
-            </div>
-          </article>
-          <article>
-            <GitCommitHorizontal aria-hidden="true" />
-            <div>
-              <span>Model</span>
-              <strong>nnU-Net · Task135</strong>
-            </div>
-          </article>
-          <article>
-            <Clock3 aria-hidden="true" />
-            <div>
-              <span>Median runtime</span>
-              <strong>
-                {formatRuntime(benchmarkResults.runtime.medianSecondsPerCase)}
-              </strong>
-            </div>
-          </article>
-        </div>
-
-        <ResultGrid metrics={benchmarkResults.metrics} />
-
-        <p className="benchmark-metric-key">
-          ↑ Higher is better · ↓ Lower is better · Values are cohort means with
-          bootstrap 95% confidence intervals.
-        </p>
-
-        <div className="benchmark-method-grid">
-          <article className="benchmark-method-card">
-            <span className="benchmark-method-number">01</span>
-            <div>
-              <h3>What the current numbers mean</h3>
-              <p>
-                Dice measures overlap. Surface Dice measures how closely the
-                predicted and reference boundaries align. HD95 reports the
-                95th-percentile symmetric surface distance, and volume MAE
-                reports the average absolute volume difference. Each is compared
-                with {benchmarkResults.protocol.labelSource} for kidney plus
-                mass, tumour plus cyst, and tumour. Each metric quantifies
-                reference agreement; none is a clinical-accuracy measure.
-              </p>
-            </div>
-          </article>
-          <article className="benchmark-method-card">
-            <span className="benchmark-method-number">02</span>
-            <div>
-              <h3>What these numbers do not prove</h3>
-              <p>
-                This within-KiTS benchmark does not establish clinical accuracy,
-                safety, clinical benefit, patient-level independence,
-                generalisation across hospitals, or suitability for
-                partial-nephrectomy decisions.
-              </p>
-            </div>
-          </article>
-          <article className="benchmark-method-card benchmark-method-card-wide">
-            <ShieldCheck aria-hidden="true" />
-            <div>
-              <h3>Aggregate-only publication</h3>
-              <p>
-                The public result contains no scan files, model predictions,
-                local computer paths, patient identifiers or study-level rows.
-                Benchmark inference runs offline; this browser displays a small
-                aggregate JSON summary only. Revisions and hashes keep the
-                protocol traceable without exposing medical-image artifacts. All
-                20 selected studies remain in the metric denominator; failures
-                use the predefined evaluation policy rather than being silently
-                removed. KiTS data are licensed under CC BY-NC-SA 4.0;
-                downstream reuse must comply with its attribution,
-                non-commercial and share-alike terms. The published model is
-                treated as a non-commercial research asset pending separate
-                rights clarification. Source references do not imply
-                endorsement.
-              </p>
-              <div className="benchmark-source-links">
-                <a
-                  href="https://github.com/nityjr-ctrl/calyxview-renal/blob/main/research/kits23-feasibility/BENCHMARK_PROMPT.md"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Reusable run prompt <ExternalLink aria-hidden="true" />
-                </a>
-                <a
-                  href="https://github.com/nityjr-ctrl/calyxview-renal/tree/main/research/kits23-feasibility"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Method &amp; scripts <ExternalLink aria-hidden="true" />
-                </a>
-                <a
-                  href="https://huggingface.co/datasets/neheller/KiTS-Challenge-Imaging"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Official CT source <ExternalLink aria-hidden="true" />
-                </a>
-                <a
-                  href="https://github.com/neheller/kits23"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  KiTS23 source <ExternalLink aria-hidden="true" />
-                </a>
-                <a
-                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Data licence <ExternalLink aria-hidden="true" />
-                </a>
-                <a
-                  href="https://zenodo.org/records/5126443"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Published model <ExternalLink aria-hidden="true" />
-                </a>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        {isScriptBlinded ? (
-          <div
-            className="benchmark-next-run benchmark-next-run-complete"
-            aria-labelledby="evaluation-custody-title"
-          >
-            <div className="benchmark-next-run-heading">
-              <div>
-                <p className="eyebrow">Evaluation custody</p>
-                <h3 id="evaluation-custody-title">
-                  Predictions were locked before references entered the scoring
-                  workspace.
-                </h3>
-              </div>
-              <span>
-                {benchmarkResults.evaluation.operatorBlinded
-                  ? 'Operator-blinded'
-                  : 'Script-blinded only'}
-              </span>
-            </div>
-            <div className="benchmark-blinding-limit" role="note">
-              <strong>Recorded custody boundary</strong>
-              <p>{benchmarkResults.evaluation.custodyStatement}</p>
-            </div>
-          </div>
-        ) : (
-          <div className="benchmark-next-run" aria-labelledby="next-run-title">
-            <div className="benchmark-next-run-heading">
-              <div>
-                <p className="eyebrow">Next validation · not yet run</p>
-                <h3 id="next-run-title">
-                  Lock each prediction before references enter the scoring
-                  workspace.
-                </h3>
-              </div>
-              <span>Protocol under review</span>
-            </div>
-            <p className="benchmark-next-run-intro">
-              The current draft uses a reproducible operator-chosen seed. That
-              supports repeatability, but it cannot rule out seed shopping,
-              independently reduce selection bias or establish accuracy. The
-              next cohort follows this fixed order:
-            </p>
-            <ol
-              className="benchmark-validation-flow"
-              aria-label="Planned blinded evaluation sequence"
-            >
-              {nextRunSteps.map((step, index) => (
-                <li key={step.label}>
-                  <span className="benchmark-flow-number">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div>
-                    <h4>{step.label}</h4>
-                    <p>{step.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <div className="benchmark-blinding-limit" role="note">
-              <strong>Blinding limit</strong>
-              <p>
-                The planned local evaluation is script-blinded, not
-                operator-blinded. The inference programs cannot access
-                references before the lock, but the same operator account can
-                access the KiTS repository. A separate custodian is still
-                required for true operator blinding.
-              </p>
-            </div>
-          </div>
-        )}
-
-        <p className="benchmark-footnote">
-          {isScriptBlinded
-            ? `Current result: protocol-frozen and script-blinded within KiTS. ${benchmarkResults.evaluation.custodyStatement}`
-            : 'Current result: identifiers outside the documented Task135 training range, evaluated within KiTS. This earlier result was not blinded.'}{' '}
-          Results are descriptive and must not be used for patient care.
-        </p>
-      </div>
-    </section>
-  );
+  return <AvailableBenchmark result={benchmarkResults} />;
 }

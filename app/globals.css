@@ -124,6 +124,11 @@ button:disabled {
     #06130f;
 }
 
+/* The viewer takes focus when it opens. Don't ring the whole screen. */
+.app-shell:focus {
+  outline: none;
+}
+
 .app-header {
   position: relative;
   z-index: 20;
@@ -168,21 +173,22 @@ button:disabled {
 .research-chip,
 .case-switcher {
   display: inline-flex;
-  height: 30px;
+  height: 32px;
   align-items: center;
   gap: 6px;
-  border: 1px solid rgb(255 255 255 / .08);
+  border: 1px solid rgb(255 255 255 / .1);
   border-radius: 8px;
-  padding: 0 9px;
+  padding: 0 10px;
   background: rgb(255 255 255 / .025);
-  color: rgb(255 255 255 / .46);
-  font-size: 10px;
+  color: rgb(255 255 255 / .74);
+  font-size: 12px;
+  white-space: nowrap;
   transition: background .18s ease, color .18s ease, border-color .18s ease;
 }
 
 .research-chip {
-  border-color: rgb(251 191 36 / .12);
-  color: rgb(253 230 138 / .62);
+  border-color: rgb(251 191 36 / .2);
+  color: rgb(253 230 138 / .88);
 }
 
 .case-indicator {
@@ -191,9 +197,14 @@ button:disabled {
 
 .research-chip:hover,
 .case-switcher:hover {
-  border-color: rgb(255 255 255 / .13);
-  background: rgb(255 255 255 / .05);
-  color: rgb(255 255 255 / .72);
+  border-color: rgb(255 255 255 / .18);
+  background: rgb(255 255 255 / .06);
+  color: rgb(255 255 255 / .95);
+}
+
+.research-chip:hover {
+  border-color: rgb(251 191 36 / .32);
+  color: rgb(254 243 199);
 }
 
 .safety-ribbon {
@@ -207,21 +218,20 @@ button:disabled {
   border-bottom: 1px solid rgb(251 191 36 / .08);
   background: rgb(84 58 15 / .14);
   padding: 5px 12px;
-  color: rgb(255 247 214 / .82);
-  font-size: 11px;
-  letter-spacing: .1em;
+  color: rgb(255 247 214 / .88);
+  font-size: 12px;
+  letter-spacing: .01em;
   text-align: center;
 }
 
 .safety-ribbon button {
-  border-bottom: 1px solid rgb(255 247 214 / .45);
-  color: rgb(255 247 214 / .78);
-  font-size: 11px;
-  letter-spacing: .04em;
+  border-bottom: 1px solid rgb(255 247 214 / .5);
+  color: rgb(255 247 214 / .88);
+  font-size: 12px;
 }
 
 .safety-ribbon button:hover {
-  color: rgb(255 248 220 / .75);
+  color: rgb(255 251 235);
 }
 
 .workspace-grid {
@@ -245,10 +255,10 @@ button:disabled {
 }
 
 .section-label {
-  color: rgb(255 255 255 / .3);
-  font-size: 9px;
+  color: rgb(255 255 255 / .64);
+  font-size: 11px;
   font-weight: 650;
-  letter-spacing: .14em;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 
@@ -270,8 +280,9 @@ button:disabled {
 }
 
 .range-control {
-  height: 14px;
+  height: 24px;
   appearance: none;
+  cursor: pointer;
   background: transparent;
   accent-color: rgb(110 231 183);
 }
@@ -283,9 +294,9 @@ button:disabled {
 }
 
 .range-control::-webkit-slider-thumb {
-  width: 12px;
-  height: 12px;
-  margin-top: -4.5px;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
   appearance: none;
   border: 2px solid rgb(7 25 19);
   border-radius: 50%;
@@ -306,8 +317,8 @@ button:disabled {
 }
 
 .range-control::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border: 2px solid rgb(7 25 19);
   border-radius: 50%;
   background: rgb(176 255 221);
@@ -325,10 +336,11 @@ button:disabled {
 .viewer-topbar {
   z-index: 4;
   display: flex;
-  height: 42px;
+  min-height: 46px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   border-bottom: 1px solid rgb(255 255 255 / .065);
   background: rgb(6 20 16 / .92);
   padding: 0 16px;
@@ -347,12 +359,11 @@ button:disabled {
 .viewer-toolbar {
   position: absolute;
   top: 14px;
-  left: 50%;
+  right: 14px;
   z-index: 4;
   display: flex;
   align-items: center;
   gap: 3px;
-  transform: translateX(-50%);
   border: 1px solid rgb(255 255 255 / .075);
   border-radius: 10px;
   background: rgb(6 25 19 / .82);
@@ -362,56 +373,159 @@ button:disabled {
 }
 
 .view-button {
-  height: 26px;
+  min-width: 32px;
+  height: 30px;
   border-radius: 6px;
-  padding: 0 7px;
-  color: rgb(255 255 255 / .34);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: .08em;
+  padding: 0 8px;
+  color: rgb(255 255 255 / .7);
+  font-size: 12px;
+  font-weight: 550;
   transition: background .16s ease, color .16s ease;
 }
 
 .view-button:hover {
-  background: rgb(255 255 255 / .04);
-  color: rgb(255 255 255 / .6);
+  background: rgb(255 255 255 / .06);
+  color: rgb(255 255 255 / .92);
 }
 
-.view-button-active {
-  background: rgb(255 255 255 / .075);
-  color: rgb(222 255 241 / .76);
+.view-button-active,
+.view-button[aria-pressed='true'] {
+  background: rgb(108 219 174 / .16);
+  color: rgb(225 255 241);
+  box-shadow: inset 0 0 0 1px rgb(138 235 195 / .28);
 }
 
 .icon-button {
   display: grid;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   place-items: center;
   border-radius: 7px;
-  color: rgb(255 255 255 / .4);
+  color: rgb(255 255 255 / .74);
   transition: background .16s ease, color .16s ease;
 }
 
 .icon-button:hover {
-  background: rgb(255 255 255 / .06);
-  color: rgb(255 255 255 / .75);
+  background: rgb(255 255 255 / .07);
+  color: rgb(255 255 255 / .95);
+}
+
+.viewer-chips {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 3;
+  display: flex;
+  max-width: calc(100% - 32px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: none;
 }
 
 .viewer-chip {
   display: inline-flex;
   width: fit-content;
-  height: 24px;
+  min-height: 26px;
   align-items: center;
   gap: 7px;
-  border: 1px solid rgb(255 255 255 / .07);
+  border: 1px solid rgb(255 255 255 / .09);
   border-radius: 7px;
-  background: rgb(7 24 18 / .68);
-  padding: 0 8px;
-  color: rgb(192 255 226 / .54);
-  font-size: 8px;
-  font-weight: 650;
-  letter-spacing: .11em;
+  background: rgb(7 24 18 / .8);
+  padding: 3px 9px;
+  color: rgb(214 255 236 / .88);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
   backdrop-filter: blur(12px);
+}
+
+.viewer-margin {
+  border-left: 1px solid rgb(255 255 255 / .1);
+  padding-left: 10px;
+}
+
+.viewer-link {
+  color: rgb(167 243 208);
+  text-decoration: underline;
+  text-decoration-color: rgb(167 243 208 / .45);
+  text-underline-offset: 2px;
+}
+
+.viewer-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.viewer-limits {
+  display: grid;
+  gap: 10px;
+}
+
+.viewer-limits li {
+  display: flex;
+  gap: 9px;
+  color: rgb(255 255 255 / .78);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.viewer-jump {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px solid rgb(186 230 253 / .5);
+  color: rgb(186 230 253 / .95);
+  font-size: 12px;
+}
+
+.case-switcher-group {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.case-switcher-group::-webkit-scrollbar {
+  display: none;
+}
+
+.case-switcher-group-label {
+  margin-right: 5px;
+  color: rgb(255 255 255 / .7);
+  font-size: 12px;
+}
+
+.case-switcher-group button {
+  min-width: 32px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 1px solid rgb(255 255 255 / .09);
+  border-radius: 7px;
+  background: rgb(255 255 255 / .02);
+  padding: 0 9px;
+  color: rgb(255 255 255 / .76);
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.case-switcher-group button:hover {
+  background: rgb(255 255 255 / .07);
+  color: rgb(255 255 255 / .95);
+}
+
+.case-switcher-group button[aria-pressed='true'] {
+  border-color: rgb(138 235 195 / .32);
+  background: rgb(108 219 174 / .16);
+  color: rgb(225 255 241);
+}
+
+/* The picker scrolls sideways, which clips anything drawn outside the buttons. */
+.case-switcher-group button:focus-visible {
+  outline-offset: -2px;
 }
 
 .viewer-controls {
@@ -421,7 +535,9 @@ button:disabled {
   z-index: 5;
   display: flex;
   max-width: calc(100% - 24px);
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   transform: translateX(-50%);
   border: 1px solid rgb(255 255 255 / .075);
@@ -437,11 +553,20 @@ button:disabled {
   right: 19px;
   bottom: 19px;
   z-index: 2;
-  width: 48px;
-  height: 48px;
-  color: rgb(255 255 255 / .32);
+  width: 52px;
+  height: 52px;
+  color: rgb(255 255 255 / .75);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* With the zoom buttons, the controls bar reaches the bottom right corner on
+   mid-width screens, so lift the axes clear of it. */
+@media (max-width: 1280px) {
+  .orientation-axis {
+    bottom: 74px;
+  }
 }
 
 .orientation-axis::before,
@@ -451,7 +576,7 @@ button:disabled {
   left: 15px;
   width: 25px;
   height: 1px;
-  background: rgb(255 255 255 / .22);
+  background: rgb(255 255 255 / .4);
   content: '';
   transform-origin: left;
 }
@@ -470,9 +595,9 @@ button:disabled {
   background: rgb(255 255 255 / .42);
 }
 
-.axis-x { position: absolute; right: 0; bottom: 10px; color: rgb(239 125 105 / .65); }
-.axis-y { position: absolute; left: 12px; top: 0; color: rgb(110 231 183 / .65); }
-.axis-z { position: absolute; left: 1px; bottom: 0; color: rgb(118 191 240 / .65); }
+.axis-x { position: absolute; right: 0; bottom: 9px; color: rgb(252 165 150); }
+.axis-y { position: absolute; left: 12px; top: -2px; color: rgb(134 239 190); }
+.axis-z { position: absolute; left: 0; bottom: -2px; color: rgb(147 205 245); }
 
 .training-hotspot {
   position: absolute;
@@ -507,9 +632,9 @@ button:disabled {
   gap: 14px;
   border-top: 1px solid rgb(255 255 255 / .065);
   background: rgb(6 20 16 / .96);
-  padding: 7px 15px;
-  color: rgb(255 255 255 / .64);
-  font-size: 11px;
+  padding: 8px 15px;
+  color: rgb(255 255 255 / .8);
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -527,22 +652,22 @@ button:disabled {
 }
 
 .inspector-tabs button {
-  height: 28px;
+  height: 32px;
   border-radius: 7px;
-  color: rgb(255 255 255 / .3);
-  font-size: 9px;
-  text-transform: capitalize;
+  color: rgb(255 255 255 / .68);
+  font-size: 12px;
   transition: background .16s ease, color .16s ease;
 }
 
 .inspector-tabs button:hover {
-  background: rgb(255 255 255 / .035);
-  color: rgb(255 255 255 / .55);
+  background: rgb(255 255 255 / .05);
+  color: rgb(255 255 255 / .92);
 }
 
 .inspector-tabs .inspector-tab-active {
-  background: rgb(255 255 255 / .07);
-  color: rgb(255 255 255 / .74);
+  background: rgb(255 255 255 / .09);
+  color: rgb(255 255 255 / .96);
+  box-shadow: inset 0 -2px 0 rgb(134 239 190 / .7);
 }
 
 .inspector-content {
@@ -555,27 +680,31 @@ button:disabled {
 
 .definition-list > div {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid rgb(255 255 255 / .05);
+  border-bottom: 1px solid rgb(255 255 255 / .06);
   padding: 9px 0;
-  font-size: 10px;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .definition-list dt {
-  color: rgb(255 255 255 / .29);
+  flex: 0 0 auto;
+  max-width: 48%;
+  color: rgb(255 255 255 / .64);
 }
 
 .definition-list dd {
   margin: 0;
-  color: rgb(255 255 255 / .55);
+  min-width: 0;
+  color: rgb(255 255 255 / .88);
   text-align: right;
 }
 
 .control-label {
-  color: rgb(255 255 255 / .38);
-  font-size: 10px;
+  color: rgb(255 255 255 / .72);
+  font-size: 12px;
 }
 
 .segmented-control {
@@ -589,35 +718,34 @@ button:disabled {
 }
 
 .segmented-control button {
-  height: 30px;
+  height: 32px;
   border-radius: 6px;
-  color: rgb(255 255 255 / .33);
-  font-size: 10px;
+  color: rgb(255 255 255 / .7);
+  font-size: 12px;
 }
 
 .segmented-control button[aria-pressed='true'] {
-  background: rgb(255 255 255 / .07);
-  color: rgb(255 255 255 / .7);
+  background: rgb(255 255 255 / .09);
+  color: rgb(255 255 255 / .95);
 }
 
 .choice-chip {
-  min-height: 28px;
-  border: 1px solid rgb(255 255 255 / .07);
+  min-height: 32px;
+  border: 1px solid rgb(255 255 255 / .09);
   border-radius: 7px;
   background: rgb(255 255 255 / .018);
-  padding: 4px 6px;
-  color: rgb(255 255 255 / .32);
-  font-size: 9px;
-  text-transform: capitalize;
+  padding: 4px 8px;
+  color: rgb(255 255 255 / .72);
+  font-size: 12px;
   transition: background .16s ease, border-color .16s ease, color .16s ease;
 }
 
 .choice-chip:hover,
 .choice-chip-active,
 .choice-chip[aria-pressed='true'] {
-  border-color: rgb(138 235 195 / .14);
-  background: rgb(108 219 174 / .07);
-  color: rgb(205 255 233 / .62);
+  border-color: rgb(138 235 195 / .28);
+  background: rgb(108 219 174 / .12);
+  color: rgb(225 255 241);
 }
 
 .import-workspace {
@@ -661,33 +789,37 @@ button:disabled {
   min-height: 40px;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgb(255 255 255 / .07);
+  border: 1px solid rgb(255 255 255 / .1);
   border-radius: 9px;
-  background: rgb(255 255 255 / .018);
+  background: rgb(255 255 255 / .02);
   padding: 8px 10px;
-  color: rgb(255 255 255 / .48);
-  font-size: 10px;
-  line-height: 1.4;
+  color: rgb(255 255 255 / .8);
+  font-size: 12px;
+  line-height: 1.45;
   text-align: left;
   transition: background .16s ease, border-color .16s ease, color .16s ease;
 }
 
-.answer-option:hover:not(:disabled) {
-  border-color: rgb(125 211 252 / .16);
-  background: rgb(125 211 252 / .04);
-  color: rgb(255 255 255 / .68);
+.answer-option:hover:not([aria-disabled='true']) {
+  border-color: rgb(125 211 252 / .3);
+  background: rgb(125 211 252 / .06);
+  color: rgb(255 255 255 / .95);
+}
+
+.answer-option[aria-disabled='true'] {
+  cursor: default;
 }
 
 .answer-correct {
-  border-color: rgb(110 231 183 / .18);
-  background: rgb(110 231 183 / .055);
-  color: rgb(209 255 237 / .72);
+  border-color: rgb(110 231 183 / .35);
+  background: rgb(110 231 183 / .08);
+  color: rgb(209 255 237);
 }
 
 .answer-wrong {
-  border-color: rgb(251 191 36 / .16);
-  background: rgb(251 191 36 / .045);
-  color: rgb(254 240 191 / .62);
+  border-color: rgb(251 191 36 / .32);
+  background: rgb(251 191 36 / .06);
+  color: rgb(254 240 191);
 }
 
 .dialog-backdrop {
@@ -789,6 +921,15 @@ button:disabled {
   .import-workspace {
     min-height: 660px;
   }
+
+  /* The lesson panel sits below the viewer from here down. */
+  .viewer-jump {
+    display: inline-flex;
+  }
+
+  .viewer-statusbar {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 760px) {
@@ -809,53 +950,75 @@ button:disabled {
   .safety-ribbon {
     min-height: 32px;
     gap: 6px;
-    font-size: 11px;
-    letter-spacing: .09em;
+    font-size: 12px;
   }
 
+  /* The Info chip in the header opens the same details. */
   .safety-ribbon button {
     display: none;
   }
 
+  /* One column: the viewer first, then the side panels, so the scores, layers
+     and lesson questions are all reachable by scrolling. The canvas is kept
+     short enough that there's always page to scroll on around it. */
   .workspace-grid {
-    display: block;
-    min-height: calc(100dvh - 132px);
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
   }
 
-  .left-sidebar {
-    display: none;
+  .model-workspace,
+  .import-workspace {
+    order: 1;
+    min-height: 0;
+    height: auto;
+  }
+
+  .model-workspace .volume-grid {
+    flex: none;
+    height: min(62dvh, 500px);
+    min-height: 340px;
   }
 
   .right-sidebar {
+    order: 2;
     border-top: 1px solid rgb(255 255 255 / .065);
   }
 
-  .model-workspace {
-    min-height: 630px;
-    height: calc(100dvh - 132px);
+  .left-sidebar {
+    display: block;
+    order: 3;
+    border-top: 1px solid rgb(255 255 255 / .065);
+    border-right: 0;
   }
 
-  .import-workspace {
-    min-height: 0;
+  .viewer-chips {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .viewer-toolbar {
-    top: 58px;
+    top: 52px;
+    right: 50%;
+    transform: translateX(50%);
   }
 
   .viewer-controls {
-    bottom: 13px;
+    bottom: 12px;
     flex-wrap: wrap;
     justify-content: center;
   }
 
   .orientation-axis {
-    display: none;
+    right: 14px;
+    bottom: 74px;
   }
 
   .training-hotspot {
-    top: 39%;
-    right: 14px;
+    top: auto;
+    bottom: 74px;
+    left: 14px;
+    right: auto;
   }
 }
 
@@ -881,7 +1044,13 @@ button:disabled {
   }
 
   .case-switcher {
-    max-width: 72px;
+    max-width: 128px;
+    overflow: hidden;
+  }
+
+  /* Keep the data chip; the model chip's details are in the About tab. */
+  .viewer-chips > :first-child {
+    display: none;
   }
 
   .viewer-toolbar {
@@ -894,8 +1063,13 @@ button:disabled {
     width: calc(100% - 20px);
   }
 
-  .viewer-controls > :nth-last-child(-n+3) {
-    display: none;
+  .viewer-margin {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .orientation-axis {
+    bottom: 104px;
   }
 
   .training-hotspot {
@@ -908,6 +1082,51 @@ button:disabled {
 
   .disclaimer-dialog {
     padding: 18px;
+  }
+}
+
+/* Touch screens: bigger targets for the viewer's controls. */
+@media (pointer: coarse) {
+  .range-control {
+    height: 36px;
+  }
+
+  .range-control::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+    margin-top: -8.5px;
+  }
+
+  .range-control::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  .view-button,
+  .case-switcher-group button {
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .icon-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .research-chip,
+  .case-switcher {
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .inspector-tabs button,
+  .choice-chip,
+  .segmented-control button {
+    min-height: 40px;
+  }
+
+  .answer-option {
+    min-height: 44px;
   }
 }
 
@@ -1140,11 +1359,10 @@ button:disabled {
   padding: .5rem 1.5rem;
   background: var(--ink);
   color: #fff;
-  font-size: .6875rem;
-  font-weight: 700;
-  letter-spacing: .18em;
+  font-size: .8125rem;
+  font-weight: 600;
+  letter-spacing: .01em;
   text-align: center;
-  text-transform: uppercase;
 }
 
 .site-header {
@@ -1261,20 +1479,18 @@ button:disabled {
 /* Section rhythm */
 
 .hero-section,
-.intro-section,
-.outcomes-section,
-.steps-section,
+.kidneys-section,
 .demo-section,
-.learning-section,
 .benchmark-section,
+.next-section,
 .safety-section,
 .closing-section {
   padding-block: 3.5rem;
 }
 
-.intro-section,
-.steps-section,
-.benchmark-section {
+.kidneys-section,
+.benchmark-section,
+.safety-section {
   background: var(--paper-alt);
   border-block: 1px solid var(--rule);
 }
@@ -1345,151 +1561,7 @@ button:disabled {
   height: auto;
 }
 
-/* Intro */
-
-.intro-grid {
-  display: grid;
-  gap: 2rem;
-}
-
-.intro-copy {
-  display: grid;
-  gap: 1rem;
-  font-size: 1.0625rem;
-  color: var(--ink-soft);
-}
-
-.intro-copy .text-link {
-  margin-top: .25rem;
-}
-
-/* Outcomes */
-
-.outcome-grid {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.outcome-card {
-  padding: 1.75rem;
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  background: var(--paper);
-}
-
-.outcome-card-top {
-  display: flex;
-  align-items: center;
-  gap: .875rem;
-  margin-bottom: 1.25rem;
-}
-
-.outcome-card-top span {
-  font-size: .75rem;
-  font-weight: 700;
-  letter-spacing: .28em;
-  color: var(--ink-muted);
-}
-
-.outcome-card-top svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  padding: .5rem;
-  box-sizing: content-box;
-  border-radius: 2px;
-  background: var(--accent-tint);
-  color: var(--accent-deep);
-  margin-left: auto;
-}
-
-.outcome-card h3 {
-  margin-bottom: .5rem;
-}
-
-.outcome-card p {
-  color: var(--ink-soft);
-}
-
-/* Steps */
-
-.steps-intro {
-  max-width: 44rem;
-  margin-bottom: 3rem;
-}
-
-.steps-intro h2 {
-  margin-bottom: 1rem;
-}
-
-.steps-intro p:last-child {
-  font-size: 1.125rem;
-  color: var(--ink-soft);
-}
-
-.steps-list {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--rule);
-}
-
-.steps-list li {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  align-items: start;
-  gap: 1rem;
-  padding-block: 1.5rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.step-number {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--ink-muted);
-  padding-top: .375rem;
-}
-
-.step-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 2px;
-  background: var(--accent-tint);
-  color: var(--accent-deep);
-}
-
-.step-icon svg {
-  width: 1.125rem;
-  height: 1.125rem;
-}
-
-.steps-list h3 {
-  margin-bottom: .375rem;
-}
-
-.steps-list p {
-  color: var(--ink-soft);
-}
-
-.steps-action {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.steps-action p {
-  font-size: .875rem;
-  color: var(--ink-muted);
-}
-
-/* 3D demo */
+/* 3D demo (the teaching kidney preview) */
 
 .section-heading-light {
   text-align: left;
@@ -1504,6 +1576,7 @@ button:disabled {
 
 .demo-canvas {
   position: relative;
+  display: grid;
   min-height: 24rem;
   border-radius: 4px;
   overflow: hidden;
@@ -1623,87 +1696,6 @@ button:disabled {
   color: var(--ink-muted);
 }
 
-.demo-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  width: 100%;
-  margin-top: .5rem;
-  padding: .75rem 1rem;
-  border: 1px solid var(--rule-strong);
-  border-radius: 2px;
-  background: var(--paper);
-  font-size: .9375rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color .15s ease-in-out;
-}
-
-.demo-secondary:hover {
-  border-color: var(--ink);
-}
-
-.demo-secondary svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.demo-note {
-  margin-top: 1rem;
-  font-size: .8125rem;
-  color: var(--ink-muted);
-}
-
-/* Guided learning */
-
-.learning-grid {
-  display: grid;
-  gap: 2.5rem;
-  align-items: start;
-}
-
-.learning-copy h2 {
-  margin-bottom: 1rem;
-}
-
-.learning-copy p {
-  margin-bottom: 1.5rem;
-  font-size: 1.0625rem;
-  color: var(--ink-soft);
-}
-
-.learning-ladder {
-  display: grid;
-  gap: 0;
-  border-top: 1px solid var(--rule);
-}
-
-.learning-ladder article {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  padding-block: 1.25rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.learning-ladder span {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--accent-deep);
-}
-
-.learning-ladder h3 {
-  font-size: 1.125rem;
-  margin-bottom: .25rem;
-}
-
-.learning-ladder p {
-  color: var(--ink-soft);
-  font-size: .9375rem;
-}
-
 /* Research benchmark */
 
 .benchmark-heading-grid {
@@ -1780,6 +1772,15 @@ button:disabled {
   background: var(--paper);
 }
 
+/* .site-page resets h3 and p margins, and that beats Tailwind's mt-* utilities. */
+.site-page .benchmark-method-card h3 {
+  margin-bottom: .75rem;
+}
+
+.site-page .benchmark-method-card p + p {
+  margin-top: .75rem;
+}
+
 .benchmark-result-heading {
   display: flex;
   align-items: baseline;
@@ -1802,6 +1803,10 @@ button:disabled {
 .benchmark-metric-key {
   font-size: .8125rem;
   color: var(--ink-muted);
+}
+
+.site-page .benchmark-metric-key {
+  margin-bottom: 2rem;
 }
 
 .benchmark-metric-value {
@@ -1854,8 +1859,17 @@ button:disabled {
 }
 
 .benchmark-source-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
   color: var(--accent-deep);
   font-weight: 600;
+}
+
+.benchmark-source-links a svg {
+  width: .875rem;
+  height: .875rem;
+  flex: 0 0 auto;
 }
 
 .benchmark-footnote {
@@ -1937,32 +1951,6 @@ button:disabled {
   margin-top: .5rem;
   border-radius: 50%;
   background: var(--rule-strong);
-}
-
-.file-flow-note {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  padding: 1.5rem;
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  background: var(--paper-alt);
-}
-
-.file-flow-note > svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--ink-muted);
-}
-
-.file-flow-note h3 {
-  font-size: 1.0625rem;
-  margin-bottom: .5rem;
-}
-
-.file-flow-note p {
-  font-size: .9375rem;
-  color: var(--ink-soft);
 }
 
 /* Closing */
@@ -2062,7 +2050,8 @@ button:disabled {
 
 /* Responsive */
 
-@media (width < 60rem) {
+/* Six nav links plus the button need about 60rem, so the menu button takes over below 68rem. */
+@media (width < 68rem) {
   .site-menu-button {
     display: inline-flex;
   }
@@ -2115,12 +2104,10 @@ button:disabled {
   }
 
   .hero-section,
-  .intro-section,
-  .outcomes-section,
-  .steps-section,
+  .kidneys-section,
   .demo-section,
-  .learning-section,
   .benchmark-section,
+  .next-section,
   .safety-section,
   .closing-section {
     padding-block: 5rem;
@@ -2130,7 +2117,6 @@ button:disabled {
     padding-top: 4rem;
   }
 
-  .outcome-grid,
   .safety-grid,
   .benchmark-results-grid,
   .benchmark-method-grid,
@@ -2153,19 +2139,9 @@ button:disabled {
     gap: 4rem;
   }
 
-  .intro-grid,
-  .learning-grid,
   .benchmark-heading-grid {
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
-  }
-
-  .outcome-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .steps-list li {
-    gap: 1.5rem;
   }
 
   .demo-stage {
@@ -2258,6 +2234,8 @@ button:disabled {
 }
 
 .pipeline-table-wrap {
+  /* Keeps the sr-only text in the table inside the scroller. */
+  position: relative;
   overflow-x: auto;
   margin-bottom: 1rem;
   border: 1px solid var(--rule);
@@ -2303,6 +2281,12 @@ button:disabled {
   background: var(--accent-tint);
   color: var(--ink);
   font-weight: 600;
+}
+
+/* Let the long rule names wrap, so all five columns fit at desktop width. */
+.pipeline-table-rules tbody th[scope='row'] {
+  min-width: 14rem;
+  white-space: normal;
 }
 
 .benchmark-status-copy {
@@ -2482,24 +2466,6 @@ button:disabled {
   }
 }
 
-/* Case switcher in the workspace top bar. */
-
-.case-switcher select {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  padding-right: 1rem;
-  max-width: 15rem;
-  text-overflow: ellipsis;
-}
-
-.case-switcher select option {
-  background: #0d1b16;
-  color: #e8f3ee;
-}
 
 .sr-only {
   position: absolute;
@@ -2511,4 +2477,532 @@ button:disabled {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* Overview sections, September 2026 */
+
+/* The overview is a light page over the viewer's dark base, so match the page
+   background, scrollbars and anchor offset while it is showing. */
+html:has(.site-page) {
+  scroll-padding-top: 5rem;
+  color-scheme: light;
+  background: #fff;
+}
+
+body:has(.site-page) {
+  background: #fff;
+}
+
+html:has(.site-page)::-webkit-scrollbar-thumb,
+html:has(.site-page) ::-webkit-scrollbar-thumb {
+  background: rgb(0 0 0 / .22);
+  background-clip: padding-box;
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+.site-page [tabindex]:focus-visible,
+.site-page summary:focus-visible {
+  outline: 2px solid var(--accent-deep);
+  outline-offset: 2px;
+}
+
+.route-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #06130f;
+  color: rgb(255 255 255 / .72);
+  font-size: .875rem;
+}
+
+/* Hero */
+
+.site-page .hero-footnote {
+  margin-top: 1rem;
+}
+
+.hero-footnote a {
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+
+.hero-caption {
+  padding: .5rem .875rem;
+  background: var(--paper-deep);
+  color: #d4d4d8;
+  font-size: .75rem;
+  line-height: 1.4;
+}
+
+/* Five real kidneys */
+
+.kidney-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kidney-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper);
+}
+
+.site-page .kidney-card h3 {
+  font-size: 1.125rem;
+}
+
+.kidney-facts {
+  display: grid;
+  gap: .5rem;
+  margin: 0;
+}
+
+.kidney-facts div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .125rem .75rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: .875rem;
+}
+
+.kidney-facts dt {
+  color: var(--ink-muted);
+}
+
+.kidney-facts dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.kidney-open {
+  width: 100%;
+  margin-top: auto;
+  padding: .625rem 1rem;
+  font-size: .9375rem;
+  text-align: center;
+}
+
+.site-page .kidneys-note {
+  max-width: 44rem;
+  margin-top: 1.5rem;
+  font-size: .9375rem;
+  color: var(--ink-soft);
+}
+
+/* Teaching kidney and the lesson */
+
+.demo-hint-touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .demo-hint-mouse {
+    display: none;
+  }
+
+  .demo-hint-touch {
+    display: inline;
+  }
+}
+
+.teaching-lesson {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.teaching-lesson-copy h3 {
+  margin-bottom: .75rem;
+}
+
+.site-page .teaching-lesson-intro {
+  margin-bottom: 1.5rem;
+  font-size: 1.0625rem;
+  color: var(--ink-soft);
+}
+
+.site-page .file-flow-link {
+  display: grid;
+  gap: .25rem;
+  margin-top: 1.5rem;
+  font-size: .9375rem;
+  color: var(--ink-soft);
+}
+
+.file-flow-link .text-link {
+  justify-self: start;
+  font-size: .9375rem;
+}
+
+.lesson-steps {
+  display: grid;
+  gap: .875rem;
+  margin: 0;
+  padding-left: 1.75rem;
+  color: var(--ink-soft);
+}
+
+.lesson-steps li {
+  padding-left: .25rem;
+}
+
+.lesson-steps li::marker {
+  color: var(--accent-deep);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.lesson-steps strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Next step */
+
+.next-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+.site-page .next-intro {
+  margin-bottom: 0;
+}
+
+.next-needs {
+  padding: 1.5rem;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  background: var(--paper-alt);
+}
+
+.next-needs h3 {
+  margin-bottom: 1rem;
+}
+
+.next-needs ol {
+  display: grid;
+  gap: .75rem;
+  margin: 0 0 1.5rem;
+  padding-left: 1.5rem;
+  color: var(--ink-soft);
+}
+
+.next-needs li::marker {
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+
+.next-needs strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Limits: the card headings are real h3s now, so keep them at card size. */
+
+.site-page h3.safety-card-heading {
+  margin-bottom: 1.25rem;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+/* Closing and footer */
+
+.site-page .closing-copy {
+  margin-top: .75rem;
+  font-size: 1.0625rem;
+  color: var(--ink-soft);
+}
+
+/* Underlined, because Tailwind's reset takes link underlines off and colour
+   alone doesn't mark a link inside a sentence. */
+.site-page .closing-copy a {
+  color: var(--accent-deep);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-byline a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .5rem 1.5rem;
+}
+
+/* Opt-in helpers for the pipeline and benchmark tables: a swipe hint for
+   phones and a first column that stays put while the table scrolls. */
+
+.table-hint {
+  display: none;
+  margin-bottom: .5rem;
+  font-size: .8125rem;
+  color: var(--ink-muted);
+}
+
+.pipeline-table-sticky tbody th[scope='row'],
+.pipeline-table-sticky thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--paper);
+  box-shadow: 1px 0 0 var(--rule);
+}
+
+.pipeline-table-sticky thead th:first-child {
+  background: var(--paper-alt);
+}
+
+.pipeline-table-sticky .pipeline-table-best th[scope='row'] {
+  background: var(--accent-tint);
+}
+
+@media (width < 48rem) {
+  .site-page .table-hint {
+    display: block;
+    margin-bottom: .5rem;
+  }
+
+  .pipeline-table th,
+  .pipeline-table td {
+    padding: .625rem .75rem;
+  }
+}
+
+@media (width >= 40rem) {
+  .kidney-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 60rem) {
+  .teaching-lesson {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 4rem;
+  }
+
+  .next-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 4rem;
+  }
+}
+
+@media (width >= 72rem) {
+  .kidney-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .kidney-open {
+    padding-inline: .75rem;
+    font-size: .875rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The builder ("Make a 3D kidney"): viewer controls, dark mint theme.
+   --------------------------------------------------------------------------- */
+
+.build-controls {
+  display: grid;
+  min-width: 0;
+}
+
+.build-file-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  color: rgb(255 255 255 / .88);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.build-file-hint {
+  flex-basis: 100%;
+  color: rgb(255 255 255 / .62);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.build-file-input {
+  width: 100%;
+  min-width: 0;
+  margin-top: 8px;
+  border: 1px dashed rgb(255 255 255 / .16);
+  border-radius: 10px;
+  background: rgb(255 255 255 / .02);
+  padding: 8px;
+  color: rgb(255 255 255 / .72);
+  font-size: 12px;
+}
+
+.build-file-input:hover:not(:disabled) {
+  border-color: rgb(126 229 187 / .32);
+  background: rgb(102 220 173 / .04);
+}
+
+.build-file-input::file-selector-button {
+  margin-right: 10px;
+  border: 1px solid rgb(255 255 255 / .12);
+  border-radius: 7px;
+  background: rgb(255 255 255 / .07);
+  padding: 6px 10px;
+  color: rgb(255 255 255 / .88);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.build-file-input:disabled {
+  opacity: .55;
+}
+
+.build-controls-compact .build-file-label {
+  font-size: 12px;
+}
+
+.build-progress {
+  margin-top: 14px;
+}
+
+.build-progress-bar {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgb(255 255 255 / .08);
+}
+
+.build-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: rgb(110 231 183 / .8);
+  transition: width .25s ease;
+}
+
+.build-steps {
+  display: grid;
+  gap: 14px;
+}
+
+.build-steps li {
+  display: flex;
+  gap: 12px;
+}
+
+.build-step-number {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgb(126 229 187 / .22);
+  border-radius: 50%;
+  background: rgb(110 231 183 / .08);
+  color: rgb(187 247 222);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.build-rule {
+  border-bottom: 1px solid rgb(255 255 255 / .06);
+  padding: 9px 0;
+}
+
+.build-rule:last-child {
+  border-bottom: 0;
+}
+
+/* The builder on the overview page, light theme. */
+
+.build-overview {
+  display: grid;
+  gap: 2rem;
+}
+
+.site-page .build-overview-actions {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  color: var(--ink-soft);
+  font-size: .9375rem;
+}
+
+.site-page .build-overview-actions a {
+  color: var(--accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (width >= 60rem) {
+  .build-overview {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 4rem;
+  }
+}
+
+/* Three modes have to fit a phone's header. */
+@media (max-width: 520px) {
+  .mode-nav button {
+    gap: 5px;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mode-nav button svg {
+    display: none;
+  }
+}
+
+/* The numbered steps need their numbers; Tailwind's reset removes them. */
+.lesson-steps {
+  list-style: decimal;
+}
+
+/* Seven links and the button have to fit on one line before the menu takes over. */
+.site-nav a,
+.site-nav-cta {
+  white-space: nowrap;
+}
+
+@media (width >= 68rem) and (width < 84rem) {
+  .site-nav {
+    gap: 1rem;
+  }
+
+  .site-nav a,
+  .site-nav-cta {
+    font-size: .875rem;
+  }
+
+  .site-nav-cta {
+    padding-inline: .875rem;
+  }
 }

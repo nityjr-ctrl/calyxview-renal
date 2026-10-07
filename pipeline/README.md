@@ -1,4 +1,4 @@
-# renalplan: CT-to-3D reconstruction and planning support for partial nephrectomy
+# renalplan: 3D models and computed nephrometry from kidney and tumour outlines
 
 > Research and teaching prototype. Not a medical device. Not for diagnosis,
 > treatment selection, surgical planning, margin selection or patient care.
@@ -18,7 +18,7 @@ de-identified DICOM export) plus a kidney / tumour / cyst label map, and produce
 - **evaluation**: Dice, surface Dice, HD95 and volume error against reference
   labels, per case and with bootstrap confidence intervals, using the KiTS23
   hierarchical regions and tolerances;
-- **optimisation**: a grid search over explainable post-processing rules for
+- **optimisation**: a grid search over simple post-processing rules for
   model output, and a sweep over mesh smoothing / decimation scored against the
   source mask.
 
@@ -33,8 +33,14 @@ cd pipeline
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install -e .            # gives you the `renalplan` command
-pytest                      # 7 tests on a synthetic phantom with known geometry
+pytest                      # 35 tests: a synthetic phantom with known geometry, the score cut-offs and rules, the DICOM tripwire
 ```
+
+`pip install -e .` points the `renalplan` command at this folder. If an older
+copy was installed from somewhere else, the command runs that copy instead.
+Check with `python -c "import renalplan; print(renalplan.__file__, renalplan.__version__)"`.
+The tests always import the copy next to them (`pythonpath` in `pyproject.toml`),
+and `python -m renalplan.cli ...` run from this folder does too.
 
 ## Commands
 
@@ -43,8 +49,9 @@ pytest                      # 7 tests on a synthetic phantom with known geometry
 renalplan case --labels case_00000/segmentation.nii.gz --out out --case-id case_00000
 # with the CT: adds hilar vessels (threshold) and the body outline, and scores against a reference
 renalplan case --labels pred.nii.gz --ct imaging.nii.gz --reference segmentation.nii.gz --vessels --out out
-# from a de-identified DICOM folder (refuses identified data)
-renalplan case --labels pred.nii.gz --dicom /path/to/export --series "NEPHRO" --out out
+# from a de-identified DICOM folder. --case-id is required here: use the study code, not a folder name.
+# The loader stops on some identifying header fields (a tripwire, not a de-identification check).
+renalplan case --labels pred.nii.gz --dicom /path/to/export --series "NEPHRO" --case-id STUDY-001 --out out
 
 # every KiTS case under a folder -> out/nephrometry.csv + one bundle per case
 renalplan batch --kits ~/CalyxView-data/kits --out out/kits
@@ -63,6 +70,11 @@ renalplan perturb --kits ~/CalyxView-data/kits --out sim/ --tumour-erode
 renalplan phantom --out phantom/
 ```
 
+Without `--case-id`, `case` names the case after the label file's folder (the
+KiTS layout, `case_00000/segmentation.nii.gz`) or, for a bare file such as
+`pred.nii.gz`, after the file. A folder name can carry a hospital or patient
+name, so pass `--case-id` for anything outside KiTS.
+
 Every case bundle contains `planning.json` (machine-readable), `report.md`
 (human-readable), `manifest_entry.json` (drop-in for the CalyxView viewer
 manifest, with the GLB copied to `web/public/models/`), and `overview.png`
@@ -72,17 +84,30 @@ manifest, with the GLB copied to `web/public/models/`), and `overview.png`
 
 | Quantity | Method | Stated assumption |
 | --- | --- | --- |
-| R (size) | Longest chord of the tumour's convex hull, mm | none |
-| E (exophytic) | Fraction of tumour voxels outside the convex hull of the parenchyma | hull stands in for the renal outline |
+| R (size) | Largest distance between tumour surface-voxel centres, mm | measured centre to centre, so it can read up to about one voxel short |
+| E (exophytic) | Fraction of tumour voxels outside the convex hull of the parenchyma | hull stands in for the renal outline; 5% or less outside is scored as entirely endophytic (E 3) |
 | N (nearness) | Distance from tumour surface to the collecting system if an excretory-phase mask is supplied, else to the sinus region | sinus = hull-enclosed space that is not parenchyma or tumour |
 | A (anterior/posterior) | Sign of the tumour centroid along the patient anterior axis relative to the kidney centroid, orthogonal to the kidney long axis; within 5 mm is "x" | none |
-| L (polar) | Tumour extent along the kidney long axis (PCA) against the polar lines at the sinus extent | polar lines at the 5th/95th percentile of the sinus along the long axis |
-| h (hilar) | Tumour within 2 mm of the vessel mask | only when a vessel mask exists |
-| PADUA rim | Sign of the tumour centroid along the centroid-to-sinus axis | as above |
+| L (polar) | Tumour extent (2nd to 98th percentile of its voxels) along the kidney long axis (PCA) against two polar lines. 3 if it lies entirely between them, crosses the axial midline (half-way between them) or has more than half its voxels between them; 1 if it lies entirely above or below them; 2 otherwise | lines at the 5th/95th percentiles of the sinus estimate along the long axis. An estimate that spans less than 20 mm or doesn't straddle the kidney's centroid isn't used: the lines then go where 30% of the kidney's volume lies beyond each (the 30th/70th percentiles of kidney voxels along the axis, roughly a third and two thirds of the way along, not 30% and 70% of the length), and the notes say so. Both scores set their lines on axial CT slices and define them differently; here one pair of planes across the kidney's own long axis serves both, so L is approximate for every case |
+| h (hilar) | Tumour within 2 mm of the vessel mask | only when a vessel mask exists. R.E.N.A.L. gives h only when the tumour touches the main renal artery or vein. The vessel mask (below) takes in branches and anything else that bright near the kidney, so this can call h too often |
+| PADUA polar location | Share of tumour voxels between the same two lines: more than half is middle (2); half or less is superior or inferior (1), after the end holding more of the tumour | the more-than-half rule is the one Wood et al. used to automate PADUA (BJU Int 2024), with lines at the axial extent of sinus fat on CT. Ficarra et al.'s own wording for a tumour that crosses a line (Eur Urol 2009) wasn't checked. Approximate for the same reasons as L |
+| PADUA rim | Sign of the tumour centroid along the centroid-to-sinus axis | uses the sinus estimate, even when it was too small to set the polar lines |
+| Sinus check | Sinus estimate more than 25% of the kidney's volume, or spanning more than half its length | no renal sinus is that big, so the kidney isn't the usual shape (a horseshoe kidney does this). The notes flag L, N and PADUA's polar, rim and sinus items as unreliable. Scores aren't changed |
 | Volumes | Voxel counts times voxel volume; mesh volumes reported separately | tumour overwrites parenchyma where labels overlap |
 | Margin | Euclidean distance transform of the tumour, thresholded at the margin | uniform margin, not a surgical plan |
 | Contact surface | Voxel faces shared between tumour and parenchyma | none |
 | Vessels | HU threshold within 30 mm of the kidney, outside the parenchyma, components >= 0.2 ml | one enhanced phase; artery/vein split needs an arterial phase |
+
+R, E and N are rounded to the precision they're stored at (0.01 cm, 0.001 and
+0.1 mm) before they're scored, so R.E.N.A.L., PADUA and the report agree at
+every cut-off. Every `planning.json` and `report.md` lists the assumptions
+behind its case.
+
+Version 0.2.0 (29 September 2026) changed the location rules: the polar-line
+fallback for a small or off-centre sinus estimate, the more-than-half rule for
+the PADUA pole, the axial midline half-way between the lines, the sinus check,
+R 3 at exactly 7.0 cm, and scoring from the rounded values. `results/README.md`
+lists what that did to each case.
 
 ## Segmentation backends
 
@@ -108,9 +133,9 @@ Everything in `docs/production-segmentation-roadmap.md` still applies: validated
 de-identification, protocol QC, a trained and independently validated
 multi-structure model (arteries, veins, collecting system), expert correction,
 human-factors and clinical validation, quality management and regulatory
-authorisation. The nephrometry here has not been compared with surgeon-assigned
-scores; that comparison is the first study to run once PACS access exists (see
-`docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md`).
+authorisation. The nephrometry here hasn't been compared with clinicians' scores.
+That comparison is the first study to run once the trust has agreed an export
+(see `docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md`).
 
 ## Data and licences
 

@@ -13,45 +13,49 @@ export type {
 
 export const benchmarkResults = parsePublicBenchmarkSummary(publicSummary);
 
-export function formatBenchmarkPercent(value: number | null): string {
-  return value === null ? '—' : `${(value * 100).toFixed(1)}%`;
+// Visible placeholders avoid dashes; they only show if a value is missing.
+const NOT_YET = 'not yet';
+
+/** Dice and surface Dice on a 0 to 1 scale, 3 dp, the same as the pipeline section. */
+export function formatBenchmarkScore(value: number | null): string {
+  return value === null ? NOT_YET : value.toFixed(3);
 }
 
-export function formatConfidenceInterval(
+export function formatScoreConfidenceInterval(
   value: [number, number] | null,
 ): string {
   if (value === null) {
-    return 'Awaiting completed run';
+    return 'Waiting for the full run';
   }
 
-  return `95% CI ${(value[0] * 100).toFixed(1)}–${(value[1] * 100).toFixed(1)}%`;
+  return `95% CI ${value[0].toFixed(3)} to ${value[1].toFixed(3)}`;
 }
 
 export function formatBenchmarkMeasurement(
   value: number | null,
-  unit: 'mm' | 'mL',
+  unit: 'mm' | 'ml',
 ): string {
-  return value === null ? '—' : `${value.toFixed(1)} ${unit}`;
+  return value === null ? NOT_YET : `${value.toFixed(1)} ${unit}`;
 }
 
 export function formatMeasurementConfidenceInterval(
   value: [number, number] | null,
-  unit: 'mm' | 'mL',
+  unit: 'mm' | 'ml',
 ): string {
   if (value === null) {
-    return 'Awaiting completed run';
+    return 'Waiting for the full run';
   }
 
-  return `95% CI ${value[0].toFixed(1)}–${value[1].toFixed(1)} ${unit}`;
+  return `95% CI ${value[0].toFixed(1)} to ${value[1].toFixed(1)} ${unit}`;
 }
 
 export function formatRuntime(value: number | null): string {
   if (value === null) {
-    return '—';
+    return NOT_YET;
   }
 
   if (value < 60) {
-    return `${value.toFixed(1)} sec`;
+    return `${value.toFixed(1)} s`;
   }
 
   return `${(value / 60).toFixed(1)} min`;

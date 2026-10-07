@@ -99,12 +99,20 @@ def _json_default(o):
     return str(o)
 
 
+def _percent(fraction: float) -> str:
+    """Whole percent, or one decimal between 0 and 10%, so 0.025 reads 2.5%
+    rather than rounding to 2% here and 3% on the site. Rounded once first, so
+    0.0996 reads 10%, not 10.0%."""
+    value = round(100 * fraction, 1)
+    return f"{value:.1f}%" if 0 < value < 10 else f"{value:.0f}%"
+
+
 def write_report_md(path: Path, doc: dict) -> None:
     n = doc["nephrometry"]
     r, p = n["renal"], n["padua"]
     pl = doc["planning"]
     lines = [
-        f"# {doc['caseId']}: CT-to-3D partial nephrectomy planning summary",
+        f"# {doc['caseId']}: computed nephrometry and volumes",
         "",
         f"> {doc['disclaimer']}",
         "",
@@ -115,7 +123,7 @@ def write_report_md(path: Path, doc: dict) -> None:
         "| R.E.N.A.L. component | Value | Points |",
         "| --- | --- | --- |",
         f"| R: maximal diameter | {r['radius_cm']:.1f} cm | {r['radius_pts']} |",
-        f"| E: exophytic fraction | {100 * r['exophytic_fraction']:.0f}% outside the parenchymal outline | {r['exophytic_pts']} |",
+        f"| E: exophytic fraction | {_percent(r['exophytic_fraction'])} outside the parenchymal outline (5% or less counts as entirely endophytic) | {r['exophytic_pts']} |",
         f"| N: nearness to sinus / collecting system | {r['nearness_mm']:.1f} mm | {r['nearness_pts']} |",
         f"| A: anterior / posterior | {r['ap']} | - |",
         f"| L: polar location | {r['location_detail']} | {r['location_pts']} |",
@@ -124,7 +132,7 @@ def write_report_md(path: Path, doc: dict) -> None:
         "",
         "| PADUA component | Value | Points |",
         "| --- | --- | --- |",
-        f"| Polar location | {p['polar_location']} | {p['polar_pts']} |",
+        f"| Polar location | {p['polar_location']} ({'more than half' if p['polar_pts'] == 2 else 'half or less'} of the tumour between the polar lines) | {p['polar_pts']} |",
         f"| Exophytic rate | see above | {p['exophytic_pts']} |",
         f"| Renal rim | {p['rim']} | {p['rim_pts']} |",
         f"| Renal sinus involvement | {'yes' if p['sinus_involved'] else 'no'} | {p['sinus_pts']} |",

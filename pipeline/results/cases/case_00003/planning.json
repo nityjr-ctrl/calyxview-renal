@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "tool": "renalplan 0.1.0",
-  "generatedAtUtc": "2026-09-03T09:13:48.038759+00:00",
+  "tool": "renalplan 0.2.0",
+  "generatedAtUtc": "2026-09-29T21:06:54.670771+00:00",
   "disclaimer": "Research and teaching prototype. Not a medical device. Not for diagnosis, treatment selection, surgical planning, margin selection or patient care.",
   "caseId": "case_00003",
   "provenance": {
-    "labels": "/root/CalyxView-data/kits/case_00003/segmentation.nii.gz",
+    "labels": "segmentation.nii.gz",
     "ct": null,
     "postprocess": null,
     "mesh": {
@@ -21,7 +21,7 @@
       0.855,
       1.0
     ],
-    "runtimeSeconds": 23.6
+    "runtimeSeconds": 7.6
   },
   "nephrometry": {
     "renal": {
@@ -32,20 +32,22 @@
       "nearness_mm": 27.3,
       "nearness_pts": 1,
       "ap": "x",
-      "location_pts": 1,
-      "location_detail": "entirely above or below the polar lines",
+      "location_pts": 3,
+      "location_detail": "more than half between the polar lines",
       "hilar": false,
-      "total": 6,
-      "complexity": "low",
+      "total": 8,
+      "complexity": "moderate",
       "notes": [
         "Renal sinus approximated as the hull-enclosed space that is not parenchyma or tumour.",
+        "Polar lines here are planes across the kidney's own long axis, not axial CT slices, and one pair serves both R.E.N.A.L. L and PADUA's polar item, though the two systems define their lines differently. PADUA's polar item is middle (2) when more than half the tumour lies between the lines, the rule Wood et al. (BJU Int 2024) used to automate PADUA. So L and PADUA's polar item are approximations.",
+        "Sinus estimate too short or off-centre to set the polar lines; polar lines assumed where 30% of the kidney's volume lies beyond each (its 30th and 70th percentiles along the long axis), so L and PADUA's polar item are approximate. N and PADUA's rim and renal-sinus items still use that estimate, so they are approximate too, and N can read long.",
         "No vessel mask; hilar suffix not assessed."
       ]
     },
-    "renalLabel": "6x",
+    "renalLabel": "8x",
     "padua": {
-      "polar_location": "inferior",
-      "polar_pts": 1,
+      "polar_location": "middle",
+      "polar_pts": 2,
       "exophytic_pts": 3,
       "rim": "lateral",
       "rim_pts": 1,
@@ -54,11 +56,13 @@
       "collecting_involved": null,
       "collecting_pts": 1,
       "size_pts": 1,
-      "total": 8,
+      "total": 9,
       "complexity": "intermediate"
     },
     "assumptions": [
-      "Renal sinus approximated as the hull-enclosed space that is not parenchyma or tumour."
+      "Renal sinus approximated as the hull-enclosed space that is not parenchyma or tumour.",
+      "Polar lines here are planes across the kidney's own long axis, not axial CT slices, and one pair serves both R.E.N.A.L. L and PADUA's polar item, though the two systems define their lines differently. PADUA's polar item is middle (2) when more than half the tumour lies between the lines, the rule Wood et al. (BJU Int 2024) used to automate PADUA. So L and PADUA's polar item are approximations.",
+      "Sinus estimate too short or off-centre to set the polar lines; polar lines assumed where 30% of the kidney's volume lies beyond each (its 30th and 70th percentiles along the long axis), so L and PADUA's polar item are approximate. N and PADUA's rim and renal-sinus items still use that estimate, so they are approximate too, and N can read long."
     ]
   },
   "planning": {

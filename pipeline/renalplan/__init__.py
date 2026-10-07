@@ -1,4 +1,4 @@
-"""renalplan: CT-to-3D reconstruction and planning support for partial nephrectomy.
+"""renalplan: 3D models and computed nephrometry from kidney and tumour outlines.
 
 Research and teaching prototype. Not a medical device. Not for diagnosis,
 treatment selection, surgical planning, margin selection or patient care.
@@ -16,7 +16,7 @@ Modules
   cli          `renalplan` command line
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 DISCLAIMER = (
     "Research and teaching prototype. Not a medical device. Not for diagnosis, "

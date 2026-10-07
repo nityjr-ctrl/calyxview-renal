@@ -127,7 +127,9 @@ def run_case(labels: Volume, ct: Volume | None, out_dir: Path, case_id: str, *,
                 present.append(name)
         scene = scene_from(meshes, COLOURS)
         scene.export(str(out_dir / f"{case_id}.glb"))
-    provenance = {"labels": labels.meta.get("source", ""), "ct": (ct.meta.get("source") if ct else None),
+    # File names only. A full path can carry a hospital folder name, and these files leave the workstation.
+    provenance = {"labels": Path(labels.meta.get("source", "")).name,
+                  "ct": ((Path(ct.meta["source"]).name if ct.meta.get("source") else "DICOM series") if ct else None),
                   "postprocess": postprocess.as_dict() if postprocess else None,
                   "mesh": mesh_params.as_dict(), "spacingMm": [round(s, 3) for s in sp],
                   "runtimeSeconds": None}
@@ -149,13 +151,31 @@ def run_case(labels: Volume, ct: Volume | None, out_dir: Path, case_id: str, *,
 # ---------------------------------------------------------------------------
 # commands
 # ---------------------------------------------------------------------------
+def default_case_id(labels_path) -> str:
+    """Case id when --case-id isn't given: the label file's folder name, as in
+    the KiTS layout (case_00000/segmentation.nii.gz), or the file name without
+    .nii.gz for a bare file such as pred.nii.gz. Pass --case-id for anything
+    else, because a folder name can carry a hospital or patient name."""
+    p = Path(labels_path)
+    folder = p.parent.name
+    if folder and folder not in (".", ".."):
+        return folder
+    name = p.name
+    for suffix in (".nii.gz", ".nii"):
+        if name.endswith(suffix):
+            return name[: -len(suffix)]
+    return p.stem
+
+
 def cmd_case(a):
+    if a.dicom and not a.case_id:
+        raise SystemExit("--case-id is required with --dicom. Use the study code, not a folder name.")
     labels = load_nifti(a.labels, dtype=np.uint8)
     ct = load_ct(a)
     ref = load_nifti(a.reference, dtype=np.uint8) if a.reference else None
     cs = load_nifti(a.collecting, dtype=np.uint8) if a.collecting else None
     pp = PostprocessConfig(**json.loads(Path(a.postprocess).read_text())) if a.postprocess else (PostprocessConfig() if a.default_postprocess else None)
-    run_case(labels, ct, a.out, a.case_id or Path(a.labels).parent.name, margin_mm=a.margin, postprocess=pp,
+    run_case(labels, ct, a.out, a.case_id or default_case_id(a.labels), margin_mm=a.margin, postprocess=pp,
              reference=ref, collecting=cs, vessels_auto=a.vessels, render_ct=a.render_ct,
              label=a.label, source=a.source, write_glb=not a.no_glb)
 
@@ -218,7 +238,8 @@ def _pairs(pred_dir: Path, ref_dir: Path, cases: list[str] | None = None):
 
 def _eval_one(pred: Volume, ref: Volume, pp: PostprocessConfig | None):
     ref_c, (pred_c,) = crop_to(ref, [pred], margin_mm=40.0)
-    # union crop: extend to prediction extent too (false positives far away count)
+    # Cropped to the reference box plus 40 mm, so a false positive further out
+    # than that isn't scored.
     pl = pred_c.data.astype(np.uint8)
     if pp is not None:
         pl = postprocess_apply(pl, ref_c.spacing, pp)

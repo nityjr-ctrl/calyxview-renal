@@ -1,40 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#06130f" />
+    <meta name="theme-color" content="#1d1d20" />
+    <meta name="author" content="Nity G" />
     <meta
       name="description"
-      content="Explore synthetic kidney, tumour, vessel and collecting-system relationships in an interactive 3D renal anatomy research and training prototype."
+      content="A research prototype for partial nephrectomy planning: make a 3D kidney with R.E.N.A.L. and PADUA from your own kidney and tumour outline, in the browser, and look at five real KiTS23 kidneys and a teaching kidney. Research and teaching only."
     />
     <link rel="preload" as="image" href="/calyxview-renal-hero.webp" fetchpriority="high" />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/red-hat-display-latin-var.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-latin-var.woff2" crossorigin />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="noindex, nofollow" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://calyxview-renal.netlify.app/" />
-    <meta property="og:title" content="CalyxView Renal: synthetic 3D renal anatomy training" />
+    <meta property="og:title" content="CalyxView Renal: renal tumours in 3D, with computed nephrometry" />
     <meta
       property="og:description"
-      content="Explore a local-only file-flow simulation, interactive synthetic renal anatomy and guided training. Research and education only."
+      content="Load a kidney and tumour outline and get a 3D model with R.E.N.A.L. and PADUA, built in your browser with nothing uploaded. Plus five real KiTS23 kidneys and a teaching kidney. Research and teaching only, not for patient care."
     />
-    <meta property="og:image" content="https://calyxview-renal.netlify.app/og.png" />
-    <meta property="og:image:width" content="1731" />
-    <meta property="og:image:height" content="909" />
-    <meta property="og:image:alt" content="Illustrative translucent kidney with a small renal tumour and branching anatomy" />
+    <meta property="og:image" content="https://calyxview-renal.netlify.app/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:alt" content="AI-generated illustration of a translucent kidney model with a small tumour. Not a real print or a real patient." />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CalyxView Renal: synthetic 3D renal anatomy training" />
+    <meta name="twitter:title" content="CalyxView Renal: renal tumours in 3D, with computed nephrometry" />
     <meta
       name="twitter:description"
-      content="A synthetic, research-only renal planning and training experience."
+      content="Load a kidney and tumour outline and get a 3D model with R.E.N.A.L. and PADUA, built in your browser with nothing uploaded. Plus five real KiTS23 kidneys and a teaching kidney. Research and teaching only, not for patient care."
     />
-    <meta name="twitter:image" content="https://calyxview-renal.netlify.app/og.png" />
+    <meta name="twitter:image" content="https://calyxview-renal.netlify.app/og.jpg" />
+    <meta name="twitter:image:alt" content="AI-generated illustration of a translucent kidney model with a small tumour. Not a real print or a real patient." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>CalyxView Renal: interactive 3D renal anatomy training prototype</title>
+    <title>CalyxView Renal: partial nephrectomy planning research prototype</title>
   </head>
   <body>
-    <noscript>This interactive research prototype requires JavaScript.</noscript>
+    <noscript>This research prototype needs JavaScript to run.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

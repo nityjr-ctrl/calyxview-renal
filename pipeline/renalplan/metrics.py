@@ -2,8 +2,13 @@
 
 All metrics take boolean masks on the same grid with a physical spacing in mm.
 Implemented with SciPy distance transforms so there is no dependency beyond
-numpy/scipy; conventions follow the KiTS23 evaluation (Dice, surface Dice at
-a tolerance, robust Hausdorff at the 95th percentile).
+numpy/scipy. Regions and surface Dice tolerances follow KiTS23, but two
+conventions differ from the official evaluation and from
+research/kits23-feasibility: surface Dice counts surface voxels without area
+weighting, and HD95 is the 95th percentile of both directions' distances
+pooled, which can read lower than the larger of the two directed 95th
+percentiles. When exactly one mask is empty, HD95 is NaN and is left out of
+means (bootstrap_mean_ci and optimise-postprocess use NaN-aware means).
 """
 from __future__ import annotations
 
