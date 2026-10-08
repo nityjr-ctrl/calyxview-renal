@@ -280,9 +280,9 @@ function ProgressSteps({ state }: { state: BuilderState }) {
           return (
             <li key={item.stage} className="flex items-center gap-2 text-xs">
               {reached ? (
-                <Check className="size-3.5 text-emerald-200/85" />
+                <Check className="size-3.5 text-ok" />
               ) : active ? (
-                <LoaderCircle className="size-3.5 animate-spin text-emerald-200" />
+                <LoaderCircle className="size-3.5 animate-spin text-teal" />
               ) : (
                 <Circle className="size-3 text-white/30" />
               )}
@@ -336,7 +336,6 @@ export function BuildControls({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button
           id="try-sample"
-          className="bg-emerald-300 text-[#052117] hover:bg-emerald-200"
           onClick={() => builder.buildSample(marginMm)}
           disabled={running}
           focusableWhenDisabled
@@ -345,11 +344,7 @@ export function BuildControls({
           Try the sample
         </Button>
         {state.output && !running ? (
-          <Button
-            className="border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
-            variant="outline"
-            onClick={builder.clear}
-          >
+          <Button variant="outline" onClick={builder.clear}>
             <RotateCcw /> Clear
           </Button>
         ) : null}
@@ -373,7 +368,7 @@ export function BuildControls({
       )}
       {running || state.status === 'done' ? <ProgressSteps state={state} /> : null}
       {state.status === 'error' && state.error ? (
-        <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-rose-200/90" role="alert">
+        <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-warn" role="alert">
           <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
           {state.error}
         </p>
@@ -403,10 +398,10 @@ export function BuildIntro({
   return (
     <section className="import-workspace" aria-labelledby="build-title">
       <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-10">
-        <Badge className="border-emerald-200/10 bg-emerald-200/[.04] text-[11px] text-emerald-100/85" variant="outline">
+        <Badge className="text-[11px]" variant="outline">
           Runs in this tab. Nothing is uploaded.
         </Badge>
-        <h1 id="build-title" className="mt-4 max-w-xl text-2xl font-semibold tracking-[-.03em] text-white/92 sm:text-3xl">
+        <h1 id="build-title" className="mt-4 max-w-xl text-3xl font-medium leading-[1.05] tracking-[-.02em] text-white sm:text-4xl">
           Make a 3D kidney from an outline
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">
@@ -415,7 +410,7 @@ export function BuildIntro({
           Or try the sample, a synthetic kidney with a lower-pole tumour, to see it work without a file.
         </p>
 
-        <div className="mt-6 rounded-xl border border-white/9 bg-white/[.025] p-4 sm:p-5">
+        <div className="mt-6 rounded-md border border-line-soft bg-surface p-4 sm:p-5">
           <BuildControls builder={builder} marginMm={marginMm} setMarginMm={setMarginMm} />
         </div>
 
@@ -474,9 +469,9 @@ export function BuildIntro({
           <code className="font-mono text-white/80">segmentation.nii.gz</code> you can load here.
         </p>
 
-        <div className="mt-6 rounded-xl border border-amber-200/12 bg-amber-200/[.035] p-4">
+        <div className="mt-6 rounded-md border border-warn/40 bg-surface p-4">
           <div className="flex gap-3">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-200/80" aria-hidden="true" />
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warn" aria-hidden="true" />
             <p className="text-xs leading-5 text-white/78">
               Not validated, and not a medical device. The scores follow published rules, but nobody has yet
               compared them with clinicians&apos; scoring. Don&apos;t use them for a real patient.
@@ -492,7 +487,7 @@ export function BuildStepsSidebar() {
   return (
     <aside className="workspace-sidebar left-sidebar">
       <p className="section-label">Make a 3D kidney</p>
-      <p className="mt-2 text-lg font-semibold tracking-tight text-white/90">What happens where</p>
+      <p className="mt-2 text-lg font-medium tracking-[-.01em] text-white">What happens where</p>
       <ol className="mt-5 space-y-1" aria-label="Where each step happens">
         {[
           ['Outline the CT', 'Outside the browser, with 3D Slicer or TotalSegmentator'],
@@ -500,7 +495,7 @@ export function BuildStepsSidebar() {
           ['Score it', 'In this tab'],
         ].map(([label, where], index) => (
           <li key={label} className="flex gap-3 rounded-lg px-2 py-2.5">
-            <span className="grid size-5 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[.035] font-mono text-[11px] text-white/70">
+            <span className="grid size-5 shrink-0 place-items-center rounded-full border border-line font-mono text-[11px] text-white/75">
               {index + 1}
             </span>
             <div>
@@ -511,7 +506,7 @@ export function BuildStepsSidebar() {
         ))}
       </ol>
       <div className="mt-5 border-t border-white/8 pt-5">
-        <div className="flex items-center gap-2 text-xs text-emerald-100/85">
+        <div className="flex items-center gap-2 text-xs text-ok">
           <LockKeyhole className="size-3.5" aria-hidden="true" />
           Nothing leaves this computer
         </div>
@@ -547,7 +542,7 @@ export function BuildPrivacyPanel() {
           ],
         ].map(([title, body]) => (
           <div key={title} className="flex gap-3">
-            <CircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-300/80" aria-hidden="true" />
+            <CircleCheck className="mt-0.5 size-4 shrink-0 text-ok" aria-hidden="true" />
             <div>
               <p className="text-xs font-medium text-white/85">{title}</p>
               <p className="mt-1 text-xs leading-5 text-white/72">{body}</p>
@@ -556,8 +551,8 @@ export function BuildPrivacyPanel() {
         ))}
       </div>
 
-      <div className="mt-5 rounded-xl border border-amber-200/12 bg-amber-200/[.035] p-3.5">
-        <p className="text-xs font-medium text-amber-50/90">Use outlines you’re allowed to use here</p>
+      <div className="mt-5 rounded-md border border-flag/45 bg-surface p-3.5">
+        <p className="text-xs font-medium text-flag">Use outlines you’re allowed to use here</p>
         <p className="mt-1.5 text-xs leading-5 text-white/75">
           Nothing is uploaded, but your organisation&apos;s rules on patient data still apply on this computer.
           Use public, synthetic or properly de-identified outlines. Taking the name out of a header isn&apos;t
@@ -636,7 +631,7 @@ export function BuiltSidebar({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="section-label">Built in this tab</p>
-          <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">
+          <h1 className="mt-2 text-lg font-medium tracking-[-.01em] text-white">
             {report.source === 'sample' ? 'Synthetic sample' : 'Your outline'}
           </h1>
           <p className="mt-1 text-xs leading-5 text-white/70">
@@ -652,10 +647,10 @@ export function BuiltSidebar({
             <Metric label="R.E.N.A.L." value={report.renal.label} detail={capitalise(report.renal.complexity)} />
             <Metric label="PADUA" value={String(report.padua.total)} detail={capitalise(report.padua.complexity)} />
           </div>
-          <p className="mt-2 text-[11px] leading-4 text-amber-100/80">{ESTIMATE_LINE}</p>
+          <p className="mt-2 text-[11px] leading-4 text-flag">{ESTIMATE_LINE}</p>
         </>
       ) : (
-        <p className="mt-4 text-xs leading-5 text-amber-100/85">Not scored. {report.notScoredReason}</p>
+        <p className="mt-4 text-xs leading-5 text-flag">Not scored. {report.notScoredReason}</p>
       )}
 
       <div className="mt-6 flex items-center justify-between">
@@ -717,7 +712,6 @@ export function BuiltSidebar({
           ).map(([label, job]) => (
             <Button
               key={label}
-              className="border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
               size="sm"
               variant="outline"
               disabled={exporting !== null}
@@ -729,7 +723,7 @@ export function BuiltSidebar({
           ))}
         </div>
         {exportError ? (
-          <p className="mt-2 text-xs text-rose-200/90" role="alert">
+          <p className="mt-2 text-xs text-warn" role="alert">
             {exportError}
           </p>
         ) : null}
@@ -749,7 +743,7 @@ function Rule({ term, points, children }: { term: string; points: string; childr
     <div className="build-rule">
       <div className="flex items-baseline justify-between gap-3">
         <dt className="text-xs font-medium text-white/88">{term}</dt>
-        <dd className="font-mono text-xs text-emerald-100/90">{points}</dd>
+        <dd className="font-mono text-xs text-white">{points}</dd>
       </div>
       <p className="mt-1 text-xs leading-5 text-white/72">{children}</p>
     </div>
@@ -814,12 +808,12 @@ export function BuiltInspector({
         {tab === 'source' ? (
           <>
             <p className="section-label">Where this model comes from</p>
-            <div className="mt-3 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
+            <div className="mt-3 rounded-md border border-line-soft bg-surface p-3.5">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-medium text-white/90">
                   {report.source === 'sample' ? 'Synthetic sample' : 'Your outline'}
                 </p>
-                <Badge className="border-white/10 bg-white/5 text-[11px] text-white/80" variant="outline">
+                <Badge className="text-[11px]" variant="outline">
                   Built here
                 </Badge>
               </div>
@@ -867,8 +861,8 @@ export function BuiltInspector({
         {tab === 'scores' ? (
           r && p && m ? (
             <>
-              <div className="rounded-xl border border-amber-200/12 bg-amber-200/[.035] p-3">
-                <p className="text-xs leading-5 text-amber-50/90">{ESTIMATE_LINE}</p>
+              <div className="rounded-md border border-flag/45 bg-surface p-3">
+                <p className="text-xs leading-5 text-flag">{ESTIMATE_LINE}</p>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <Metric
@@ -953,12 +947,12 @@ export function BuiltInspector({
           <>
             <p className="section-label">Kidney kept</p>
             {m ? (
-              <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
-                <p className="text-[11px] uppercase tracking-[.1em] text-white/66">{`Kept at a ${m.marginMm} mm margin`}</p>
-                <p className="mt-1 font-mono text-xl text-white/90">{pct(m.preservedFraction, 0)}</p>
-                <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/6">
+              <div className="mt-3 rounded-md border border-line-soft bg-surface p-3.5">
+                <p className="text-[11px] font-bold uppercase tracking-[.1em] text-white/66">{`At a ${m.marginMm} mm margin`}</p>
+                <p className="mt-1 font-mono text-xl text-white">{pct(m.preservedFraction, 0)}</p>
+                <div className="mt-3 h-1 overflow-hidden rounded-full bg-line-soft">
                   <div
-                    className="h-full rounded-full bg-emerald-300/70"
+                    className="h-full rounded-full bg-teal"
                     style={{ width: `${Math.round(m.preservedFraction * 100)}%` }}
                   />
                 </div>
@@ -971,11 +965,9 @@ export function BuiltInspector({
                   {m.cystMl > 0 ? <div><dt>Cyst</dt><dd>{`${m.cystMl.toFixed(1)} ml`}</dd></div> : null}
                 </dl>
                 <p className="mt-3 text-xs leading-5 text-white/75">
-                  The share of the tumour-side kidney outside a uniform band round the tumour. It&apos;s volume,
-                  not function, and not a resection plan. Enucleation takes less, and renorrhaphy and
-                  devascularised tissue usually cost more, so expect the real figure to be lower. Change the
-                  margin with the slider on the left.
+                  {`Parenchyma outside a uniform ${m.marginMm} mm band round the tumour, as a share of the tumour-side kidney. Volume, not function, and not a resection plan. Enucleation takes less; renorrhaphy and devascularised tissue take more.`}
                 </p>
+                <p className="mt-2 text-xs leading-5 text-white/75">The margin slider on the left reruns it.</p>
               </div>
             ) : (
               <p className="mt-3 text-xs leading-5 text-white/75">Nothing to plan without a kidney and a tumour.</p>

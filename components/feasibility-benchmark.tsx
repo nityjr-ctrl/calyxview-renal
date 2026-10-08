@@ -2,7 +2,6 @@ import {
   Beaker,
   Clock3,
   Database,
-  ExternalLink,
   GitCommitHorizontal,
   LoaderCircle,
   ShieldCheck,
@@ -385,7 +384,10 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {link.label} <ExternalLink aria-hidden="true" />
+                    {link.label}{' '}
+                    <span className="link-arrow" aria-hidden="true">
+                      ↗
+                    </span>
                     <span className="sr-only"> (opens in a new tab)</span>
                   </a>
                 ))}
@@ -424,7 +426,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
               <h3 id="next-run-title" className="inline text-[1.375rem]">
                 How the next run will be done
               </h3>
-              <span className="ml-3 inline-block rounded-[2px] border border-[var(--rule)] bg-[var(--paper-alt)] px-2 py-1 align-middle text-[.6875rem] font-bold uppercase tracking-[.12em] text-[var(--ink-muted)]">
+              <span className="ml-3 inline-block rounded-full border border-line px-2.5 py-1 align-middle text-[.6875rem] font-bold uppercase tracking-[.1em] text-[var(--ink-muted)]">
                 Draft, not run yet
               </span>
             </summary>
