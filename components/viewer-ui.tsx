@@ -70,35 +70,27 @@ export function PlanningNote({ term, children }: { term: string; children: React
   );
 }
 
-/** General teaching points on approach and clamping, shown under every kidney's plan. */
+/** Approach and clamping, as general notes under every kidney's plan. */
 export function ApproachNotes() {
   return (
     <>
-      <p className="section-label mt-6">Approach</p>
-      <p className="mt-2 text-xs leading-5 text-white/66">General teaching points, not advice for this kidney.</p>
+      <p className="section-label mt-6">Approach and clamping</p>
+      <p className="mt-2 text-xs leading-5 text-white/66">General, not advice for this kidney.</p>
       <div className="mt-1">
-        <PlanningNote term="Transperitoneal">
-          More working space. The usual choice for anterior and hilar tumours.
-        </PlanningNote>
+        <PlanningNote term="Transperitoneal">Room to work; the default for anterior and hilar tumours.</PlanningNote>
         <PlanningNote term="Retroperitoneal">
-          Less space, but direct access to the posterior surface. Often chosen for posterior and posterolateral
-          tumours, and it keeps away from bowel after previous abdominal surgery.
+          Direct to the posterior surface, no bowel, less room; favoured for posterior and posterolateral tumours
+          and the re-operative abdomen.
         </PlanningNote>
-      </div>
-
-      <p className="section-label mt-6">Clamping</p>
-      <div className="mt-1">
         <PlanningNote term="Main artery">
-          Global warm ischaemia while the clamp is on, so keep it short. Every renal artery, accessory ones
-          included, has to be found and controlled first.
+          Global warm ischaemia, so keep it short; find and control every artery first, accessory ones included.
         </PlanningNote>
         <PlanningNote term="Selective (segmental)">
-          Only the territory of the clamped branches is ischaemic. It needs a map of the segmental arteries
-          showing which supply the tumour, usually from an arterial-phase CT.
+          Ischaemia limited to the clamped territory; needs an arterial-phase map of the segmental branches to
+          the tumour.
         </PlanningNote>
         <PlanningNote term="Off-clamp">
-          No planned ischaemia, at the cost of more bleeding during the excision. Better suited to small,
-          largely exophytic tumours.
+          No planned ischaemia, more bleeding at excision; suits small, largely exophytic tumours.
         </PlanningNote>
       </div>
     </>

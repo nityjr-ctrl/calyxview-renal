@@ -5,9 +5,39 @@
 import type { BuildReport } from './build.ts';
 
 export const ESTIMATE_LINE =
-  'Estimated in the browser from the outline; same rules as renalplan but approximate; not validated.';
+  'Estimated in the browser from the outline by renalplan’s rules; approximate; not validated.';
+
+/** The warnings a build can carry, shown above the scores and at the top of both reports. */
+export const WARNING = {
+  tumourDetached:
+    'The tumour does not touch the scored kidney, so E, N, the PADUA sinus item and ‘kidney kept’ are not meaningful here.',
+  sinusSmall: 'Sinus estimate unreliable; N and the sinus item may be wrong.',
+  edge: 'The outline reaches the edge of the scan, so it may be cut off; sizes and scores may be low.',
+  orientation:
+    'No orientation in the file; axes assumed from the pixdim. Left/right and anterior/posterior may be wrong.',
+  similarPieces: (where: string) => `Two tumour pieces of similar size; the ${where} one was scored.`,
+  kidneyVolume: (ml: number) =>
+    `The tumour-side kidney is ${ml.toFixed(0)} ml, outside the usual 60 to 600 ml. Check the outline and the voxel size.`,
+  tumourSize: (cm: number) => `The tumour is ${cm.toFixed(2)} cm across, over 15 cm. Check the outline and the voxel size.`,
+  fragmented: (pieces: number) => `The kidney label is in ${pieces} pieces over 1 ml; the outline looks fragmented.`,
+  spacing: (mm: number[]) =>
+    `Voxel spacing ${mm.map((s) => s.toFixed(2)).join(' x ')} mm is outside 0.3 to 6 mm. Check the header.`,
+} as const;
+
+/**
+ * Kept kidney as a percentage. Above 99% it gets one decimal, and it never
+ * reads 100% when any kidney was inside the margin.
+ */
+export function keptPercent(fraction: number, removedMl: number, digits = 0): string {
+  if (!Number.isFinite(fraction)) return 'n/a';
+  const percent = fraction * 100;
+  const text = percent > 99 ? percent.toFixed(Math.max(1, digits)) : percent.toFixed(digits);
+  if (removedMl > 0 && Number(text) >= 100) return '>99.9%';
+  return `${text}%`;
+}
 
 export const BROWSER_DIFFERENCES = [
+  'E uses an exact convex hull of the kidney and tumour, where renalplan builds a Delaunay hull on up to 20,000 sampled surface points. Raw E and N can differ by a few tenths, which can move a point when a value sits at a cut-off.',
   'Uses every voxel for the centroids, long axis and percentiles, where renalplan samples up to 60,000.',
   'The largest tumour diameter is exact over the voxel centres, where renalplan samples 8,000 surface voxels.',
   'The surfaces come from a signed distance field resampled to an isotropic grid of at least 1 mm, lightly smoothed, then marching cubes and 5 Taubin passes, where renalplan meshes the binary mask directly with 15 passes and decimates. They are for display; the scores use the voxels.',
@@ -36,7 +66,8 @@ export function reportJson(report: BuildReport): string {
       estimate: ESTIMATE_LINE,
       rules: RULES,
       browserDifferences: BROWSER_DIFFERENCES,
-      coordinates: 'Meshes are in RAS millimetres from the file’s affine (+x patient right, +y anterior, +z superior).',
+      coordinates:
+        'Meshes and the STL download are in RAS millimetres from the file’s affine (+x patient right, +y anterior, +z superior). The GLB download is in metres, y-up, centred on the model.',
       disclaimer: DISCLAIMER,
     },
     null,
@@ -56,6 +87,11 @@ export function reportMarkdown(report: BuildReport): string {
     `Grid: ${report.grid.workingDims.join(' x ')} voxels of ${report.grid.spacingMm.map((s) => s.toFixed(2)).join(' x ')} mm${report.grid.downsampled ? ' (sampled from a larger grid)' : ''}. Orientation from the ${report.grid.affineSource}.`,
   );
   lines.push(`Rules: ${report.rulesFrom}. Built in ${(report.totalMs / 1000).toFixed(1)} s.`, '');
+  if (report.warnings.length) {
+    lines.push('## Warnings', '');
+    for (const warning of report.warnings) lines.push(`- **${warning}**`);
+    lines.push('');
+  }
   lines.push('## Structures', '');
   for (const label of report.labels) lines.push(`- Label ${label.value} (${label.name}): ${label.ml.toFixed(1)} ml`);
   lines.push('');
@@ -69,7 +105,7 @@ export function reportMarkdown(report: BuildReport): string {
     lines.push(`- Tumour: ${fixed(r.radiusCm, 2)} cm largest diameter, ${fixed(m.tumourMl, 1)} ml, ${(r.exophyticFraction * 100).toFixed(1)}% outside the kidney's hull.`);
     lines.push(`- Distance to the estimated sinus: ${fixed(r.nearnessMm, 1)} mm. Location: ${r.locationDetail}.`);
     lines.push(`- Tumour-side kidney ${fixed(m.ipsilateralKidneyMl, 1)} ml; other kidney ${fixed(m.contralateralKidneyMl, 1)} ml; cyst ${fixed(m.cystMl, 1)} ml.`);
-    lines.push(`- Kept at a ${m.marginMm} mm margin: ${(m.preservedFraction * 100).toFixed(1)}% of the tumour-side kidney.`, '');
+    lines.push(`- Kept at a ${m.marginMm} mm margin: ${keptPercent(m.preservedFraction, m.parenchymaRemovedMl, 1)} of the tumour-side kidney.`, '');
   } else {
     lines.push('## Scores', '', `Not scored. ${report.notScoredReason ?? ''}`, '');
   }
@@ -86,6 +122,10 @@ export function reportMarkdown(report: BuildReport): string {
   for (const note of report.notes) lines.push(`- ${note}`);
   lines.push('', '## How this differs from renalplan', '');
   for (const item of BROWSER_DIFFERENCES) lines.push(`- ${item}`);
-  lines.push('', 'Meshes are in RAS millimetres from the file’s affine (+x patient right, +y anterior, +z superior).', '');
+  lines.push(
+    '',
+    'Meshes and the STL download are in RAS millimetres from the file’s affine (+x patient right, +y anterior, +z superior). The GLB download is in metres, y-up, centred on the model.',
+    '',
+  );
   return lines.join('\n');
 }

@@ -234,6 +234,34 @@ button:disabled {
   color: rgb(255 251 235);
 }
 
+/* One line under the ribbon, e.g. when an address named a kidney that doesn't exist. */
+.viewer-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-bottom: 1px solid rgb(255 255 255 / .08);
+  background: rgb(255 255 255 / .04);
+  padding: 6px 12px;
+  color: rgb(255 255 255 / .85);
+  font-size: 12px;
+}
+
+.viewer-notice button {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 6px;
+  padding: 2px;
+  color: rgb(255 255 255 / .7);
+}
+
+/* No WebGL: the view controls have nothing to act on. */
+.view-button:disabled,
+.icon-button:disabled,
+.range-control:disabled {
+  opacity: .4;
+}
+
 .workspace-grid {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr) 310px;
@@ -469,16 +497,6 @@ button:disabled {
   line-height: 1.55;
 }
 
-.viewer-jump {
-  display: none;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 5px;
-  border-bottom: 1px solid rgb(186 230 253 / .5);
-  color: rgb(186 230 253 / .95);
-  font-size: 12px;
-}
-
 .case-switcher-group {
   display: flex;
   min-width: 0;
@@ -598,30 +616,6 @@ button:disabled {
 .axis-x { position: absolute; right: 0; bottom: 9px; color: rgb(252 165 150); }
 .axis-y { position: absolute; left: 12px; top: -2px; color: rgb(134 239 190); }
 .axis-z { position: absolute; left: 0; bottom: -2px; color: rgb(147 205 245); }
-
-.training-hotspot {
-  position: absolute;
-  top: 46%;
-  right: 10%;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgb(125 211 252 / .14);
-  border-radius: 10px;
-  background: rgb(7 27 23 / .78);
-  padding: 9px 11px;
-  box-shadow: 0 16px 40px rgb(0 0 0 / .22);
-  backdrop-filter: blur(12px);
-}
-
-.hotspot-pulse {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgb(125 211 252 / .82);
-  box-shadow: 0 0 0 5px rgb(125 211 252 / .08), 0 0 18px rgb(125 211 252 / .36);
-}
 
 .viewer-statusbar {
   display: flex;
@@ -783,45 +777,6 @@ button:disabled {
   background: rgb(255 255 255 / .012);
 }
 
-.answer-option {
-  display: flex;
-  width: 100%;
-  min-height: 40px;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgb(255 255 255 / .1);
-  border-radius: 9px;
-  background: rgb(255 255 255 / .02);
-  padding: 8px 10px;
-  color: rgb(255 255 255 / .8);
-  font-size: 12px;
-  line-height: 1.45;
-  text-align: left;
-  transition: background .16s ease, border-color .16s ease, color .16s ease;
-}
-
-.answer-option:hover:not([aria-disabled='true']) {
-  border-color: rgb(125 211 252 / .3);
-  background: rgb(125 211 252 / .06);
-  color: rgb(255 255 255 / .95);
-}
-
-.answer-option[aria-disabled='true'] {
-  cursor: default;
-}
-
-.answer-correct {
-  border-color: rgb(110 231 183 / .35);
-  background: rgb(110 231 183 / .08);
-  color: rgb(209 255 237);
-}
-
-.answer-wrong {
-  border-color: rgb(251 191 36 / .32);
-  background: rgb(251 191 36 / .06);
-  color: rgb(254 240 191);
-}
-
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -922,11 +877,6 @@ button:disabled {
     min-height: 660px;
   }
 
-  /* The lesson panel sits below the viewer from here down. */
-  .viewer-jump {
-    display: inline-flex;
-  }
-
   .viewer-statusbar {
     flex-wrap: wrap;
   }
@@ -959,7 +909,7 @@ button:disabled {
   }
 
   /* One column: the viewer first, then the side panels, so the scores, layers
-     and lesson questions are all reachable by scrolling. The canvas is kept
+     and plan notes are all reachable by scrolling. The canvas is kept
      short enough that there's always page to scroll on around it. */
   .workspace-grid {
     display: flex;
@@ -1014,12 +964,6 @@ button:disabled {
     bottom: 74px;
   }
 
-  .training-hotspot {
-    top: auto;
-    bottom: 74px;
-    left: 14px;
-    right: auto;
-  }
 }
 
 @media (max-width: 520px) {
@@ -1072,10 +1016,6 @@ button:disabled {
     bottom: 104px;
   }
 
-  .training-hotspot {
-    display: none;
-  }
-
   .workspace-sidebar {
     padding: 16px;
   }
@@ -1123,10 +1063,6 @@ button:disabled {
   .choice-chip,
   .segmented-control button {
     min-height: 40px;
-  }
-
-  .answer-option {
-    min-height: 44px;
   }
 }
 
@@ -1561,7 +1497,7 @@ button:disabled {
   height: auto;
 }
 
-/* 3D demo (the teaching kidney preview) */
+/* 3D demo (the hand-made kidney preview) */
 
 .section-heading-light {
   text-align: left;
@@ -1615,22 +1551,6 @@ button:disabled {
 }
 
 .demo-badges svg {
-  width: .75rem;
-  height: .75rem;
-}
-
-.demo-hint {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: .375rem;
-  color: #a2a2a8;
-  font-size: .75rem;
-}
-
-.demo-hint svg {
   width: .75rem;
   height: .75rem;
 }
@@ -2606,39 +2526,7 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
   color: var(--ink-soft);
 }
 
-/* Teaching kidney and the lesson */
-
-.demo-hint-touch {
-  display: none;
-}
-
-@media (pointer: coarse) {
-  .demo-hint-mouse {
-    display: none;
-  }
-
-  .demo-hint-touch {
-    display: inline;
-  }
-}
-
-.teaching-lesson {
-  display: grid;
-  gap: 2rem;
-  margin-top: 2.5rem;
-  padding-top: 2.5rem;
-  border-top: 1px solid var(--rule);
-}
-
-.teaching-lesson-copy h3 {
-  margin-bottom: .75rem;
-}
-
-.site-page .teaching-lesson-intro {
-  margin-bottom: 1.5rem;
-  font-size: 1.0625rem;
-  color: var(--ink-soft);
-}
+/* Hand-made kidney and the build steps */
 
 .site-page .file-flow-link {
   display: grid;
@@ -2653,7 +2541,7 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
   font-size: .9375rem;
 }
 
-.lesson-steps {
+.steps-list {
   display: grid;
   gap: .875rem;
   margin: 0;
@@ -2661,17 +2549,17 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
   color: var(--ink-soft);
 }
 
-.lesson-steps li {
+.steps-list li {
   padding-left: .25rem;
 }
 
-.lesson-steps li::marker {
+.steps-list li::marker {
   color: var(--accent-deep);
   font-family: var(--font-display);
   font-weight: 800;
 }
 
-.lesson-steps strong {
+.steps-list strong {
   color: var(--ink);
   font-weight: 600;
 }
@@ -2756,15 +2644,8 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
   gap: .5rem 1.5rem;
 }
 
-/* Opt-in helpers for the pipeline and benchmark tables: a swipe hint for
-   phones and a first column that stays put while the table scrolls. */
-
-.table-hint {
-  display: none;
-  margin-bottom: .5rem;
-  font-size: .8125rem;
-  color: var(--ink-muted);
-}
+/* Opt-in helper for the pipeline and benchmark tables: a first column that
+   stays put while the table scrolls. */
 
 .pipeline-table-sticky tbody th[scope='row'],
 .pipeline-table-sticky thead th:first-child {
@@ -2784,11 +2665,6 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
 }
 
 @media (width < 48rem) {
-  .site-page .table-hint {
-    display: block;
-    margin-bottom: .5rem;
-  }
-
   .pipeline-table th,
   .pipeline-table td {
     padding: .625rem .75rem;
@@ -2802,11 +2678,6 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
 }
 
 @media (width >= 60rem) {
-  .teaching-lesson {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    gap: 4rem;
-  }
-
   .next-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
@@ -2982,7 +2853,7 @@ html:has(.site-page) ::-webkit-scrollbar-thumb {
 }
 
 /* The numbered steps need their numbers; Tailwind's reset removes them. */
-.lesson-steps {
+.steps-list {
   list-style: decimal;
 }
 

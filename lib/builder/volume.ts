@@ -775,15 +775,39 @@ export function symmetricEigen3(matrix: number[]): { values: Vec3; vectors: numb
   return { values: [a[0], a[4], a[8]], vectors: v };
 }
 
-/** Python's round(x, digits): nearest, ties to even. */
+const FLOAT_VIEW = new DataView(new ArrayBuffer(8));
+
+/**
+ * Python's round(x, digits) for digits >= 0, exactly. Python rounds the exact
+ * binary value of the double (not its shortest decimal form), ties to even,
+ * then reads the decimal result back as the nearest double. So 2.675 gives
+ * 2.67, because the double nearest 2.675 is just below it. Here the double is
+ * split into an integer mantissa and a power of two with BigInt, scaled by
+ * 10^digits exactly, and rounded half to even on that exact fraction.
+ */
 export function pyRound(value: number, digits: number): number {
-  if (!Number.isFinite(value)) return value;
-  const scale = 10 ** digits;
-  const scaled = value * scale;
-  const floor = Math.floor(scaled);
-  const diff = scaled - floor;
-  let result: number;
-  if (diff === 0.5) result = floor % 2 === 0 ? floor : floor + 1;
-  else result = Math.round(scaled);
-  return result / scale;
+  if (!Number.isFinite(value) || value === 0) return value;
+  if (!Number.isInteger(digits) || digits < 0) throw new RangeError('pyRound needs a whole number of digits, 0 or more.');
+  FLOAT_VIEW.setFloat64(0, value);
+  const bits = FLOAT_VIEW.getBigUint64(0);
+  const negative = bits >> 63n === 1n;
+  const biased = Number((bits >> 52n) & 0x7ffn);
+  const fraction = bits & 0xfffffffffffffn;
+  // value = mantissa * 2^exponent, exactly.
+  const mantissa = biased === 0 ? fraction : fraction | (1n << 52n);
+  const exponent = (biased === 0 ? 1 : biased) - 1075;
+  let scaled = mantissa * 10n ** BigInt(digits);
+  let rounded: bigint;
+  if (exponent >= 0) {
+    rounded = scaled << BigInt(exponent);
+  } else {
+    const denominator = 1n << BigInt(-exponent);
+    rounded = scaled / denominator;
+    const twiceRemainder = 2n * (scaled - rounded * denominator);
+    if (twiceRemainder > denominator || (twiceRemainder === denominator && rounded % 2n === 1n)) rounded += 1n;
+  }
+  scaled = rounded;
+  const result = Number(`${negative ? '-' : ''}${scaled}e-${digits}`);
+  // Python keeps the sign of a value that rounds to zero.
+  return result === 0 ? (negative ? -0 : 0) : result;
 }

@@ -292,7 +292,7 @@ export function CtPanel({
             ) : null}
           </ul>
           <p className="mt-2 text-[11px] leading-4 text-white/66">
-            {`Soft-tissue window, ${mm(data.sliceMm)} mm slabs, seen from the feet. The pale plane through the 3D model is this slice. Scroll over the image, or use the arrow keys on the slider.`}
+            {`Soft-tissue window, ${mm(data.sliceMm)} mm slabs, seen from the feet. The pale plane through the 3D model is this slice.`}
           </p>
         </>
       ) : null}

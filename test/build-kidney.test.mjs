@@ -292,7 +292,11 @@ test('the sample reproduces renalplan 0.2.0 on its own phantom', () => {
 
   const wider = remargin(state, 10);
   assert.ok(wider.planning.preservedFraction < planning.preservedFraction);
-  assert.match(reportMarkdown(output.report), /same rules as renalplan but approximate; not validated/);
+  assert.match(reportMarkdown(output.report), /by renalplan’s rules; approximate; not validated/);
+  // renalplan's phantom puts the right kidney and tumour past the grid's +x face
+  // (kidney to x = 81 mm, tumour to 87 mm, grid to 79 mm), so the edge flag is true here.
+  assert.equal(output.report.flags.touchesEdge, true);
+  assert.deepEqual(output.report.warnings, ['The outline reaches the edge of the scan, so it may be cut off; sizes and scores may be low.']);
 });
 
 test('a NIfTI file builds end to end, and a kidney without a tumour is meshed but not scored', async () => {

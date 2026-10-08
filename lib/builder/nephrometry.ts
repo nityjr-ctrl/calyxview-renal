@@ -8,6 +8,7 @@ import {
   andMask,
   andNotMask,
   anySet,
+  applyAffine,
   bboxOf,
   boxDims,
   components6,
@@ -248,9 +249,70 @@ function rejectAlong(v: Vec3, axis: Vec3): Vec3 {
   return [out[0] / length, out[1] / length, out[2] / length];
 }
 
-/** The largest tumour piece and how many smaller ones there are. */
-export function indexLesion(tumour: Uint8Array, dims: Dims): { mask: Uint8Array; others: number } {
-  return largestComponent(tumour, dims);
+export type LesionIndex = {
+  mask: Uint8Array;
+  others: number;
+  /** The runner-up is within 5% of the scored piece's volume. */
+  similar: boolean;
+  /** Voxel-index centroids of the scored piece and the runner-up, when there is one. */
+  scoredCentre: Vec3 | null;
+  runnerUpCentre: Vec3 | null;
+};
+
+/** Pieces within this share of the largest count as the same size. */
+export const SIMILAR_PIECES = 0.05;
+
+/**
+ * The largest tumour piece (renalplan's index lesion), how many others there
+ * are, and whether the next largest is about the same size. A tie keeps the
+ * first piece in scan order, as renalplan does.
+ */
+export function indexLesion(tumour: Uint8Array, dims: Dims): LesionIndex {
+  const components = components6(tumour, dims);
+  const { sizes, labels } = components;
+  if (sizes.length <= 1) return { mask: tumour, others: 0, similar: false, scoredCentre: null, runnerUpCentre: null };
+  let best = 0;
+  for (let i = 1; i < sizes.length; i += 1) if (sizes[i] > sizes[best]) best = i;
+  let second = -1;
+  for (let i = 0; i < sizes.length; i += 1) if (i !== best && (second < 0 || sizes[i] > sizes[second])) second = i;
+  const similar = sizes[second] >= (1 - SIMILAR_PIECES) * sizes[best];
+  const sums = [new Float64Array(3), new Float64Array(3)];
+  const [nx, ny] = dims;
+  for (let index = 0; index < labels.length; index += 1) {
+    const label = labels[index] - 1;
+    const slot = label === best ? 0 : label === second ? 1 : -1;
+    if (slot < 0) continue;
+    sums[slot][0] += index % nx;
+    sums[slot][1] += Math.floor(index / nx) % ny;
+    sums[slot][2] += Math.floor(index / (nx * ny));
+  }
+  const centre = (slot: number, size: number): Vec3 => [sums[slot][0] / size, sums[slot][1] / size, sums[slot][2] / size];
+  return {
+    mask: componentMask(components, best + 1),
+    others: sizes.length - 1,
+    similar,
+    scoredCentre: centre(0, sizes[best]),
+    runnerUpCentre: centre(1, sizes[second]),
+  };
+}
+
+/**
+ * Where the scored piece lies relative to the runner-up, as one patient-axis
+ * word (RAS: +x right, +y anterior, +z superior), along the axis that
+ * separates them most.
+ */
+export function relativePosition(scored: Vec3, other: Vec3, affine: Affine): string {
+  const a = applyAffine(affine, scored[0], scored[1], scored[2]);
+  const b = applyAffine(affine, other[0], other[1], other[2]);
+  const diff = [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  let axis = 2;
+  for (const candidate of [1, 0]) if (Math.abs(diff[candidate]) > Math.abs(diff[axis]) + 1e-9) axis = candidate;
+  const words = [
+    ['left', 'right'],
+    ['posterior', 'anterior'],
+    ['inferior', 'superior'],
+  ];
+  return words[axis][diff[axis] >= 0 ? 1 : 0];
 }
 
 /**

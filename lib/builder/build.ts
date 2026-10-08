@@ -8,6 +8,7 @@ import {
   anySet,
   bboxOf,
   boxDims,
+  components6,
   countMask,
   cropVolume,
   equalsMask,
@@ -30,6 +31,7 @@ import {
   indexLesion,
   paduaScore,
   planMargin,
+  relativePosition,
   renalScore,
   scoringBox,
   tumourBearingKidney,
@@ -39,10 +41,11 @@ import {
   type Planning,
   type RenalScore,
 } from './nephrometry.ts';
-import { readNifti, toLabelMap } from './nifti.ts';
+import { INVALID_AFFINE, affineUsable, readNifti, toLabelMap } from './nifti.ts';
+import { WARNING } from './report.ts';
 import { PHANTOM_DIMS, buildPhantomLabels, phantomAffine } from './phantom.ts';
 
-export { BROWSER_DIFFERENCES, ESTIMATE_LINE, RULES, reportJson, reportMarkdown } from './report.ts';
+export { BROWSER_DIFFERENCES, ESTIMATE_LINE, RULES, WARNING, keptPercent, reportJson, reportMarkdown } from './report.ts';
 
 export const BUILDER_VERSION = '1.0.0';
 export const RENALPLAN_VERSION = '0.2.0';
@@ -101,7 +104,23 @@ export type BuildReport = {
     sinusEstimateTooLarge: boolean;
     otherTumourPieces: number;
     contralateralKidneyPresent: boolean;
+    /** No voxel face where the tumour meets the scored kidney. */
+    tumourDetached: boolean;
+    /** The estimated sinus is under 1% of the kidney's volume. */
+    sinusEstimateSmall: boolean;
+    /** The two largest tumour pieces are within 5% of each other. */
+    similarTumourPieces: boolean;
+    /** The tumour or the scored kidney reaches a face of the scan. */
+    touchesEdge: boolean;
+    /** Neither sform nor qform: axes came from pixdim. */
+    orientationAssumed: boolean;
+    kidneyVolumeUnusual: boolean;
+    tumourOver15Cm: boolean;
+    kidneyFragmented: boolean;
+    spacingUnusual: boolean;
   };
+  /** Plain statements that change how the scores should be read. Shown above them. */
+  warnings: string[];
   /** Each surface's enclosed volume next to the voxel volume it came from. */
   meshVolumes: MeshVolume[];
   notes: string[];
@@ -228,7 +247,11 @@ export function buildFromLabels(
     mark = now;
   };
   const notes: string[] = [];
+  const warnings: string[] = [];
   const own = source === 'sample' ? 'Synthetic sample' : 'Your outline';
+  if (!affineUsable(fileAffine)) throw new Error(INVALID_AFFINE);
+  const orientationAssumed = affineSource === 'pixdim';
+  if (orientationAssumed) warnings.push(WARNING.orientation);
 
   // Crop to everything outlined, plus room for a 10 mm margin and the closing.
   progress('labelling', 'Finding the outlined structures', 0.18);
@@ -237,6 +260,7 @@ export function buildFromLabels(
   const box = bboxOf(anyLabel, fileDims);
   if (!box) throw new Error('Every voxel in this file is 0, so there’s nothing outlined to build.');
   const fileSpacing = spacingOf(fileAffine);
+  const spacingUnusual = fileSpacing.some((s) => s < 0.3 || s > 6);
   const pad: Vec3 = [0, 1, 2].map((a) => Math.ceil(12 / fileSpacing[a]) + 2) as Vec3;
   const cropBox = padBox(box, pad, fileDims);
   const croppedDims = boxDims(cropBox);
@@ -278,12 +302,22 @@ export function buildFromLabels(
 
   let lesion = tumourAll;
   let otherPieces = 0;
+  let similarPieces = false;
   let ipsilateral = kidneyAll;
   if (hasTumour) {
     const index = indexLesion(tumourAll, dims);
     lesion = index.mask;
     otherPieces = index.others;
-    if (otherPieces) {
+    similarPieces = index.similar;
+    if (similarPieces && index.scoredCentre && index.runnerUpCentre) {
+      warnings.push(WARNING.similarPieces(relativePosition(index.scoredCentre, index.runnerUpCentre, affine)));
+      if (otherPieces > 1) {
+        const rest = otherPieces - 1;
+        notes.push(
+          `${rest === 1 ? 'One more, smaller piece' : `${rest} more, smaller pieces`} labelled tumour ${rest === 1 ? 'is' : 'are'} also in the outline and not scored.`,
+        );
+      }
+    } else if (otherPieces) {
       notes.push(
         `${otherPieces === 1 ? 'One more, smaller piece' : `${otherPieces} more, smaller pieces`} labelled tumour ${otherPieces === 1 ? 'is' : 'are'} in the outline. The scores are for the largest.`,
       );
@@ -292,6 +326,16 @@ export function buildFromLabels(
   if (hasKidney && hasTumour) ipsilateral = tumourBearingKidney(kidneyAll, lesion, dims, spacing);
   const contralateral = andNotMask(kidneyAll, ipsilateral);
   const contralateralPresent = hasTumour && anySet(contralateral);
+
+  // A structure on a face of the scan may continue beyond it.
+  const touchesEdge =
+    (hasTumour && touchesFileEdge(lesion, dims, cropBox.lo, stride, fileDims)) ||
+    (hasKidney && touchesFileEdge(ipsilateral, dims, cropBox.lo, stride, fileDims));
+  if (touchesEdge) warnings.push(WARNING.edge);
+  const kidneyPieces = hasKidney ? components6(kidneyAll, dims).sizes.filter((size) => size * voxelMl > 1).length : 0;
+  const kidneyFragmented = kidneyPieces > 3;
+  const ipsilateralMl = hasKidney ? countMask(ipsilateral) * voxelMl : 0;
+  const kidneyVolumeUnusual = hasKidney && (ipsilateralMl < 60 || ipsilateralMl > 600);
   lap('kidneys');
 
   // Scores.
@@ -304,6 +348,7 @@ export function buildFromLabels(
   let envelopeMesh: Surface | null = null;
   let envelopeMl = 0;
   let subAffine: Affine | null = null;
+  let sinusEstimateSmall = false;
   if (!hasKidney) notScoredReason = 'There’s no kidney label (1) in the outline, so nothing could be scored.';
   else if (!hasTumour) notScoredReason = 'There’s no tumour label (2) in the outline, so nothing could be scored. The meshes are still built.';
   if (!notScoredReason) {
@@ -326,6 +371,7 @@ export function buildFromLabels(
         planning = margin.planning;
         state = { geometry, toTumour, extras, source };
         notes.push(...geometry.notes, NOTE_NO_VESSELS, NOTE_NO_COLLECTING);
+        sinusEstimateSmall = countMask(geometry.sinus) < 0.01 * countMask(geometry.kidney);
         envelopeMesh = maskToSurface(orMask(margin.envelope, geometry.tumour), geometry.dims, sub.affine, { keepLargest: true });
         // The surface is the outer face of the band, so compare it with band plus tumour.
         envelopeMl = (countMask(margin.envelope) + countMask(geometry.tumour)) * voxelMl;
@@ -336,6 +382,15 @@ export function buildFromLabels(
     }
   }
   lap('scoring');
+
+  const tumourDetached = Boolean(planning && planning.contactSurfaceCm2 === 0);
+  if (tumourDetached) warnings.push(WARNING.tumourDetached);
+  if (sinusEstimateSmall) warnings.push(WARNING.sinusSmall);
+  const tumourOver15Cm = Boolean(renal && renal.radiusCm > 15);
+  if (renal && tumourOver15Cm) warnings.push(WARNING.tumourSize(renal.radiusCm));
+  if (kidneyVolumeUnusual) warnings.push(WARNING.kidneyVolume(ipsilateralMl));
+  if (kidneyFragmented) warnings.push(WARNING.fragmented(kidneyPieces));
+  if (spacingUnusual) warnings.push(WARNING.spacing(fileSpacing));
 
   // Meshes.
   const meshes: StructureMesh[] = [];
@@ -382,7 +437,7 @@ export function buildFromLabels(
         run: () =>
           toStructure(meshOf(others, false), {
             name: 'tumour-other',
-            label: 'Smaller tumour pieces',
+            label: similarPieces ? 'Other tumour pieces' : 'Smaller tumour pieces',
             provenance: `${own}, label 2, not scored`,
             colour: '#e8a0a2',
             opacity: 0.8,
@@ -512,7 +567,17 @@ export function buildFromLabels(
       sinusEstimateTooLarge: geometry?.sinusEstimateTooLarge ?? false,
       otherTumourPieces: otherPieces,
       contralateralKidneyPresent: contralateralPresent,
+      tumourDetached,
+      sinusEstimateSmall,
+      similarTumourPieces: similarPieces,
+      touchesEdge,
+      orientationAssumed,
+      kidneyVolumeUnusual,
+      tumourOver15Cm,
+      kidneyFragmented,
+      spacingUnusual,
     },
+    warnings,
     meshVolumes: meshVolumes(meshes),
     notes,
     timingsMs: timings,
@@ -526,6 +591,28 @@ export function buildFromLabels(
   }
   progress('done', 'Done', 1);
   return { output: { report, meshes }, state };
+}
+
+/**
+ * Whether a mask in the cropped (and possibly strided) grid reaches a face of
+ * the original file. Sampled index i on an axis is file index lo + i * stride;
+ * the last sample counts as on the face when the next one would be past it.
+ */
+export function touchesFileEdge(mask: Uint8Array, dims: Dims, lo: Vec3, stride: Vec3, fileDims: Dims): boolean {
+  const [nx, ny, nz] = dims;
+  const atLow = [lo[0] === 0, lo[1] === 0, lo[2] === 0];
+  const atHigh = [0, 1, 2].map((a) => lo[a] + dims[a] * stride[a] >= fileDims[a]);
+  let index = 0;
+  for (let z = 0; z < nz; z += 1) {
+    for (let y = 0; y < ny; y += 1) {
+      for (let x = 0; x < nx; x += 1, index += 1) {
+        if (!mask[index]) continue;
+        if ((x === 0 && atLow[0]) || (y === 0 && atLow[1]) || (z === 0 && atLow[2])) return true;
+        if ((x === nx - 1 && atHigh[0]) || (y === ny - 1 && atHigh[1]) || (z === nz - 1 && atHigh[2])) return true;
+      }
+    }
+  }
+  return false;
 }
 
 /** New margin: new numbers and a new band, without redoing the rest. */

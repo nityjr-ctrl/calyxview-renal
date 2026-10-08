@@ -3,10 +3,10 @@
 // Renders one of Kidneys A to E from its GLB, or a kidney the builder has just
 // made in this tab from typed arrays. The A to E meshes came from my separate
 // CalyxView endourology project, built from the KiTS23 expert outlines (see
-// scripts/make-reference-cases.mjs). The teaching kidney in kidney-scene.tsx is
+// scripts/make-reference-cases.mjs). The hand-made kidney in kidney-scene.tsx is
 // drawn in code instead.
 //
-// Lighting, interaction and view presets mirror the teaching kidney's scene so
+// Lighting, interaction and view presets mirror the hand-made kidney's scene so
 // switching between them doesn't feel like moving to a different application.
 
 import { useEffect, useRef, useState } from 'react';
@@ -47,6 +47,8 @@ type ReferenceCaseSceneProps = {
   onUserRotate?: () => void;
   /** The CT slice on show, drawn as a thin axial plane through the model. Null hides it. */
   slicePlane?: SlicePlane | null;
+  /** Called once if the browser can't draw WebGL, so the view controls can stand down. */
+  onNoWebgl?: () => void;
 };
 
 type Status = 'loading' | 'ready' | 'failed' | 'no-webgl';
@@ -99,6 +101,7 @@ export function ReferenceCaseScene({
   zoomRequest = NO_ZOOM,
   onUserRotate,
   slicePlane = null,
+  onNoWebgl,
 }: ReferenceCaseSceneProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<Status>('loading');
@@ -115,6 +118,14 @@ export function ReferenceCaseScene({
   useEffect(() => {
     onUserRotateRef.current = onUserRotate;
   }, [onUserRotate]);
+
+  const onNoWebglRef = useRef(onNoWebgl);
+  useEffect(() => {
+    onNoWebglRef.current = onNoWebgl;
+  }, [onNoWebgl]);
+  useEffect(() => {
+    if (status === 'no-webgl') onNoWebglRef.current?.();
+  }, [status]);
 
   // The parent remounts this component per case, so status starts at 'loading'
   // for each one and is only advanced from the loader's callbacks, or to no-webgl.
@@ -410,7 +421,7 @@ export function ReferenceCaseScene({
     resize();
 
     // Don't draw frames nobody can see, such as when a phone has scrolled down
-    // to the panels under the model. The teaching kidney's scene does the same.
+    // to the panels under the model. The hand-made kidney's scene does the same.
     let onScreen = true;
     const visibility =
       typeof IntersectionObserver === 'undefined'

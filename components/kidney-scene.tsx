@@ -1,6 +1,6 @@
 'use client';
 
-// The teaching kidney: a hand-made RIGHT kidney with a tumour, drawn in code.
+// The hand-made kidney: a RIGHT kidney with a tumour, drawn in code.
 // No patient data is in it.
 //
 // Scene axes: +x is the patient's left (so +x is medial for this right
@@ -12,7 +12,7 @@
 // the pelviureteric junction just outside the hilum, and the ureter runs down
 // medial to the lower pole. Tube positions were checked so that different
 // structures don't intersect, and so that the nearest calyx sits 3.6 mm from
-// the tumour, which is the N value the lesson uses.
+// the tumour, which is the N value its example score uses.
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
@@ -45,7 +45,6 @@ type KidneySceneProps = {
   resetNonce?: number;
   /** From the zoom buttons, for keyboard users and anyone who can't pinch. */
   zoomRequest?: ZoomRequest;
-  trainingStep?: number;
   /**
    * For the embedded overview preview. Vertical swipes scroll the page
    * (touch-action: pan-y), the mouse wheel only zooms with Ctrl or Cmd held,
@@ -61,6 +60,8 @@ type KidneySceneProps = {
   onStopTurning?: () => void;
   /** Called when someone turns the model by hand. */
   onUserRotate?: () => void;
+  /** Called once if the browser can't draw WebGL, so the view controls can stand down. */
+  onNoWebgl?: () => void;
 };
 
 type Point = [number, number, number];
@@ -173,11 +174,11 @@ export function KidneyScene({
   viewNonce = 0,
   resetNonce = 0,
   zoomRequest = NO_ZOOM,
-  trainingStep = -1,
   allowPageScroll = false,
   autoTurn = false,
   onStopTurning,
   onUserRotate,
+  onNoWebgl,
 }: KidneySceneProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef({
@@ -189,12 +190,12 @@ export function KidneyScene({
     viewNonce,
     resetNonce,
     zoomRequest,
-    trainingStep,
   });
   const onUserRotateRef = useRef(onUserRotate);
   const allowPageScrollRef = useRef(allowPageScroll);
   const autoTurnRef = useRef(autoTurn);
   const onStopTurningRef = useRef(onStopTurning);
+  const onNoWebglRef = useRef(onNoWebgl);
 
   useEffect(() => {
     stateRef.current = {
@@ -206,9 +207,8 @@ export function KidneyScene({
       viewNonce,
       resetNonce,
       zoomRequest,
-      trainingStep,
     };
-  }, [layers, kidneyOpacity, marginMm, clipPercent, preset, viewNonce, resetNonce, zoomRequest, trainingStep]);
+  }, [layers, kidneyOpacity, marginMm, clipPercent, preset, viewNonce, resetNonce, zoomRequest]);
 
   useEffect(() => {
     onUserRotateRef.current = onUserRotate;
@@ -225,6 +225,10 @@ export function KidneyScene({
   useEffect(() => {
     onStopTurningRef.current = onStopTurning;
   }, [onStopTurning]);
+
+  useEffect(() => {
+    onNoWebglRef.current = onNoWebgl;
+  }, [onNoWebgl]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -245,6 +249,7 @@ export function KidneyScene({
     } catch {
       host.innerHTML =
         '<div class="grid h-full min-h-[300px] place-items-center p-8 text-center text-sm leading-6 text-white/70">Your browser can’t show 3D here. The rest of the page still works.</div>';
+      onNoWebglRef.current?.();
       return;
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -256,7 +261,7 @@ export function KidneyScene({
     renderer.domElement.id = 'renal-3d-canvas';
     renderer.domElement.setAttribute(
       'aria-label',
-      'The teaching kidney in 3D: a hand-made right kidney with a tumour, arteries, veins and a collecting system',
+      'The hand-made kidney in 3D: a right kidney with a tumour, arteries, veins and a collecting system',
     );
     renderer.domElement.setAttribute('role', 'img');
     renderer.domElement.style.display = 'block';
@@ -592,12 +597,6 @@ export function KidneyScene({
 
       clippingPlane.constant =
         current.clipPercent <= 0 ? 10 : THREE.MathUtils.lerp(1.25, -0.95, current.clipPercent / 100);
-
-      // Lesson steps: 1 tumour, 2 arteries, 3 collecting system, 4 tumour.
-      const pulse = reducedMotion ? 1 : 1 + Math.sin(performance.now() * 0.0028) * 0.025;
-      tumour.scale.setScalar(current.trainingStep === 1 || current.trainingStep === 4 ? pulse : 1);
-      arteries.scale.setScalar(current.trainingStep === 2 ? pulse : 1);
-      collecting.scale.setScalar(current.trainingStep === 3 ? pulse : 1);
 
       renderer.render(scene, camera);
     };

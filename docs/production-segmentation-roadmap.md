@@ -81,4 +81,4 @@ At minimum, predefine acceptance criteria for:
 - Demonstrate valid clinical association, analytical validation and clinical validation in line with [IMDRF SaMD guidance](https://www.imdrf.org/documents/software-medical-device-samd-clinical-evaluation).
 - Complete the applicable regulatory pathway before patient use.
 
-Until these gates are met, the site stays a research and teaching prototype: the hand-made teaching kidney, five de-identified KiTS23 kidneys (A to E) with nephrometry computed from their expert outlines, a local-only file flow with simulated stages, and the lesson.
+Until these gates are met, the site stays a research and teaching prototype: the hand-made kidney, five de-identified KiTS23 kidneys (A to E) with nephrometry computed from their expert outlines, and a local-only file flow with simulated stages.

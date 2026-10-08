@@ -224,7 +224,6 @@ export function PlanningPipeline() {
           </p>
         </div>
 
-        <p className="table-hint">Swipe the table sideways to see every column.</p>
         {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a table that scrolls sideways must be reachable by keyboard. */}
         <section className="pipeline-table-wrap" tabIndex={0} aria-labelledby="pipeline-nephrometry-title">
           <table className="pipeline-table pipeline-table-sticky" aria-labelledby="pipeline-nephrometry-title">
@@ -316,13 +315,11 @@ export function PlanningPipeline() {
           ) : null}
           {outlineNotes.length > 0 ? <p>{outlineNotes.join(' ')}</p> : null}
           <p>
-            &ldquo;Kept at 5 mm&rdquo; is the share of the tumour-side kidney, tumour left out, that
-            sits outside a uniform 5 mm band round the tumour. It&apos;s there to show the volume
-            involved. It isn&apos;t a surgical plan, and it&apos;s volume, not function. The excision
-            is often narrower, down to enucleation along the pseudocapsule, but a real partial
-            nephrectomy usually loses more than this, through the renorrhaphy and tissue that loses
-            its blood supply. In one published series of 894 partial nephrectomies the median kept was
-            84% (Kazama et al., BJU Int 2024).
+            &ldquo;Kept at 5 mm&rdquo; is the share of tumour-side parenchyma, tumour excluded,
+            outside a uniform 5 mm band round the tumour: volume, not function, and not a surgical
+            plan. Enucleation along the pseudocapsule takes less, renorrhaphy and devascularised
+            tissue take more, and in one series of 894 partial nephrectomies the median kept was 84%
+            (Kazama et al., BJU Int 2024).
           </p>
         </div>
 
@@ -346,7 +343,6 @@ export function PlanningPipeline() {
           </p>
         </div>
 
-        <p className="table-hint">Swipe the table sideways to see every column.</p>
         {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a table that scrolls sideways must be reachable by keyboard. */}
         <section className="pipeline-table-wrap" tabIndex={0} aria-labelledby="pipeline-postprocess-title">
           <table className="pipeline-table pipeline-table-rules" aria-labelledby="pipeline-postprocess-title">
@@ -430,7 +426,8 @@ export function PlanningPipeline() {
                 This checks the pipeline&apos;s own 3D surfaces. Its default still uses 15 smoothing
                 passes, which wasn&apos;t one of the settings I tried. The surfaces of Kidneys A to E
                 came from my CalyxView project (not public yet), not from the pipeline. The
-                builder&apos;s are drawn from a smoothed distance field on a 1 mm grid instead, which
+                builder&apos;s are drawn from a smoothed distance field on a 1 mm grid instead (coarser for very
+                large volumes; the report says the grid used), which
                 copes better with thick slices.
               </p>
             </div>

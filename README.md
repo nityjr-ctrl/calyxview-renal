@@ -1,37 +1,29 @@
 # CalyxView Renal
 
-CalyxView Renal is my research and teaching prototype for partial nephrectomy planning. Load a kidney and tumour outline and the browser builds a 3D kidney and scores R.E.N.A.L. and PADUA, with nothing uploaded. Behind it is renalplan, a Python pipeline I wrote that does the same from the command line, and the site also has five real KiTS23 kidneys and a hand-made teaching kidney with a short lesson.
+CalyxView Renal is my research and teaching prototype for partial nephrectomy planning. Load a kidney and tumour outline and the browser builds a 3D kidney and scores R.E.N.A.L. and PADUA, with nothing uploaded. Behind it is renalplan, a Python pipeline I wrote that does the same from the command line, and the site also has five real KiTS23 kidneys and a hand-made kidney with vessels and a collecting system.
 
 **Live site:** [calyxview-renal.netlify.app](https://calyxview-renal.netlify.app/)
 
 **Author:** Nity G, [nity@uroref.com](mailto:nity@uroref.com). Python library and coding by Nity G. Content organisation and presentation done with help of AI.
 
-> Research and teaching only. It isn't validated and it isn't a medical device. It isn't UKCA or CE marked, and it isn't FDA cleared. Please don't use it for diagnosis, treatment, surgical planning, consent or guidance in theatre.
+> Research and teaching only. It isn't validated and it isn't a medical device. It isn't UKCA or CE marked, and it isn't FDA cleared. Not for diagnosis, treatment, surgical planning, consent or intra-operative guidance.
 
 ## What's on the site
 
-- **Make a 3D kidney (the builder).** Load a label map (.nii or .nii.gz; 1 kidney, 2 tumour, 3 cyst) and the browser meshes it and scores R.E.N.A.L. and PADUA with renalplan 0.2.0's rules, each point shown with its rule, plus the kidney kept outside a margin you choose. Download the model as GLB or STL and a report as JSON or Markdown. "Try the sample" builds renalplan's own synthetic phantom with no file; on it the browser and the pipeline agree on every score and volume. Outlining the CT is still done outside the browser (3D Slicer, TotalSegmentator). See "The builder" below.
-- **The teaching kidney.** A right kidney with a tumour that I built by hand in code. The arteries, veins and collecting system are hand-made too. There's no patient data in it. A small version sits on the overview page so you can turn it over without opening anything.
+- **Make a 3D kidney (the builder).** Load a label map (.nii or .nii.gz; 1 kidney, 2 tumour, 3 cyst) and the browser meshes it and scores R.E.N.A.L. and PADUA with renalplan 0.2.0's rules, each point shown with its rule, plus the kidney kept outside a margin you choose. Download the model as GLB (metres, y-up, centred, for general viewers) or STL (RAS millimetres) and a report as JSON or Markdown. "Try the sample" builds renalplan's own synthetic phantom with no file; on it the browser and the pipeline agree on every score and volume. On real outlines raw E and N can differ slightly because the browser's convex hull is exact, where renalplan samples up to 20,000 surface points. Outlining the CT is still done outside the browser (3D Slicer, TotalSegmentator). See "The builder" below.
+- **The hand-made kidney.** A right kidney with an interpolar tumour, made in code. The arteries, veins and collecting system are drawn by hand, so there's no patient data in it. It's the only model here with vessels. A small version sits on the overview page.
 - **KiTS23 kidneys A to E.** Five real kidneys from the public KiTS23 dataset. They're de-identified CTs of real patients, outlined by the KiTS team, and shared under CC BY-NC-SA 4.0. The 3D meshes were made by my separate CalyxView endourology project from the KiTS expert outlines. The R.E.N.A.L. and PADUA scores beside them were worked out by renalplan from the same outlines, not from the meshes, and nothing was typed in. Each kidney also has a CT tab: cropped, soft-tissue-windowed axial slices round the tumour-bearing kidney, with the KiTS kidney, tumour and cyst outlines drawn over them and a plane in the 3D view that follows the slice.
 - **Kidney C** also carries ribs, psoas, colon, spleen, liver and a body outline. Those came from an AI model (TotalSegmentator) run on its CT. They aren't KiTS outlines and nobody has checked them. The cyst in Kidney C's file belongs to the other kidney, which isn't in the file.
-- **The 3D viewer.** Drag to turn, scroll to zoom, switch between standard views, hide or fade each structure, cut away the kidney and save a picture of what you see. For Kidneys A to E, the CT tab scrolls through the slices (slider, arrow keys, Page Up and Page Down, or the mouse wheel over the image). `#workspace/reference-c?ct` opens Kidney C on its CT.
-- **The lesson.** Five short questions on the teaching kidney, with the reasoning shown after each answer. It covers the hilum, where the tumour is, blood supply, nearness to the collecting system, and putting a score together.
+- **The 3D viewer.** Standard views, per-structure show, hide and fade, a cutaway and an image export. For Kidneys A to E, the CT tab scrolls through the slices (slider, arrow keys, Page Up and Page Down, or the mouse wheel over the image). `#workspace/reference-c?ct` opens Kidney C on its CT.
 - **The pipeline section.** What renalplan does and what it has been run on, with links to the full results.
 - **The benchmark.** Aggregate results from running a published segmentation model on 20 KiTS23 scans.
 - **The next step.** What I'd like to do with hospital scans, and what I'm asking for.
 
 ## How to use it
 
-1. Open the 3D viewer. It starts on the teaching kidney, and you don't need any files.
-2. To see a real kidney, pick one of Kidneys A to E, either from the overview or inside the viewer. Its scores sit beside it.
-3. Drag to turn the kidney and scroll to zoom. Use the side panel to show, hide or fade each structure.
-4. Open the lesson for the five questions:
-   1. The hilum: which structure is most anterior? (The renal vein. Front to back it's usually vein, artery, pelvis.)
-   2. Where the tumour is: lateral, interpolar, on the anterior face.
-   3. Blood supply: what selective clamping needs, which is an arterial phase showing the segmental branches that feed the tumour.
-   4. Nearness: a tumour 3.6 mm from the collecting system scores N 3 (4 mm or less).
-   5. Putting a score together: 2.8 cm (R 1), less than half exophytic (E 2), 3.6 mm from the collecting system (N 3), entirely between the polar lines (L 3), anterior. That's 9a, moderate complexity.
-5. To make your own, open "Make a 3D kidney" and press "Try the sample", or load a label map. Use public, synthetic or properly de-identified outlines.
+1. Open the 3D viewer. It starts on the hand-made kidney.
+2. Pick one of Kidneys A to E, from the overview or inside the viewer. Its scores sit beside it.
+3. To make your own, open "Make a 3D kidney" and press "Try the sample", or load a label map. Use public, synthetic or properly de-identified outlines.
 
 ## The builder
 
@@ -120,7 +112,7 @@ CalyxView is my separate endourology teaching project for URS and PCNL. It isn't
 
 ## Next step
 
-I'd like to test the pipeline on hospital scans. The proposal asks for research access through the trust's R&D office, a coded export of the study scans and a first retrospective study comparing the computed scores with clinicians' scores. It's in [`docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md`](docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md). Tell me what's wrong with it.
+I'd like to test the pipeline on hospital scans. The proposal asks for research access through the trust's R&D office, a coded export of the study scans and a first retrospective study comparing the computed scores with clinicians' scores. It's in [`docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md`](docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md).
 
 ## Development
 

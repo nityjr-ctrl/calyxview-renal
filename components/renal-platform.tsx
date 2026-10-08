@@ -2,18 +2,13 @@
 
 import {
   Activity,
-  ArrowDown,
   ArrowLeft,
-  ArrowRight,
-  BookOpen,
   Box,
-  Check,
   Download,
   Focus,
   Info,
   Layers3,
   LockKeyhole,
-  MousePointer2,
   RotateCcw,
   ShieldAlert,
   SlidersHorizontal,
@@ -55,7 +50,7 @@ import { CtPanel, slicePlaneFor, useCtSlices, type CtSliceSet, type SlicePlane }
 import { ApproachNotes, LayerButton, Metric } from '@/components/viewer-ui';
 import { referenceCases, type ReferenceCase } from '@/lib/reference-cases';
 
-export type WorkspaceMode = 'plan' | 'build' | 'learn';
+export type WorkspaceMode = 'plan' | 'build';
 type InspectorTab = 'source' | 'scores' | 'plan' | 'limits' | 'ct';
 /** What the CT tab needs from the platform, which keeps the slice in step with the 3D plane. */
 type CtControls = {
@@ -67,8 +62,8 @@ type CtControls = {
   setOutlines: (value: boolean) => void;
 };
 
-/** The hand-made teaching kidney. Every other case id is one of Kidneys A to E. */
-const TEACHING_CASE_ID = 'synthetic';
+/** The hand-made kidney. Every other case id is one of Kidneys A to E. */
+const HAND_MADE_CASE_ID = 'synthetic';
 const BUILD_HASH = '#workspace/build';
 
 const NO_ZOOM: ZoomRequest = { nonce: 0, direction: 1 };
@@ -143,74 +138,6 @@ const orientation: Record<ViewPreset, { up: string; right: string; toward: strin
   },
 };
 
-const trainingSteps = [
-  {
-    title: 'The hilum',
-    short: 'Hilum',
-    instruction:
-      'Press L to look from the patient’s left, straight into the hilum of this right kidney. Anterior is now on the left of the screen. Blue is the renal vein, amber the artery, pale teal the pelvis.',
-    question: 'Which structure is most anterior at the hilum?',
-    options: ['The renal artery', 'The renal vein', 'The renal pelvis', 'The ureter'],
-    correct: 1,
-    rationale:
-      'Anterior to posterior the usual order is vein, artery, pelvis, so the renal vein is the first hilar structure you meet from the front.',
-  },
-  {
-    title: 'Where the tumour is',
-    short: 'Tumour',
-    instruction:
-      'Press Ant for the anterior view, then R for the patient’s right. This is a right kidney, so R shows its lateral border.',
-    question: 'Where is the tumour?',
-    options: [
-      'Upper pole, medial, posterior face',
-      'Between the poles, lateral, anterior face',
-      'Lower pole, lateral, posterior face',
-      'Between the poles, at the hilum',
-    ],
-    correct: 1,
-    rationale:
-      'It sits on the lateral border, entirely between the polar lines, and bulges from the anterior face. In R.E.N.A.L. terms that’s L 3 with the a suffix.',
-  },
-  {
-    title: 'Blood supply',
-    short: 'Blood supply',
-    instruction:
-      'Follow the amber branch from the hilum to the tumour. If the parenchyma is in the way, drag Cutaway under the model to peel it back from the front.',
-    question: 'What would you want from the imaging before planning selective clamping?',
-    options: [
-      'An excretory phase showing the calyces',
-      'An arterial phase showing the segmental branches',
-      'A venous phase showing the renal vein tributaries',
-      'The tumour diameter and depth',
-    ],
-    correct: 1,
-    rationale:
-      'Selective (segmental) clamping stops flow only in the branches supplying the tumour, so you need to know which branches those are. That needs an arterial phase. The branches in this model are drawn by hand.',
-  },
-  {
-    title: 'Nearness',
-    short: 'Nearness',
-    instruction:
-      'Drag Cutaway about halfway, then press Sup to look down from above. Note how close the calyx (pale teal) comes to the tumour: 3.6 mm in this model.',
-    question: 'The tumour is 3.6 mm from the collecting system. What does N score?',
-    options: ['N 1', 'N 2', 'N 3', 'It depends on the tumour size'],
-    correct: 2,
-    rationale:
-      'N scores 1 at 7 mm or more, 2 between 4 and 7 mm, and 3 at 4 mm or less, so 3.6 mm is N 3. At that distance a breach of the collecting system needing repair is more likely.',
-  },
-  {
-    title: 'Putting a score together',
-    short: 'Score',
-    instruction:
-      'This tumour: 2.8 cm, less than half exophytic, 3.6 mm from the collecting system, entirely between the polar lines, anterior.',
-    question: 'What’s its R.E.N.A.L. score?',
-    options: ['6a, low complexity', '9a, moderate complexity', '9p, moderate complexity', '11a, high complexity'],
-    correct: 1,
-    rationale:
-      'R 1 (4 cm or less), E 2 (under 50% exophytic), N 3 (4 mm or less) and L 3 (entirely between the polar lines) make 9. It’s anterior, so 9a. Totals of 7 to 9 are moderate complexity. The pipeline does the same sum for Kidneys A to E.',
-  },
-];
-
 const faceNames: Record<string, string> = {
   a: 'Anterior (a)',
   p: 'Posterior (p)',
@@ -238,7 +165,7 @@ function share(fraction: number) {
 }
 
 function caseSummary(activeCase: ReferenceCase | null) {
-  if (!activeCase) return 'Teaching kidney: example R.E.N.A.L. 9a (moderate), tumour 2.8 cm';
+  if (!activeCase) return 'Hand-made kidney: example R.E.N.A.L. 9a (moderate), tumour 2.8 cm';
   const { nephrometry: n } = activeCase;
   return `${activeCase.label}: R.E.N.A.L. ${n.renalLabel} (${n.renalComplexity}), PADUA ${n.paduaTotal} (${n.paduaComplexity}), tumour ${n.diameterCm.toFixed(1)} cm`;
 }
@@ -272,7 +199,6 @@ function ModeButton({
 }
 
 function CaseSidebar({
-  mode,
   activeCase,
   referenceVisible,
   setReferenceVisible,
@@ -280,10 +206,7 @@ function CaseSidebar({
   setLayers,
   kidneyOpacity,
   setKidneyOpacity,
-  trainingStep,
-  answers,
 }: {
-  mode: WorkspaceMode;
   activeCase: ReferenceCase | null;
   referenceVisible: Record<string, boolean>;
   setReferenceVisible: (name: string, value?: boolean) => void;
@@ -291,59 +214,7 @@ function CaseSidebar({
   setLayers: Dispatch<SetStateAction<AnatomyLayers>>;
   kidneyOpacity: number;
   setKidneyOpacity: (value: number) => void;
-  trainingStep: number;
-  answers: Record<number, number>;
 }) {
-  if (mode === 'learn') {
-    const completed = Object.keys(answers).length;
-    return (
-      <aside className="workspace-sidebar left-sidebar">
-        <p className="section-label">The lesson</p>
-        <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">Small renal mass basics</h1>
-        <p className="mt-2 text-xs leading-5 text-white/70">
-          Five questions on the teaching kidney, the only model here with vessels and a collecting system.
-        </p>
-
-        <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-white/6">
-          <div
-            className="h-full rounded-full bg-sky-300 transition-[width] duration-500"
-            style={{ width: `${(completed / trainingSteps.length) * 100}%` }}
-          />
-        </div>
-        <p className="mt-2 text-[11px] text-white/66">
-          {completed} of {trainingSteps.length} answered. Answers aren’t saved.
-        </p>
-
-        <ol className="mt-5 space-y-1">
-          {trainingSteps.map((step, index) => {
-            const answered = answers[index] !== undefined;
-            const current = index === trainingStep;
-            return (
-              <li
-                key={step.title}
-                aria-current={current ? 'step' : undefined}
-                className={`flex items-center gap-3 rounded-lg px-2.5 py-2.5 ${current ? 'bg-white/6' : ''}`}
-              >
-                <span
-                  className={`grid size-5 place-items-center rounded-full border ${
-                    answered
-                      ? 'border-emerald-300/25 bg-emerald-300/12 text-emerald-200'
-                      : current
-                        ? 'border-sky-300/30 bg-sky-300/10 text-sky-200'
-                        : 'border-white/10 text-white/62'
-                  }`}
-                >
-                  {answered ? <Check className="size-3" /> : <span className="font-mono text-[11px]">{index + 1}</span>}
-                </span>
-                <span className={`text-xs ${current ? 'text-white/90' : 'text-white/66'}`}>{step.title}</span>
-              </li>
-            );
-          })}
-        </ol>
-      </aside>
-    );
-  }
-
   const isolate = () => {
     if (activeCase) setReferenceVisible('parenchyma', false);
     else setLayers({ ...ALL_LAYERS, kidney: false });
@@ -355,10 +226,10 @@ function CaseSidebar({
         <div>
           <p className="section-label">{activeCase ? 'KiTS23 kidney' : 'Hand-made model'}</p>
           <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">
-            {activeCase ? activeCase.label : 'The teaching kidney'}
+            {activeCase ? activeCase.label : 'Hand-made kidney'}
           </h1>
           <p className="mt-1 text-xs leading-5 text-white/70">
-            {activeCase ? 'De-identified CT, KiTS expert outlines' : 'A right kidney with a tumour, made in code'}
+            {activeCase ? 'De-identified CT, KiTS expert outlines' : 'A right kidney with an interpolar tumour, made in code'}
           </p>
         </div>
         <span className="status-dot mt-1" aria-hidden="true" />
@@ -373,7 +244,7 @@ function CaseSidebar({
         <Metric
           label="PADUA"
           value={activeCase ? String(activeCase.nephrometry.paduaTotal) : 'Not scored'}
-          detail={activeCase ? capitalise(activeCase.nephrometry.paduaComplexity) : 'Teaching kidney'}
+          detail={activeCase ? capitalise(activeCase.nephrometry.paduaComplexity) : 'Hand-made kidney'}
         />
       </div>
 
@@ -447,11 +318,14 @@ function ViewToolbar({
   choosePreset,
   resetView,
   onSnapshot,
+  disabled = false,
 }: {
   preset: ViewPreset;
   choosePreset: (preset: ViewPreset) => void;
   resetView: () => void;
   onSnapshot: () => void;
+  /** No WebGL, so there is no view to change or save. */
+  disabled?: boolean;
 }) {
   return (
     <div className="viewer-toolbar">
@@ -461,6 +335,7 @@ function ViewToolbar({
             key={item.preset}
             type="button"
             onClick={() => choosePreset(item.preset)}
+            disabled={disabled}
             aria-pressed={preset === item.preset}
             aria-label={`${item.short}, ${item.label}`}
             title={item.label.charAt(0).toUpperCase() + item.label.slice(1)}
@@ -471,13 +346,14 @@ function ViewToolbar({
         ))}
       </fieldset>
       <div className="ml-1 h-5 w-px bg-white/10" />
-      <button type="button" className="icon-button" onClick={resetView} aria-label="Reset view" title="Reset view">
+      <button type="button" className="icon-button" onClick={resetView} disabled={disabled} aria-label="Reset view" title="Reset view">
         <RotateCcw className="size-4" />
       </button>
       <button
         type="button"
         className="icon-button"
         onClick={onSnapshot}
+        disabled={disabled}
         aria-label="Save an image of this view"
         title="Save an image of this view"
       >
@@ -500,11 +376,11 @@ function CasePicker({
       <span className="case-switcher-group-label" aria-hidden="true">Kidney</span>
       <button
         type="button"
-        aria-pressed={caseId === TEACHING_CASE_ID}
-        onClick={() => chooseCase(TEACHING_CASE_ID)}
-        title="The teaching kidney"
+        aria-pressed={caseId === HAND_MADE_CASE_ID}
+        onClick={() => chooseCase(HAND_MADE_CASE_ID)}
+        title="Hand-made kidney"
       >
-        Teaching
+        Hand-made
       </button>
       {referenceCases.map((item) => {
         const letter = item.label.replace(/^Kidney\s+/, '');
@@ -549,8 +425,10 @@ function ModelWorkspace({
   zoom,
   handRotated,
   onUserRotate,
-  trainingStep,
   slicePlane,
+  rebuilding,
+  noWebgl,
+  onNoWebgl,
 }: {
   mode: WorkspaceMode;
   activeCase: ReferenceCase | null;
@@ -575,8 +453,11 @@ function ModelWorkspace({
   zoom: (direction: 1 | -1) => void;
   handRotated: boolean;
   onUserRotate: () => void;
-  trainingStep: number;
   slicePlane: SlicePlane | null;
+  /** A new file is building, so the kidney on screen is the last one. */
+  rebuilding: boolean;
+  noWebgl: boolean;
+  onNoWebgl: () => void;
 }) {
   const building = mode === 'build' && builtCase !== null;
   const sceneCase: SceneCase | null = building ? builtCase : activeCase;
@@ -589,7 +470,7 @@ function ModelWorkspace({
       ? 'built-kidney'
       : activeCase
         ? activeCase.label.toLowerCase().replace(/\s+/g, '-')
-        : 'teaching-kidney';
+        : 'hand-made-kidney';
     const anchor = document.createElement('a');
     // The canvas is transparent, so paint the viewer's background behind the
     // model. Otherwise image viewers show the pale kidney on white.
@@ -608,31 +489,21 @@ function ModelWorkspace({
   };
 
   const axes = orientation[preset];
-  const modelName = sceneCase ? sceneCase.label : 'Teaching kidney';
+  const modelName = sceneCase ? sceneCase.label : 'Hand-made kidney';
   const showMargin = building || (!activeCase && mode !== 'build');
 
   return (
     <section id="model-workspace" tabIndex={-1} className="model-workspace" aria-label={`${modelName}, 3D model`}>
       <div className="viewer-topbar">
-        {mode === 'plan' ? (
-          <CasePicker caseId={caseId} chooseCase={chooseCase} />
-        ) : building ? (
+        {building ? (
           <p className="flex items-center gap-2 text-xs text-white/75">
             <Wand2 className="size-3.5" aria-hidden="true" />
             {modelName}
             <span className="hidden text-white/66 sm:inline">(built in this tab)</span>
           </p>
         ) : (
-          <p className="flex items-center gap-2 text-xs text-white/75">
-            <Box className="size-3.5" aria-hidden="true" />
-            Teaching kidney
-            <span className="hidden text-white/66 sm:inline">(the lesson always uses it)</span>
-          </p>
+          <CasePicker caseId={caseId} chooseCase={chooseCase} />
         )}
-        <div className="hidden shrink-0 items-center gap-2 text-xs text-white/66 lg:flex">
-          <MousePointer2 className="size-3" aria-hidden="true" />
-          Drag to turn it. Scroll or pinch to zoom.
-        </div>
       </div>
 
       <div className="volume-grid relative min-h-0 flex-1 overflow-hidden">
@@ -656,6 +527,7 @@ function ModelWorkspace({
               zoomRequest={zoomRequest}
               onUserRotate={onUserRotate}
               slicePlane={building ? null : slicePlane}
+              onNoWebgl={onNoWebgl}
             />
           ) : (
             <KidneyScene
@@ -668,12 +540,24 @@ function ModelWorkspace({
               resetNonce={resetNonce}
               zoomRequest={zoomRequest}
               onUserRotate={onUserRotate}
-              trainingStep={mode === 'learn' ? trainingStep : -1}
+              onNoWebgl={onNoWebgl}
             />
           )}
         </Suspense>
 
-        <ViewToolbar preset={preset} choosePreset={choosePreset} resetView={resetView} onSnapshot={snapshot} />
+        {rebuilding ? (
+          <output className="absolute inset-0 z-[5] grid place-items-center bg-black/60 text-sm text-white/85">
+            Building…
+          </output>
+        ) : null}
+
+        <ViewToolbar
+          preset={preset}
+          choosePreset={choosePreset}
+          resetView={resetView}
+          onSnapshot={snapshot}
+          disabled={noWebgl}
+        />
 
         <div className="viewer-chips">
           <div className="viewer-chip">
@@ -685,13 +569,6 @@ function ModelWorkspace({
             {building ? 'Nothing uploaded' : activeCase ? 'De-identified public data' : 'No patient data'}
           </div>
         </div>
-
-        {mode === 'learn' ? (
-          <output className="training-hotspot">
-            <span className="hotspot-pulse" />
-            <span className="text-xs text-white/85">{`Step ${trainingStep + 1}: ${trainingSteps[trainingStep].short}`}</span>
-          </output>
-        ) : null}
 
         {handRotated ? null : (
           <div className="orientation-axis" title={axes.words}>
@@ -713,6 +590,7 @@ function ModelWorkspace({
               min="0"
               max="100"
               value={clipPercent}
+              disabled={noWebgl}
               onChange={(event) => setClipPercent(Number(event.target.value))}
               className="range-control w-28 sm:w-36"
             />
@@ -720,10 +598,10 @@ function ModelWorkspace({
           </div>
           {/* Buttons as well as the wheel and pinch, for keyboard users and anyone who can't pinch. */}
           <div className="flex items-center gap-1">
-            <button type="button" className="icon-button" onClick={() => zoom(1)} aria-label="Zoom in" title="Zoom in">
+            <button type="button" className="icon-button" onClick={() => zoom(1)} disabled={noWebgl} aria-label="Zoom in" title="Zoom in">
               <ZoomIn className="size-4" aria-hidden="true" />
             </button>
-            <button type="button" className="icon-button" onClick={() => zoom(-1)} aria-label="Zoom out" title="Zoom out">
+            <button type="button" className="icon-button" onClick={() => zoom(-1)} disabled={noWebgl} aria-label="Zoom out" title="Zoom out">
               <ZoomOut className="size-4" aria-hidden="true" />
             </button>
           </div>
@@ -746,26 +624,7 @@ function ModelWorkspace({
       </div>
 
       <div className="viewer-statusbar">
-        {mode === 'learn' ? (
-          <>
-            <p>{`Lesson step ${trainingStep + 1} of ${trainingSteps.length}: ${trainingSteps[trainingStep].title}`}</p>
-            {/* A button, not a #hash link: the site uses the hash to decide which view to show. */}
-            <button
-              type="button"
-              className="viewer-jump"
-              onClick={() => {
-                const panel = document.getElementById('lesson-panel');
-                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                panel?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-                panel?.querySelector<HTMLElement>('#lesson-question')?.focus({ preventScroll: true });
-              }}
-            >
-              Question below <ArrowDown className="size-3" aria-hidden="true" />
-            </button>
-          </>
-        ) : (
-          <p>{building ? builtLine : caseSummary(activeCase)}</p>
-        )}
+        <p>{rebuilding ? 'Building…' : building ? builtLine : caseSummary(activeCase)}</p>
       </div>
     </section>
   );
@@ -786,7 +645,7 @@ function PlanningInspector({
   setMarginMm: (value: number) => void;
   ct: CtControls;
 }) {
-  // Only Kidneys A to E have a CT. The teaching kidney falls back to its scores.
+  // Only Kidneys A to E have a CT. The hand-made kidney falls back to its scores.
   const tab: InspectorTab = requestedTab === 'ct' && !activeCase ? 'scores' : requestedTab;
   const tabs: Array<{ id: InspectorTab; label: string }> = [
     { id: 'source', label: 'About' },
@@ -917,14 +776,14 @@ function PlanningInspector({
               <p className="section-label">Where this model comes from</p>
               <div className="mt-3 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-white/90">The teaching kidney</p>
+                  <p className="text-sm font-medium text-white/90">Hand-made kidney</p>
                   <Badge className="border-white/10 bg-white/5 text-[11px] text-white/80" variant="outline">
                     Hand-made
                   </Badge>
                 </div>
                 <p className="mt-2 text-xs leading-5 text-white/75">
-                  I built this right kidney in code to teach with: a tumour, arteries, veins and a collecting
-                  system. It isn’t from a scan, and there’s no patient data in it.
+                  A right kidney made in code, with a tumour, arteries, veins and a collecting system. Not from a
+                  scan; no patient data.
                 </p>
               </div>
               <dl className="definition-list mt-5">
@@ -1009,8 +868,7 @@ function PlanningInspector({
               </dl>
               <div className="mt-5 rounded-xl border border-white/8 bg-white/[.025] p-3.5">
                 <p className="text-xs leading-5 text-white/75">
-                  I set these numbers to match the model, and the score adds up from them. Pick one of Kidneys A
-                  to E for scores the pipeline computed, or make your own kidney from an outline.
+                  Set by hand to match the model. Kidneys A to E have computed scores.
                 </p>
               </div>
             </>
@@ -1035,7 +893,7 @@ function PlanningInspector({
             <p className="section-label">Kidney kept</p>
             {activeCase && n ? (
               <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
-                <p className="text-[11px] uppercase tracking-[.1em] text-white/66">Kept at a 5 mm margin</p>
+                <p className="text-[11px] uppercase tracking-[.1em] text-white/66">At a 5 mm margin</p>
                 <p className="mt-1 font-mono text-xl text-white/90">{percent(n.preservedFraction)}</p>
                 <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/6">
                   <div
@@ -1044,13 +902,11 @@ function PlanningInspector({
                   />
                 </div>
                 <p className="mt-3 text-xs leading-5 text-white/75">
-                  The share of this kidney outside a uniform 5 mm band round the tumour, from renalplan. Real
-                  partial nephrectomies usually lose more, through the renorrhaphy and devascularised tissue, so
-                  expect the real figure to be lower.
+                  Parenchyma outside a uniform 5 mm band round the tumour, as a share of the tumour-side kidney,
+                  from renalplan. Volume, not function. Enucleation takes less; renorrhaphy and devascularised
+                  tissue take more.
                 </p>
-                <p className="mt-2 text-xs leading-5 text-white/75">
-                  The pipeline only ran a 5 mm margin, so there’s no margin slider for this kidney.
-                </p>
+                <p className="mt-2 text-xs leading-5 text-white/75">No slider here: the pipeline only ran 5 mm.</p>
               </div>
             ) : (
               <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
@@ -1068,8 +924,8 @@ function PlanningInspector({
                   className="range-control mt-2 w-full"
                 />
                 <p className="mt-3 text-xs leading-5 text-white/75">
-                  The slider redraws the shell round the tumour, to scale. The teaching kidney has no volume
-                  calculation, so there’s no kept-kidney figure for it.
+                  The slider redraws the margin shell to scale. Hand-made kidney, so no volumes and no kept
+                  figure.
                 </p>
               </div>
             )}
@@ -1088,7 +944,7 @@ function PlanningInspector({
                     'It can’t export a plan.',
                   ]
                 : [
-                    'Everything in it, including the measurements, is made up to teach with.',
+                    'Everything in it, including the measurements, is made up.',
                     'The vessels and collecting system are drawn by hand, not taken from a scan.',
                     'It can’t export a plan.',
                   ]
@@ -1102,134 +958,6 @@ function PlanningInspector({
           </>
         ) : null}
       </div>
-    </aside>
-  );
-}
-
-function TrainingPanel({
-  step,
-  setStep,
-  answers,
-  setAnswers,
-}: {
-  step: number;
-  setStep: (value: number) => void;
-  answers: Record<number, number>;
-  setAnswers: Dispatch<SetStateAction<Record<number, number>>>;
-}) {
-  const lesson = trainingSteps[step];
-  const selected = answers[step];
-  const answered = selected !== undefined;
-  const lastStep = step === trainingSteps.length - 1;
-  const score = Object.entries(answers).filter(([index, value]) => trainingSteps[Number(index)].correct === value).length;
-  const questionRef = useRef<HTMLParagraphElement>(null);
-
-  // The button just pressed can end up disabled or removed on the new step,
-  // which drops focus. Move it to the new question once React has drawn it.
-  const goToStep = (next: number) => {
-    setStep(next);
-    requestAnimationFrame(() => questionRef.current?.focus());
-  };
-
-  return (
-    <aside className="workspace-sidebar right-sidebar" id="lesson-panel">
-      <div className="flex items-center justify-between">
-        <p className="section-label">The lesson</p>
-        <span className="font-mono text-xs text-white/66">
-          {step + 1} of {trainingSteps.length}
-        </span>
-      </div>
-      <h2 className="mt-3 text-lg font-semibold tracking-tight text-white/90">{lesson.title}</h2>
-      <p className="mt-2 text-xs leading-5 text-white/75">{lesson.instruction}</p>
-
-      <div className="mt-5 border-t border-white/8 pt-5">
-        <p id="lesson-question" ref={questionRef} tabIndex={-1} className="text-sm font-medium leading-5 text-white/88 outline-none">
-          {lesson.question}
-        </p>
-        <fieldset className="mt-3 min-w-0 space-y-2" aria-labelledby="lesson-question">
-          {lesson.options.map((option, index) => {
-            const isSelected = selected === index;
-            const isCorrect = answered && index === lesson.correct;
-            const isWrong = answered && isSelected && index !== lesson.correct;
-            return (
-              <button
-                key={option}
-                type="button"
-                // aria-disabled, not disabled, so focus stays on the button after answering.
-                aria-disabled={answered}
-                aria-pressed={isSelected}
-                onClick={() => {
-                  if (!answered) setAnswers((current) => ({ ...current, [step]: index }));
-                }}
-                className={`answer-option ${isCorrect ? 'answer-correct' : ''} ${isWrong ? 'answer-wrong' : ''}`}
-              >
-                <span className="grid size-5 shrink-0 place-items-center rounded-full border border-white/15 font-mono text-[11px]">
-                  {isCorrect ? <Check className="size-3" aria-hidden="true" /> : String.fromCharCode(65 + index)}
-                </span>
-                <span>{option}</span>
-              </button>
-            );
-          })}
-        </fieldset>
-      </div>
-
-      {/* Always in the page, so screen readers announce the feedback when it's filled in. */}
-      <output
-        className={
-          answered
-            ? `mt-4 block rounded-xl border p-3.5 ${selected === lesson.correct ? 'border-emerald-200/10 bg-emerald-200/[.035]' : 'border-amber-200/10 bg-amber-200/[.03]'}`
-            : 'sr-only'
-        }
-      >
-        {answered ? (
-          <>
-            <span className="block text-xs font-semibold text-white/85">
-              {selected === lesson.correct ? 'Right' : 'Not quite'}
-            </span>
-            <span className="mt-2 block text-xs leading-5 text-white/75">{lesson.rationale}</span>
-          </>
-        ) : null}
-      </output>
-
-      <div className="mt-5 flex gap-2">
-        <Button
-          className="border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
-          variant="outline"
-          disabled={step === 0}
-          onClick={() => goToStep(Math.max(0, step - 1))}
-        >
-          Previous
-        </Button>
-        {lastStep ? null : (
-          <Button
-            className="flex-1 bg-sky-300 text-[#061b1c] hover:bg-sky-200"
-            disabled={!answered}
-            onClick={() => goToStep(step + 1)}
-          >
-            Next question <ArrowRight />
-          </Button>
-        )}
-      </div>
-
-      <p className="mt-4 text-[11px] text-white/62">{`Score so far: ${score} of ${Object.keys(answers).length} answered`}</p>
-
-      {lastStep && answered ? (
-        <div className="mt-4 rounded-xl border border-white/8 bg-white/[.025] p-3.5">
-          <p className="text-xs leading-5 text-white/80">
-            {`You got ${score} of ${trainingSteps.length}. If a question is wrong or too easy, tell me.`}
-          </p>
-          <Button
-            className="mt-3 w-full text-white/75 hover:bg-white/5 hover:text-white"
-            variant="ghost"
-            onClick={() => {
-              setAnswers({});
-              goToStep(0);
-            }}
-          >
-            <RotateCcw /> Start again
-          </Button>
-        </div>
-      ) : null}
     </aside>
   );
 }
@@ -1287,9 +1015,8 @@ function DisclaimerDialog({ onClose }: { onClose: () => void }) {
             and the numbers may be incomplete or wrong.
           </p>
           <p className="mt-3 text-sm leading-6 text-white/78">
-            It’s for teaching and research: the teaching kidney, the five de-identified KiTS23 kidneys A to E,
-            and kidneys built in this tab from an outline you load. Those are built on your computer, and
-            nothing is uploaded.
+            It covers a hand-made kidney, five de-identified KiTS23 kidneys (A to E) and kidneys built in this
+            tab from your own outline.
           </p>
         </div>
         <Button className="mt-6 w-full bg-emerald-300 text-[#052117] hover:bg-emerald-200" onClick={onClose}>
@@ -1314,37 +1041,37 @@ function rememberMode(mode: WorkspaceMode, hash?: string) {
 }
 
 function knownCaseId(id: string | undefined) {
-  return id && referenceCases.some((item) => item.id === id) ? id : TEACHING_CASE_ID;
+  return id && referenceCases.some((item) => item.id === id) ? id : HAND_MADE_CASE_ID;
 }
 
 /** The viewer's address for a kidney. `?ct` opens Kidneys A to E on the CT tab. */
 function caseHash(id: string, ct = false) {
-  if (id === TEACHING_CASE_ID) return '#workspace';
+  if (id === HAND_MADE_CASE_ID) return '#workspace';
   return ct ? `#workspace/${id}?ct` : `#workspace/${id}`;
 }
 
 export function RenalPlatform({
   onExit,
   initialMode = 'plan',
-  initialCaseId = TEACHING_CASE_ID,
+  initialCaseId = HAND_MADE_CASE_ID,
   startWithSample = false,
   startOnCt = false,
+  kidneyNotFound = false,
 }: {
   onExit?: () => void;
   initialMode?: WorkspaceMode;
-  /** 'synthetic' for the teaching kidney, or a KiTS23 kidney id such as 'reference-a'. */
+  /** 'synthetic' for the hand-made kidney, or a KiTS23 kidney id such as 'reference-a'. */
   initialCaseId?: string;
   /** Build the synthetic sample as soon as the builder opens. */
   startWithSample?: boolean;
   /** Open a KiTS23 kidney on its CT tab. */
   startOnCt?: boolean;
+  /** The address named a kidney that doesn't exist, so the hand-made one opened instead. */
+  kidneyNotFound?: boolean;
 }) {
   const [mode, setMode] = useState<WorkspaceMode>(initialMode);
   const [layers, setLayers] = useState<AnatomyLayers>(ALL_LAYERS);
-  // The lesson always runs on the teaching kidney.
-  const [caseId, setCaseId] = useState<string>(() =>
-    initialMode === 'learn' ? TEACHING_CASE_ID : knownCaseId(initialCaseId),
-  );
+  const [caseId, setCaseId] = useState<string>(() => knownCaseId(initialCaseId));
   const activeCase = useMemo(
     () => referenceCases.find((item) => item.id === caseId) ?? null,
     [caseId],
@@ -1381,16 +1108,18 @@ export function RenalPlatform({
   const [resetNonce, setResetNonce] = useState(0);
   const [handRotated, setHandRotated] = useState(false);
   const [inspectorTab, setInspectorTabState] = useState<InspectorTab>(() =>
-    startOnCt && initialMode === 'plan' && knownCaseId(initialCaseId) !== TEACHING_CASE_ID ? 'ct' : 'scores',
+    startOnCt && initialMode === 'plan' && knownCaseId(initialCaseId) !== HAND_MADE_CASE_ID ? 'ct' : 'scores',
   );
   // The CT: one slice remembered per kidney, starting on the tumour.
   const [ctIndexByCase, setCtIndexByCase] = useState<Record<string, number>>({});
   const [ctOutlines, setCtOutlines] = useState(true);
   // A built kidney has no CT, so its panel has no CT tab.
   const [builtTab, setBuiltTab] = useState<Exclude<InspectorTab, 'ct'>>('scores');
-  const [trainingStep, setTrainingStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [notFoundNotice, setNotFoundNotice] = useState(kidneyNotFound);
+  // WebGL is the browser's, not the kidney's, so once missing it stays missing.
+  const [noWebgl, setNoWebgl] = useState(false);
+  const onNoWebgl = useCallback(() => setNoWebgl(true), []);
   const [zoomRequest, setZoomRequest] = useState<ZoomRequest>(NO_ZOOM);
   const shellRef = useRef<HTMLDivElement>(null);
 
@@ -1499,6 +1228,7 @@ export function RenalPlatform({
 
   const chooseCase = useCallback((id: string) => {
     setCaseId(id);
+    setNotFoundNotice(false);
     // The new scene starts in the selected view, so the axes are right again.
     setHandRotated(false);
     // Keep the address in step, so a reload or a shared link opens the same kidney.
@@ -1511,20 +1241,13 @@ export function RenalPlatform({
   }, [inspectorTab]);
 
   const changeMode = (next: WorkspaceMode) => {
-    rememberMode(
-      next,
-      next === 'build' ? BUILD_HASH : caseHash(next === 'learn' ? TEACHING_CASE_ID : caseId, inspectorTab === 'ct'),
-    );
-    if (next === 'learn') {
-      // The lesson needs the teaching kidney's vessels and collecting system.
-      chooseCase(TEACHING_CASE_ID);
-      setLayers(ALL_LAYERS);
-    }
+    rememberMode(next, next === 'build' ? BUILD_HASH : caseHash(caseId, inspectorTab === 'ct'));
     setHandRotated(false);
     setMode(next);
   };
 
   const building = mode === 'build';
+  const rebuilding = building && builtOutput !== null && builder.state.status === 'running';
   const announcement =
     building && builder.state.status !== 'idle' && builder.state.status !== 'error' ? builder.state.message : '';
 
@@ -1556,7 +1279,6 @@ export function RenalPlatform({
         <nav className="mode-nav" aria-label="Viewer modes">
           <ModeButton active={building} icon={<Wand2 className="size-3.5" />} label="Make a 3D kidney" onClick={() => changeMode('build')} />
           <ModeButton active={mode === 'plan'} icon={<Box className="size-3.5" />} label="Kidneys" onClick={() => changeMode('plan')} />
-          <ModeButton active={mode === 'learn'} icon={<BookOpen className="size-3.5" />} label="Lesson" onClick={() => changeMode('learn')} />
         </nav>
 
         <div className="flex items-center justify-end gap-2">
@@ -1589,6 +1311,15 @@ export function RenalPlatform({
         <button type="button" onClick={() => setShowDisclaimer(true)}>Details</button>
       </div>
 
+      {notFoundNotice && !building ? (
+        <output className="viewer-notice">
+          Kidney not found; showing the hand-made kidney.
+          <button type="button" onClick={() => setNotFoundNotice(false)} aria-label="Dismiss">
+            <X className="size-3.5" aria-hidden="true" />
+          </button>
+        </output>
+      ) : null}
+
       <main className="workspace-grid">
         {building ? (
           builtOutput ? (
@@ -1607,7 +1338,6 @@ export function RenalPlatform({
           )
         ) : (
           <CaseSidebar
-            mode={mode}
             activeCase={activeCase}
             referenceVisible={referenceVisible}
             setReferenceVisible={setReferenceVisible}
@@ -1615,8 +1345,6 @@ export function RenalPlatform({
             setLayers={setLayers}
             kidneyOpacity={kidneyOpacity}
             setKidneyOpacity={setKidneyOpacity}
-            trainingStep={trainingStep}
-            answers={answers}
           />
         )}
 
@@ -1647,12 +1375,14 @@ export function RenalPlatform({
             zoom={zoom}
             handRotated={handRotated}
             onUserRotate={onUserRotate}
-            trainingStep={trainingStep}
             slicePlane={slicePlane}
+            rebuilding={rebuilding}
+            noWebgl={noWebgl}
+            onNoWebgl={onNoWebgl}
           />
         )}
 
-        {mode === 'plan' ? (
+        {!building ? (
           <PlanningInspector
             tab={inspectorTab}
             setTab={setInspectorTab}
@@ -1668,14 +1398,10 @@ export function RenalPlatform({
               setOutlines: setCtOutlines,
             }}
           />
-        ) : building ? (
-          builtOutput ? (
-            <BuiltInspector output={builtOutput} tab={builtTab} setTab={setBuiltTab} />
-          ) : (
-            <BuildPrivacyPanel />
-          )
+        ) : builtOutput ? (
+          <BuiltInspector output={builtOutput} tab={builtTab} setTab={setBuiltTab} building={rebuilding} />
         ) : (
-          <TrainingPanel step={trainingStep} setStep={setTrainingStep} answers={answers} setAnswers={setAnswers} />
+          <BuildPrivacyPanel />
         )}
       </main>
 

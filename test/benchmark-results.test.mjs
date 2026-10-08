@@ -388,6 +388,19 @@ test('the rest of the site copy avoids en and em dashes too', async () => {
   }
 });
 
+// The lesson was taken out in October 2026. The hand-made kidney stays as a model.
+test('the lesson is gone and the hand-made kidney is not framed as teaching', async () => {
+  const siteText = await readFile(new URL('../components/renal-site.tsx', import.meta.url), 'utf8');
+  const sceneText = await readFile(new URL('../components/kidney-scene.tsx', import.meta.url), 'utf8');
+  for (const text of [siteText, platformText, sceneText]) {
+    assert.doesNotMatch(text, /'learn'|trainingStep|TrainingPanel|lessonSteps/);
+    assert.doesNotMatch(text, /teaching kidney/i);
+  }
+  assert.doesNotMatch(platformText, /label="Lesson"/);
+  assert.doesNotMatch(stylesheetText, /\.teaching-lesson|\.lesson-steps|\.training-hotspot|\.answer-option/);
+  assert.match(siteText, /A right kidney with an interpolar tumour, made in code\./);
+});
+
 test('pipeline section states its limits and links nothing private', () => {
   assert.doesNotMatch(pipelineComponentText, /under a minute/i);
   assert.doesNotMatch(pipelineComponentText, /laptop/i);

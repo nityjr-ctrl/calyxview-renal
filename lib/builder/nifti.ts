@@ -88,8 +88,15 @@ export function parseNifti(buffer: ArrayBuffer): NiftiVolume {
   const type = TYPES[datatype];
   if (!type) throw new NiftiError(`Voxel type ${datatype} isn’t supported. Use 8, 16 or 32-bit integers, or float32.`);
   const pixdim = [f32(76), f32(80), f32(84), f32(88)];
-  const offset = Math.max(352, Math.round(f32(108)));
+  // vox_offset feeds a slice length, so a NaN, infinite or negative value is a
+  // damaged header, not "start at 352".
+  const voxOffset = f32(108);
+  if (!Number.isFinite(voxOffset) || voxOffset < 0 || voxOffset > buffer.byteLength) {
+    throw new NiftiError('The NIfTI header is damaged (its voxel offset is invalid).');
+  }
+  const offset = Math.max(352, Math.round(voxOffset));
   const count = dims[0] * dims[1] * dims[2];
+  if (!Number.isSafeInteger(count * type.bytes)) throw new NiftiError('The image size in the header is invalid.');
   if (offset + count * type.bytes > buffer.byteLength) {
     throw new NiftiError('The file ends before all the voxels. It may be truncated.');
   }
@@ -135,7 +142,25 @@ export function parseNifti(buffer: ArrayBuffer): NiftiVolume {
     affineSource = 'pixdim';
   }
   if (affine.some((value) => !Number.isFinite(value))) throw new NiftiError('The header’s orientation is invalid.');
+  if (!affineUsable(affine)) throw new NiftiError(INVALID_AFFINE);
   return { dims, data: scaled, affine, affineSource, datatype, scale: { slope, intercept } };
+}
+
+export const INVALID_AFFINE = 'This file’s orientation matrix is invalid (zero spacing).';
+
+/**
+ * Every voxel axis needs a length, and the three axes must span 3D space:
+ * a zero column or a zero determinant would give zero or infinite spacing.
+ */
+export function affineUsable(affine: Affine): boolean {
+  const column = (c: number) => Math.hypot(affine[c], affine[4 + c], affine[8 + c]);
+  const lengths = [column(0), column(1), column(2)];
+  if (lengths.some((length) => !(length > 1e-6))) return false;
+  const det =
+    affine[0] * (affine[5] * affine[10] - affine[6] * affine[9]) -
+    affine[1] * (affine[4] * affine[10] - affine[6] * affine[8]) +
+    affine[2] * (affine[4] * affine[9] - affine[5] * affine[8]);
+  return Math.abs(det) > 1e-6 * lengths[0] * lengths[1] * lengths[2];
 }
 
 function readVoxels(buffer: ArrayBuffer, offset: number, count: number, datatype: number, little: boolean): NiftiVolume['data'] {

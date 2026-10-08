@@ -14,7 +14,6 @@ import {
   FileUp,
   Info,
   LoaderCircle,
-  LockKeyhole,
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
@@ -25,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import type { SceneCase } from '@/components/reference-case-scene';
 import { ApproachNotes, LayerButton, Metric } from '@/components/viewer-ui';
 import type { BuildOutput, Stage, StructureMesh } from '@/lib/builder/build';
-import { BROWSER_DIFFERENCES, ESTIMATE_LINE, reportJson, reportMarkdown } from '@/lib/builder/report';
+import { BROWSER_DIFFERENCES, ESTIMATE_LINE, keptPercent, reportJson, reportMarkdown } from '@/lib/builder/report';
 import type { FromWorker, ToWorker } from '@/lib/builder/protocol';
 
 const KITS23_URL = 'https://github.com/neheller/kits23';
@@ -315,6 +314,9 @@ export function BuildControls({
     const file = event.target.files?.[0];
     // Clear the input straight away so the browser drops its reference too.
     event.target.value = '';
+    // The input is disabled during a build; this also drops any change event
+    // that still reaches it then.
+    if (running) return;
     if (file) void builder.buildFile(file, marginMm);
   };
 
@@ -403,16 +405,12 @@ export function BuildIntro({
   return (
     <section className="import-workspace" aria-labelledby="build-title">
       <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-10">
-        <Badge className="border-emerald-200/10 bg-emerald-200/[.04] text-[11px] text-emerald-100/85" variant="outline">
-          Runs in this tab. Nothing is uploaded.
-        </Badge>
-        <h1 id="build-title" className="mt-4 max-w-xl text-2xl font-semibold tracking-[-.03em] text-white/92 sm:text-3xl">
+        <h1 id="build-title" className="max-w-xl text-2xl font-semibold tracking-[-.03em] text-white/92 sm:text-3xl">
           Make a 3D kidney from an outline
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">
-          Load a label map of the kidney and tumour. The builder makes the surfaces, works out R.E.N.A.L. and
-          PADUA with the same rules as my renalplan pipeline, and lets you download the model and a report.
-          Or try the sample, a synthetic kidney with a lower-pole tumour, to see it work without a file.
+          Takes a kidney and tumour label map. Returns the 3D model, R.E.N.A.L. and PADUA by renalplan&apos;s
+          rules, and the model and a report to download. Runs in this tab; nothing is uploaded.
         </p>
 
         <div className="mt-6 rounded-xl border border-white/9 bg-white/[.025] p-4 sm:p-5">
@@ -445,8 +443,9 @@ export function BuildIntro({
             <div>
               <p className="text-sm font-medium text-white/88">Build the surfaces. Done here.</p>
               <p className="mt-1 text-xs leading-5 text-white/72">
-                Each structure becomes a distance field, resampled to 1 mm cubes so thick slices don&apos;t
-                show as steps, then marching cubes and light smoothing. The scores use the original voxels,
+                Each structure becomes a distance field, resampled to a 1 mm grid, coarser for very large
+                volumes (the report says the grid used), so thick slices don&apos;t show as steps, then
+                marching cubes and light smoothing. The scores use the original voxels,
                 not the surfaces. With two kidneys in the file, the one nearest the tumour is scored and
                 the other is shown faintly.
               </p>
@@ -478,8 +477,8 @@ export function BuildIntro({
           <div className="flex gap-3">
             <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-200/80" aria-hidden="true" />
             <p className="text-xs leading-5 text-white/78">
-              Not validated, and not a medical device. The scores follow published rules, but nobody has yet
-              compared them with clinicians&apos; scoring. Don&apos;t use them for a real patient.
+              Not validated. The scores follow published rules but haven&apos;t been compared with
+              clinicians&apos; scoring.
             </p>
           </div>
         </div>
@@ -510,15 +509,6 @@ export function BuildStepsSidebar() {
           </li>
         ))}
       </ol>
-      <div className="mt-5 border-t border-white/8 pt-5">
-        <div className="flex items-center gap-2 text-xs text-emerald-100/85">
-          <LockKeyhole className="size-3.5" aria-hidden="true" />
-          Nothing leaves this computer
-        </div>
-        <p className="mt-2 text-xs leading-5 text-white/70">
-          The file is read into this tab&apos;s memory and goes when you close the tab.
-        </p>
-      </div>
     </aside>
   );
 }
@@ -527,41 +517,25 @@ export function BuildPrivacyPanel() {
   return (
     <aside className="workspace-sidebar right-sidebar">
       <p className="section-label">What the builder does with your file</p>
-      <div className="mt-4 space-y-3">
+      <ul className="mt-4 space-y-3">
         {[
-          [
-            'Reads the whole file, in memory',
-            'The label map is read into this tab and passed to a background worker in the same tab. The page makes no upload request and has no server to send it to.',
-          ],
-          [
-            'Keeps nothing',
-            'No file name, no browser storage. Load another file or close the tab and it’s gone. Downloads are named calyxview-renal, never after your file.',
-          ],
-          [
-            'Reads outlines only',
-            'Not DICOM, and not CT. A file that looks like a CT, with negative values or more than 20 different values, is refused.',
-          ],
-          [
-            'Leaves the header text alone',
-            'A NIfTI header has a free-text description that can carry identifiers. The builder doesn’t read it or copy it into anything it saves.',
-          ],
-        ].map(([title, body]) => (
-          <div key={title} className="flex gap-3">
+          'Read into this tab’s memory. No upload request, no server.',
+          'Nothing kept: no file name, no browser storage. Downloads are named calyxview-renal.',
+          'Outlines only. Not DICOM; a file that looks like CT is refused.',
+          'The NIfTI header’s free-text description is not read or copied.',
+        ].map((fact) => (
+          <li key={fact} className="flex gap-3">
             <CircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-300/80" aria-hidden="true" />
-            <div>
-              <p className="text-xs font-medium text-white/85">{title}</p>
-              <p className="mt-1 text-xs leading-5 text-white/72">{body}</p>
-            </div>
-          </div>
+            <p className="text-xs leading-5 text-white/85">{fact}</p>
+          </li>
         ))}
-      </div>
+      </ul>
 
       <div className="mt-5 rounded-xl border border-amber-200/12 bg-amber-200/[.035] p-3.5">
         <p className="text-xs font-medium text-amber-50/90">Use outlines you’re allowed to use here</p>
         <p className="mt-1.5 text-xs leading-5 text-white/75">
-          Nothing is uploaded, but your organisation&apos;s rules on patient data still apply on this computer.
-          Use public, synthetic or properly de-identified outlines. Taking the name out of a header isn&apos;t
-          enough to de-identify a scan.
+          Your organisation&apos;s rules on patient data apply on this computer. Use public, synthetic or
+          properly de-identified outlines; removing the name from a header doesn&apos;t de-identify a scan.
         </p>
       </div>
 
@@ -594,6 +568,31 @@ const faceWords: Record<string, string> = { a: 'anterior (a)', p: 'posterior (p)
 const poleWords: Record<string, string> = { superior: 'upper pole', inferior: 'lower pole', middle: 'between the poles' };
 
 const capitalise = (value: string) => (value ? value.charAt(0).toUpperCase() + value.slice(1) : value);
+
+/** The build's warnings, above anything they qualify. */
+function Warnings({ warnings, className = '' }: { warnings: string[]; className?: string }) {
+  if (!warnings.length) return null;
+  return (
+    <ul className={`build-warnings space-y-2 ${className}`} aria-label="Warnings">
+      {warnings.map((warning) => (
+        <li key={warning} className="flex gap-2 rounded-lg border border-amber-200/25 bg-amber-200/[.07] p-2.5">
+          <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-200/90" aria-hidden="true" />
+          <span className="text-xs font-medium leading-5 text-amber-50/95">{warning}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Shown in place of the last kidney's numbers while a new one builds. */
+function Building() {
+  return (
+    <output className="mt-4 flex items-center gap-2 text-xs text-white/75">
+      <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
+      Building…
+    </output>
+  );
+}
 const pct = (fraction: number, digits = 1) => `${(fraction * 100).toFixed(digits)}%`;
 
 export function BuiltSidebar({
@@ -618,6 +617,8 @@ export function BuiltSidebar({
   const { report } = output;
   const [exporting, setExporting] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  // While a new file builds, the last kidney's numbers and layers stand down.
+  const building = builder.state.status === 'running';
 
   const run = async (kind: string, job: () => Promise<void> | void) => {
     setExporting(kind);
@@ -637,16 +638,20 @@ export function BuiltSidebar({
         <div>
           <p className="section-label">Built in this tab</p>
           <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">
-            {report.source === 'sample' ? 'Synthetic sample' : 'Your outline'}
+            {building ? 'New outline' : report.source === 'sample' ? 'Synthetic sample' : 'Your outline'}
           </h1>
           <p className="mt-1 text-xs leading-5 text-white/70">
-            {`${(report.totalMs / 1000).toFixed(1)} s, nothing uploaded`}
+            {building ? 'Building…' : `${(report.totalMs / 1000).toFixed(1)} s`}
           </p>
         </div>
         <span className="status-dot mt-1" aria-hidden="true" />
       </div>
 
-      {report.renal && report.padua ? (
+      {building ? null : <Warnings warnings={report.warnings} className="mt-4" />}
+
+      {building ? (
+        <Building />
+      ) : report.renal && report.padua ? (
         <>
           <div className="mt-5 grid grid-cols-2 gap-2">
             <Metric label="R.E.N.A.L." value={report.renal.label} detail={capitalise(report.renal.complexity)} />
@@ -661,7 +666,7 @@ export function BuiltSidebar({
       <div className="mt-6 flex items-center justify-between">
         <p className="section-label">Layers</p>
       </div>
-      <div className="mt-2 space-y-0.5">
+      <div className={`mt-2 space-y-0.5 ${building ? 'pointer-events-none opacity-35' : ''}`} aria-hidden={building || undefined}>
         {output.meshes.map((mesh) => (
           <LayerButton
             key={mesh.name}
@@ -705,7 +710,10 @@ export function BuiltSidebar({
 
       <div className="mt-5 border-t border-white/8 pt-5">
         <p className="section-label">Download</p>
-        <p className="mt-2 text-[11px] leading-4 text-white/62">The 3D files hold the layers that are switched on.</p>
+        <p className="mt-2 text-[11px] leading-4 text-white/62">
+          The 3D files hold the layers that are switched on. GLB is metres, y-up, centred, for general viewers; STL
+          is RAS millimetres.
+        </p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           {(
             [
@@ -720,7 +728,7 @@ export function BuiltSidebar({
               className="border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
               size="sm"
               variant="outline"
-              disabled={exporting !== null}
+              disabled={exporting !== null || building}
               focusableWhenDisabled
               onClick={() => void run(label, job)}
             >
@@ -760,10 +768,13 @@ export function BuiltInspector({
   output,
   tab,
   setTab,
+  building = false,
 }: {
   output: BuildOutput;
   tab: InspectorTab;
   setTab: (tab: InspectorTab) => void;
+  /** A new build is running, so the last kidney's numbers are hidden. */
+  building?: boolean;
 }) {
   const tabs: Array<{ id: InspectorTab; label: string }> = [
     { id: 'source', label: 'About' },
@@ -811,7 +822,8 @@ export function BuiltInspector({
       </div>
 
       <div id="built-panel" className="inspector-content" role="tabpanel" aria-labelledby={`built-tab-${tab}`}>
-        {tab === 'source' ? (
+        {building ? <Building /> : null}
+        {!building && tab === 'source' ? (
           <>
             <p className="section-label">Where this model comes from</p>
             <div className="mt-3 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
@@ -826,7 +838,7 @@ export function BuiltInspector({
               <p className="mt-2 text-xs leading-5 text-white/75">
                 {report.source === 'sample'
                   ? 'renalplan’s test phantom, made in this tab: two ellipsoid kidneys with a sinus concavity, a 3 cm lower-pole tumour on the right kidney and a small cyst on the left. No patient data.'
-                  : 'Built in this tab from the label map you loaded. The file wasn’t uploaded and isn’t kept.'}
+                  : 'Built from the label map you loaded. The file isn’t kept.'}
               </p>
             </div>
             <dl className="definition-list mt-5">
@@ -840,8 +852,17 @@ export function BuiltInspector({
                   <dd>{`${label.name}, ${label.ml.toFixed(1)} ml`}</dd>
                 </div>
               ))}
-              <div><dt>Surfaces</dt><dd>Smoothed distance field on a 1 mm grid, marching cubes, 5 Taubin passes</dd></div>
-              <div><dt>Rules</dt><dd>{report.rulesFrom}, ported to the browser</dd></div>
+              <div>
+                <dt>Surfaces</dt>
+                <dd>
+                  Smoothed distance field on a 1 mm grid, coarser for very large volumes (the report says the grid
+                  used), marching cubes, 5 Taubin passes
+                </dd>
+              </div>
+              <div>
+                <dt>Rules</dt>
+                <dd>{`${report.rulesFrom}’s rules; raw E and N can differ slightly because the browser’s hull is exact`}</dd>
+              </div>
               <div><dt>Built in</dt><dd>{`${(report.totalMs / 1000).toFixed(1)} s`}</dd></div>
               <div><dt>Clinical review</dt><dd>None</dd></div>
             </dl>
@@ -864,9 +885,10 @@ export function BuiltInspector({
           </>
         ) : null}
 
-        {tab === 'scores' ? (
+        {!building && tab === 'scores' ? (
           r && p && m ? (
             <>
+              <Warnings warnings={report.warnings} className="mb-3" />
               <div className="rounded-xl border border-amber-200/12 bg-amber-200/[.035] p-3">
                 <p className="text-xs leading-5 text-amber-50/90">{ESTIMATE_LINE}</p>
               </div>
@@ -877,7 +899,7 @@ export function BuiltInspector({
                   detail={`R ${r.radiusPoints}, E ${r.exophyticPoints}, N ${r.nearnessPoints}, L ${r.locationPoints}, ${r.complexity}`}
                 />
                 <Metric label="PADUA" value={String(p.total)} detail={capitalise(p.complexity)} />
-                <Metric label="Tumour" value={`${r.radiusCm.toFixed(1)} cm`} detail="Largest diameter" />
+                <Metric label="Tumour" value={`${r.radiusCm.toFixed(2)} cm`} detail="Largest diameter" />
                 <Metric label="Tumour volume" value={`${m.tumourMl.toFixed(1)} ml`} />
               </div>
 
@@ -943,19 +965,23 @@ export function BuiltInspector({
             </>
           ) : (
             <>
+              <Warnings warnings={report.warnings} className="mb-3" />
               <p className="section-label">Not scored</p>
               <p className="mt-3 text-xs leading-5 text-white/75">{report.notScoredReason}</p>
             </>
           )
         ) : null}
 
-        {tab === 'plan' ? (
+        {!building && tab === 'plan' ? (
           <>
+            {report.flags.tumourDetached ? (
+              <Warnings warnings={report.warnings.filter((w) => w.startsWith('The tumour does not touch'))} className="mb-3" />
+            ) : null}
             <p className="section-label">Kidney kept</p>
             {m ? (
               <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
-                <p className="text-[11px] uppercase tracking-[.1em] text-white/66">{`Kept at a ${m.marginMm} mm margin`}</p>
-                <p className="mt-1 font-mono text-xl text-white/90">{pct(m.preservedFraction, 0)}</p>
+                <p className="text-[11px] uppercase tracking-[.1em] text-white/66">{`At a ${m.marginMm} mm margin`}</p>
+                <p className="mt-1 font-mono text-xl text-white/90">{keptPercent(m.preservedFraction, m.parenchymaRemovedMl)}</p>
                 <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/6">
                   <div
                     className="h-full rounded-full bg-emerald-300/70"
@@ -971,11 +997,9 @@ export function BuiltInspector({
                   {m.cystMl > 0 ? <div><dt>Cyst</dt><dd>{`${m.cystMl.toFixed(1)} ml`}</dd></div> : null}
                 </dl>
                 <p className="mt-3 text-xs leading-5 text-white/75">
-                  The share of the tumour-side kidney outside a uniform band round the tumour. It&apos;s volume,
-                  not function, and not a resection plan. Enucleation takes less, and renorrhaphy and
-                  devascularised tissue usually cost more, so expect the real figure to be lower. Change the
-                  margin with the slider on the left.
+                  {`Parenchyma outside a uniform ${m.marginMm} mm band round the tumour, as a share of the tumour-side kidney. Volume, not function, and not a resection plan. Enucleation takes less; renorrhaphy and devascularised tissue take more.`}
                 </p>
+                <p className="mt-2 text-xs leading-5 text-white/75">The margin slider on the left reruns it.</p>
               </div>
             ) : (
               <p className="mt-3 text-xs leading-5 text-white/75">Nothing to plan without a kidney and a tumour.</p>
@@ -984,7 +1008,7 @@ export function BuiltInspector({
           </>
         ) : null}
 
-        {tab === 'limits' ? (
+        {!building && tab === 'limits' ? (
           <>
             <p className="section-label">What this can’t tell you</p>
             <ul className="viewer-limits mt-3">
@@ -1013,6 +1037,6 @@ export function builtSummary(output: BuildOutput): string {
   const { report } = output;
   const name = report.source === 'sample' ? 'Synthetic sample' : 'Your outline';
   if (!report.renal || !report.padua) return `${name}: meshes built, not scored`;
-  return `${name}: R.E.N.A.L. ${report.renal.label} (${report.renal.complexity}), PADUA ${report.padua.total} (${report.padua.complexity}), tumour ${report.renal.radiusCm.toFixed(1)} cm, estimated`;
+  return `${name}: R.E.N.A.L. ${report.renal.label} (${report.renal.complexity}), PADUA ${report.padua.total} (${report.padua.complexity}), tumour ${report.renal.radiusCm.toFixed(2)} cm, estimated`;
 }
 
