@@ -2,6 +2,8 @@
 
 import {
   Activity,
+  ArrowDown,
+  ArrowRight,
   Check,
   CircleAlert,
   FileCheck,
@@ -54,15 +56,6 @@ const CONTACT_EMAIL = 'nity@uroref.com';
 // Kidney C shows the most anatomy round the tumour.
 const HERO_SCAN = '/ct/reference-c/key.webp';
 
-/** The small trailing arrow on links and buttons: → in-page, ↓ down the page, ↗ external. */
-function Arrow({ glyph = '→' }: { glyph?: '→' | '↓' | '↗' }) {
-  return (
-    <span className="link-arrow" aria-hidden="true">
-      {glyph}
-    </span>
-  );
-}
-
 const navLinks = [
   { href: '#build', label: 'Make a 3D kidney' },
   { href: '#kidneys', label: 'Real kidneys' },
@@ -99,25 +92,25 @@ const buildSteps = [
 const studyNeeds = [
   {
     label: 'Research access',
-    body: "An honorary research contract or letter of access, by the trust's R&D route, with the Clinical Director's support.",
+    body: "through whichever route the trust's R&D office uses, for example an honorary research contract or letter of access, with the Clinical Director's support.",
   },
   {
     label: 'Scan export',
-    body: "Coded pre-operative CTs (arterial, nephrographic and, where done, excretory), exported by the PACS team through the trust's de-identification route under the study approval; no PACS or identifiable-record access for me.",
+    body: "a coded export of the cohort's pre-operative CTs (arterial, nephrographic and, where done, excretory phases), made by the PACS team through the trust's de-identification route under the study's approval. I don't need access to PACS or to identifiable records myself.",
   },
   {
     label: 'Cases',
-    body: '30 to 50 consecutive partial nephrectomies, each scored for R.E.N.A.L. and PADUA by two clinicians independently, plus any pre-operative score on record.',
+    body: '30 to 50 consecutive partial nephrectomies, each scored for R.E.N.A.L. and PADUA by two clinicians working independently, plus any score recorded before surgery.',
   },
   {
     label: 'Consultant time',
-    body: 'An hour a fortnight from a consultant urologist or nominee, to check the outlines and 3D models against the scans.',
+    body: 'one hour a fortnight from a consultant urologist or nominee, to check the reference outlines and 3D models against the scans.',
   },
   {
     label: 'Compute',
-    body: "Time on a trust GPU workstation, with IT's agreement to install the research model.",
+    body: "time on a trust GPU workstation, and IT's agreement to install the research model on it.",
   },
-  { label: 'Spend', body: 'None: free tools on trust hardware, no licence or cloud costs.' },
+  { label: 'Spend', body: 'no licence or cloud costs. The tools are free, and it runs on trust hardware.' },
 ];
 
 const prototypeIncludes = [
@@ -262,7 +255,7 @@ function SiteHeader({ openDemo }: { openDemo: OpenDemo }) {
             <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
           ))}
           <button type="button" className="site-nav-cta" data-return-focus="header" onClick={() => openDemo()}>
-            Open the 3D viewer <Arrow />
+            Open the 3D viewer <ArrowRight />
           </button>
         </nav>
       </div>
@@ -283,21 +276,19 @@ function HeroSection({ openDemo }: { openDemo: OpenDemo }) {
             scroll through five real KiTS23 CTs beside their 3D models.
           </p>
           <div className="hero-actions">
-            <button type="button" className="button button-primary" data-return-focus="hero" onClick={() => openDemo('build')}>
-              Make a 3D kidney <Arrow />
+            <button type="button" className="button button-mint" data-return-focus="hero" onClick={() => openDemo('build')}>
+              Make a 3D kidney <ArrowRight />
             </button>
-            <a className="button button-secondary" href="#kidneys">
-              See the five real kidneys <Arrow glyph="↓" />
+            <a className="button button-glass" href="#kidneys">
+              See the five real kidneys <ArrowDown />
             </a>
           </div>
           <p className="hero-footnote">
-            <a className="text-link" href="#limits">
-              Read the limits <Arrow glyph="↓" />
-            </a>
+            <a href="#limits">Read the limits</a>.
           </p>
         </div>
-        <figure className="hero-figure atlas-card">
-          <div className="atlas-image">
+        <figure className="hero-figure">
+          <div className="hero-scan">
             {/* oxlint-disable-next-line next/no-img-element -- Vite serves this local CT still directly. */}
             <img
               src={HERO_SCAN}
@@ -306,11 +297,9 @@ function HeroSection({ openDemo }: { openDemo: OpenDemo }) {
               height="635"
               fetchPriority="high"
             />
+            <span className="hero-scan-tag" aria-hidden="true">Kidney C</span>
           </div>
-          <figcaption className="atlas-caption">
-            <span className="atlas-kicker">Kidney C</span>
-            <span className="atlas-meta">KiTS23 CT, de-identified, CC BY-NC-SA 4.0</span>
-          </figcaption>
+          <figcaption className="hero-caption">KiTS23 CT, de-identified, CC BY-NC-SA 4.0</figcaption>
         </figure>
       </div>
     </section>
@@ -343,15 +332,15 @@ function BuildSection({ openDemo }: { openDemo: OpenDemo }) {
             <div className="hero-actions">
               <button
                 type="button"
-                className="button button-primary"
+                className="button button-mint"
                 data-return-focus="build-sample"
                 onClick={() => openDemo('build', 'synthetic', { sample: true })}
               >
-                Try the sample <Arrow />
+                Try the sample <ArrowRight />
               </button>
               <button
                 type="button"
-                className="button button-secondary"
+                className="button button-glass"
                 data-return-focus="build-load"
                 onClick={() => openDemo('build')}
               >
@@ -393,8 +382,8 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
           {referenceCases.map((item) => {
             const { nephrometry } = item;
             return (
-              <li key={item.id} className="kidney-card atlas-card">
-                <div className="kidney-scan atlas-image">
+              <li key={item.id} className="kidney-card">
+                <div className="kidney-scan">
                   {/* oxlint-disable-next-line next/no-img-element -- Vite serves these local CT stills directly. */}
                   <img
                     src={`/ct/${item.id}/key.webp`}
@@ -405,10 +394,7 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
                     decoding="async"
                   />
                 </div>
-                <div className="atlas-caption">
-                  <h3 className="atlas-kicker">{item.label}</h3>
-                  <span className="atlas-meta">KiTS23</span>
-                </div>
+                <h3>{item.label}</h3>
                 <dl className="kidney-facts">
                   <div>
                     <dt>R.E.N.A.L.</dt>
@@ -430,7 +416,7 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
                 <div className="kidney-actions">
                   <button
                     type="button"
-                    className="button button-primary kidney-open"
+                    className="button button-mint kidney-open"
                     data-return-focus={`kidney-${item.id}`}
                     onClick={() => openDemo('plan', item.id)}
                   >
@@ -438,7 +424,7 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
                   </button>
                   <button
                     type="button"
-                    className="button button-secondary kidney-open"
+                    className="button button-glass kidney-open"
                     data-return-focus={`kidney-ct-${item.id}`}
                     onClick={() => openDemo('plan', item.id, { ct: true })}
                   >
@@ -566,8 +552,8 @@ function TeachingSection({ openDemo }: { openDemo: OpenDemo }) {
               Five questions for a registrar preparing for a partial nephrectomy, with the reasoning
               shown as soon as you answer.
             </p>
-            <button type="button" className="button button-primary" data-return-focus="lesson" onClick={() => openDemo('learn')}>
-              Start the lesson <Arrow />
+            <button type="button" className="button button-mint" data-return-focus="lesson" onClick={() => openDemo('learn')}>
+              Start the lesson <ArrowRight />
             </button>
           </div>
           <ol className="lesson-steps" aria-labelledby="lesson-title">
@@ -589,12 +575,11 @@ function NextStepSection() {
       <div className="site-shell next-grid">
         <div className="section-heading section-heading-light next-intro">
           <p className="eyebrow">Next step</p>
-          <h2 id="next-title">The study I want to run.</h2>
+          <h2 id="next-title">The first study I&apos;d like to run.</h2>
           <p>
-            None of these scores has been compared with clinicians&apos; yet, so on our own partial
-            nephrectomies the first question is whether computed R.E.N.A.L. and PADUA agree with
-            clinician scoring as well as two clinicians agree with each other. The second is how well the
-            research model outlines kidney and tumour on our own scanners.
+            None of these scores has been compared with clinicians&apos; scoring. On our own partial
+            nephrectomies, I&apos;d like to ask whether the computed scores agree with clinicians as well
+            as two clinicians agree with each other, and how well the research model outlines our scans.
           </p>
         </div>
         <div className="next-needs">
@@ -602,12 +587,12 @@ function NextStepSection() {
           <ol aria-labelledby="next-needs-title">
             {studyNeeds.map((need) => (
               <li key={need.label}>
-                <strong>{need.label}</strong> <span>{need.body}</span>
+                <strong>{need.label}:</strong> {need.body}
               </li>
             ))}
           </ol>
           <a className="text-link" href={PROPOSAL_URL} target="_blank" rel="noreferrer">
-            Read the full proposal <Arrow glyph="↗" />
+            Read the full proposal <ArrowRight />
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
         </div>
@@ -678,8 +663,8 @@ function Overview({ openDemo }: { openDemo: OpenDemo }) {
                 Otherwise, email me at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
               </p>
             </div>
-            <button type="button" className="button button-primary" data-return-focus="closing" onClick={() => openDemo()}>
-              Open the 3D viewer <Arrow />
+            <button type="button" className="button button-mint" data-return-focus="closing" onClick={() => openDemo()}>
+              Open the 3D viewer <ArrowRight />
             </button>
           </div>
         </section>

@@ -43,10 +43,10 @@ export function LayerButton({
       aria-pressed={active}
       onClick={onClick}
       className={`group flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition ${
-        active ? 'bg-raised' : 'hover:bg-raised'
+        active ? 'bg-white/[.045]' : 'hover:bg-white/[.03]'
       }`}
     >
-      <span className="grid size-5 shrink-0 place-items-center rounded-full border border-line">
+      <span className="grid size-5 shrink-0 place-items-center rounded-md border border-white/10 bg-black/10">
         {active ? <Eye className="size-3 text-white/80" /> : <EyeOff className="size-3 text-white/60" />}
       </span>
       <span
@@ -63,35 +63,42 @@ export function LayerButton({
 
 export function PlanningNote({ term, children }: { term: string; children: ReactNode }) {
   return (
-    <div className="border-b border-line-soft py-2.5 last:border-b-0">
+    <div className="border-b border-white/6 py-2.5 last:border-b-0">
       <p className="text-xs font-medium text-white/88">{term}</p>
       <p className="mt-1 text-xs leading-5 text-white/72">{children}</p>
     </div>
   );
 }
 
-/** Approach and clamping, as general teaching points under every kidney's plan. */
+/** General teaching points on approach and clamping, shown under every kidney's plan. */
 export function ApproachNotes() {
   return (
     <>
-      <p className="section-label mt-6">Approach and clamping</p>
-      <p className="mt-2 text-xs leading-5 text-white/66">Teaching points, not advice for this kidney.</p>
+      <p className="section-label mt-6">Approach</p>
+      <p className="mt-2 text-xs leading-5 text-white/66">General teaching points, not advice for this kidney.</p>
       <div className="mt-1">
-        <PlanningNote term="Transperitoneal">Room to work; the default for anterior and hilar tumours.</PlanningNote>
-        <PlanningNote term="Retroperitoneal">
-          Direct to the posterior surface, no bowel, less room; favoured for posterior and posterolateral tumours
-          and the re-operative abdomen.
+        <PlanningNote term="Transperitoneal">
+          More working space. The usual choice for anterior and hilar tumours.
         </PlanningNote>
+        <PlanningNote term="Retroperitoneal">
+          Less space, but direct access to the posterior surface. Often chosen for posterior and posterolateral
+          tumours, and it keeps away from bowel after previous abdominal surgery.
+        </PlanningNote>
+      </div>
+
+      <p className="section-label mt-6">Clamping</p>
+      <div className="mt-1">
         <PlanningNote term="Main artery">
-          Global warm ischaemia, so clamp late and keep it short; find and control every artery first, accessory
-          ones included.
+          Global warm ischaemia while the clamp is on, so keep it short. Every renal artery, accessory ones
+          included, has to be found and controlled first.
         </PlanningNote>
         <PlanningNote term="Selective (segmental)">
-          Ischaemia limited to the clamped territory; needs an arterial-phase map of the segmental branches to
-          the tumour.
+          Only the territory of the clamped branches is ischaemic. It needs a map of the segmental arteries
+          showing which supply the tumour, usually from an arterial-phase CT.
         </PlanningNote>
         <PlanningNote term="Off-clamp">
-          No planned ischaemia, more bleeding at excision; suits small, largely exophytic tumours.
+          No planned ischaemia, at the cost of more bleeding during the excision. Better suited to small,
+          largely exophytic tumours.
         </PlanningNote>
       </div>
     </>

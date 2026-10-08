@@ -1,6 +1,7 @@
 import {
   Boxes,
   Cpu,
+  ExternalLink,
   Ruler,
   ShieldCheck,
   SlidersHorizontal,
@@ -71,15 +72,6 @@ function casesWord(items: unknown[]): string {
 
 function NewTab() {
   return <span className="sr-only"> (opens in a new tab)</span>;
-}
-
-/** The small arrow after a link that leaves the site. */
-function OutArrow() {
-  return (
-    <span className="link-arrow" aria-hidden="true">
-      ↗
-    </span>
-  );
 }
 
 function RegionDelta({ label, region }: { label: string; region: keyof RegionSummary }) {
@@ -324,11 +316,13 @@ export function PlanningPipeline() {
           ) : null}
           {outlineNotes.length > 0 ? <p>{outlineNotes.join(' ')}</p> : null}
           <p>
-            &ldquo;Kept at 5 mm&rdquo; is the share of tumour-side parenchyma, tumour excluded,
-            outside a uniform 5 mm band round the tumour: volume, not function, and not a surgical
-            plan. Enucleation along the pseudocapsule takes less, renorrhaphy and devascularised
-            tissue take more, and in one series of 894 partial nephrectomies the median kept was 84%
-            (Kazama et al., BJU Int 2024).
+            &ldquo;Kept at 5 mm&rdquo; is the share of the tumour-side kidney, tumour left out, that
+            sits outside a uniform 5 mm band round the tumour. It&apos;s there to show the volume
+            involved. It isn&apos;t a surgical plan, and it&apos;s volume, not function. The excision
+            is often narrower, down to enucleation along the pseudocapsule, but a real partial
+            nephrectomy usually loses more than this, through the renorrhaphy and tissue that loses
+            its blood supply. In one published series of 894 partial nephrectomies the median kept was
+            84% (Kazama et al., BJU Int 2024).
           </p>
         </div>
 
@@ -469,19 +463,19 @@ export function PlanningPipeline() {
               </p>
               <div className="benchmark-source-links">
                 <a href={repoFolder('pipeline')} target="_blank" rel="noreferrer">
-                  Pipeline source <OutArrow />
+                  Pipeline source <ExternalLink aria-hidden="true" />
                   <NewTab />
                 </a>
                 <a href={repoFile('pipeline/results/README.md')} target="_blank" rel="noreferrer">
-                  Full results <OutArrow />
+                  Full results <ExternalLink aria-hidden="true" />
                   <NewTab />
                 </a>
                 <a href={repoFile('docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md')} target="_blank" rel="noreferrer">
-                  Study proposal <OutArrow />
+                  Study proposal <ExternalLink aria-hidden="true" />
                   <NewTab />
                 </a>
                 <a href={repoFile('docs/PACS-DICOM-EXPORT-REQUEST.md')} target="_blank" rel="noreferrer">
-                  CalyxView teaching export request <OutArrow />
+                  CalyxView teaching export request <ExternalLink aria-hidden="true" />
                   <NewTab />
                 </a>
               </div>

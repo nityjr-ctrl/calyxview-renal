@@ -259,8 +259,10 @@ function ModeButton({
       type="button"
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
-      className={`flex h-8 items-center gap-2 rounded-full px-3 text-xs font-medium transition ${
-        active ? 'bg-ink text-background' : 'text-white/66 hover:bg-raised hover:text-white'
+      className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium transition ${
+        active
+          ? 'bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,.04)]'
+          : 'text-white/70 hover:bg-white/5 hover:text-white'
       }`}
     >
       {icon}
@@ -297,14 +299,14 @@ function CaseSidebar({
     return (
       <aside className="workspace-sidebar left-sidebar">
         <p className="section-label">The lesson</p>
-        <h1 className="mt-2 text-lg font-medium tracking-[-.01em] text-white">Small renal mass basics</h1>
+        <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">Small renal mass basics</h1>
         <p className="mt-2 text-xs leading-5 text-white/70">
           Five questions on the teaching kidney, the only model here with vessels and a collecting system.
         </p>
 
         <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-white/6">
           <div
-            className="h-full rounded-full bg-teal transition-[width] duration-500"
+            className="h-full rounded-full bg-sky-300 transition-[width] duration-500"
             style={{ width: `${(completed / trainingSteps.length) * 100}%` }}
           />
         </div>
@@ -320,15 +322,15 @@ function CaseSidebar({
               <li
                 key={step.title}
                 aria-current={current ? 'step' : undefined}
-                className={`flex items-center gap-3 rounded-md px-2.5 py-2.5 ${current ? 'bg-raised' : ''}`}
+                className={`flex items-center gap-3 rounded-lg px-2.5 py-2.5 ${current ? 'bg-white/6' : ''}`}
               >
                 <span
                   className={`grid size-5 place-items-center rounded-full border ${
                     answered
-                      ? 'border-ok/50 text-ok'
+                      ? 'border-emerald-300/25 bg-emerald-300/12 text-emerald-200'
                       : current
-                        ? 'border-teal text-teal'
-                        : 'border-line text-white/66'
+                        ? 'border-sky-300/30 bg-sky-300/10 text-sky-200'
+                        : 'border-white/10 text-white/62'
                   }`}
                 >
                   {answered ? <Check className="size-3" /> : <span className="font-mono text-[11px]">{index + 1}</span>}
@@ -352,7 +354,7 @@ function CaseSidebar({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="section-label">{activeCase ? 'KiTS23 kidney' : 'Hand-made model'}</p>
-          <h1 className="mt-2 text-lg font-medium tracking-[-.01em] text-white">
+          <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">
             {activeCase ? activeCase.label : 'The teaching kidney'}
           </h1>
           <p className="mt-1 text-xs leading-5 text-white/70">
@@ -418,10 +420,20 @@ function CaseSidebar({
           onChange={(event) => setKidneyOpacity(Number(event.target.value))}
         />
         <div className="mt-3 flex gap-2">
-          <Button className="flex-1" size="sm" variant="outline" onClick={() => setKidneyOpacity(34)}>
+          <Button
+            className="flex-1 border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
+            size="sm"
+            variant="outline"
+            onClick={() => setKidneyOpacity(34)}
+          >
             <Sparkles /> Ghost
           </Button>
-          <Button className="flex-1" size="sm" variant="outline" onClick={isolate}>
+          <Button
+            className="flex-1 border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
+            size="sm"
+            variant="outline"
+            onClick={isolate}
+          >
             <Focus /> Hide kidney
           </Button>
         </div>
@@ -586,7 +598,7 @@ function ModelWorkspace({
     out.height = canvas.height;
     const context = out.getContext('2d');
     if (context) {
-      context.fillStyle = '#070707';
+      context.fillStyle = '#05120e';
       context.fillRect(0, 0, out.width, out.height);
       context.drawImage(canvas, 0, 0);
     }
@@ -665,7 +677,7 @@ function ModelWorkspace({
 
         <div className="viewer-chips">
           <div className="viewer-chip">
-            <span className="size-1.5 rounded-full bg-teal" aria-hidden="true" />
+            <span className="size-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
             {building ? 'Built from an outline' : activeCase ? 'KiTS expert outlines' : 'Hand-made model'}
           </div>
           <div className="viewer-chip">
@@ -830,10 +842,10 @@ function PlanningInspector({
           activeCase ? (
             <>
               <p className="section-label">Where this model comes from</p>
-              <div className="mt-3 rounded-md border border-line-soft bg-surface p-3.5">
+              <div className="mt-3 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-white/90">{activeCase.label}</p>
-                  <Badge className="text-[11px]" variant="outline">
+                  <Badge className="border-white/10 bg-white/5 text-[11px] text-white/80" variant="outline">
                     KiTS23
                   </Badge>
                 </div>
@@ -903,10 +915,10 @@ function PlanningInspector({
           ) : (
             <>
               <p className="section-label">Where this model comes from</p>
-              <div className="mt-3 rounded-md border border-line-soft bg-surface p-3.5">
+              <div className="mt-3 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-white/90">The teaching kidney</p>
-                  <Badge className="text-[11px]" variant="outline">
+                  <Badge className="border-white/10 bg-white/5 text-[11px] text-white/80" variant="outline">
                     Hand-made
                   </Badge>
                 </div>
@@ -964,7 +976,7 @@ function PlanningInspector({
                   <dd>{n.collectingAssessed ? 'Assessed' : 'Not assessed'}</dd>
                 </div>
               </dl>
-              <div className="mt-5 rounded-md border border-line-soft bg-surface p-3.5">
+              <div className="mt-5 rounded-xl border border-white/8 bg-white/[.025] p-3.5">
                 <p className="text-xs leading-5 text-white/75">
                   renalplan scored these from the KiTS23 outlines, not from the mesh on screen. KiTS doesn’t
                   outline the renal sinus, so it’s estimated from the kidney outline. L and the PADUA pole are
@@ -995,7 +1007,7 @@ function PlanningInspector({
                 <div><dt>Rim</dt><dd>Lateral</dd></div>
                 <div><dt>Hilar (h)</dt><dd>No</dd></div>
               </dl>
-              <div className="mt-5 rounded-md border border-line-soft bg-surface p-3.5">
+              <div className="mt-5 rounded-xl border border-white/8 bg-white/[.025] p-3.5">
                 <p className="text-xs leading-5 text-white/75">
                   I set these numbers to match the model, and the score adds up from them. Pick one of Kidneys A
                   to E for scores the pipeline computed, or make your own kidney from an outline.
@@ -1022,27 +1034,29 @@ function PlanningInspector({
           <>
             <p className="section-label">Kidney kept</p>
             {activeCase && n ? (
-              <div className="mt-3 rounded-md border border-line-soft bg-surface p-3.5">
-                <p className="text-[11px] font-bold uppercase tracking-[.1em] text-white/66">At a 5 mm margin</p>
-                <p className="mt-1 font-mono text-xl text-white">{percent(n.preservedFraction)}</p>
-                <div className="mt-3 h-1 overflow-hidden rounded-full bg-line-soft">
+              <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
+                <p className="text-[11px] uppercase tracking-[.1em] text-white/66">Kept at a 5 mm margin</p>
+                <p className="mt-1 font-mono text-xl text-white/90">{percent(n.preservedFraction)}</p>
+                <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/6">
                   <div
-                    className="h-full rounded-full bg-teal"
+                    className="h-full rounded-full bg-emerald-300/70"
                     style={{ width: `${Math.round(n.preservedFraction * 100)}%` }}
                   />
                 </div>
                 <p className="mt-3 text-xs leading-5 text-white/75">
-                  Parenchyma outside a uniform 5 mm band round the tumour, as a share of the tumour-side kidney,
-                  from renalplan. Volume, not function. Enucleation takes less; renorrhaphy and devascularised
-                  tissue take more.
+                  The share of this kidney outside a uniform 5 mm band round the tumour, from renalplan. Real
+                  partial nephrectomies usually lose more, through the renorrhaphy and devascularised tissue, so
+                  expect the real figure to be lower.
                 </p>
-                <p className="mt-2 text-xs leading-5 text-white/75">No slider here: the pipeline only ran 5 mm.</p>
+                <p className="mt-2 text-xs leading-5 text-white/75">
+                  The pipeline only ran a 5 mm margin, so there’s no margin slider for this kidney.
+                </p>
               </div>
             ) : (
-              <div className="mt-3 rounded-md border border-line-soft bg-surface p-3.5">
+              <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
                 <div className="flex items-center justify-between">
                   <label htmlFor="margin-panel" className="control-label">Margin</label>
-                  <span className="font-mono text-xs text-white/85">{marginMm} mm</span>
+                  <span className="font-mono text-xs text-emerald-100/85">{marginMm} mm</span>
                 </div>
                 <input
                   id="margin-panel"
@@ -1054,8 +1068,8 @@ function PlanningInspector({
                   className="range-control mt-2 w-full"
                 />
                 <p className="mt-3 text-xs leading-5 text-white/75">
-                  The slider redraws the margin shell to scale. Hand-made kidney, so no volumes and no kept
-                  figure.
+                  The slider redraws the shell round the tumour, to scale. The teaching kidney has no volume
+                  calculation, so there’s no kept-kidney figure for it.
                 </p>
               </div>
             )}
@@ -1125,7 +1139,7 @@ function TrainingPanel({
           {step + 1} of {trainingSteps.length}
         </span>
       </div>
-      <h2 className="mt-3 text-lg font-medium tracking-[-.01em] text-white">{lesson.title}</h2>
+      <h2 className="mt-3 text-lg font-semibold tracking-tight text-white/90">{lesson.title}</h2>
       <p className="mt-2 text-xs leading-5 text-white/75">{lesson.instruction}</p>
 
       <div className="mt-5 border-t border-white/8 pt-5">
@@ -1163,13 +1177,13 @@ function TrainingPanel({
       <output
         className={
           answered
-            ? `mt-4 block rounded-md border bg-surface p-3.5 ${selected === lesson.correct ? 'border-ok/50' : 'border-flag/50'}`
+            ? `mt-4 block rounded-xl border p-3.5 ${selected === lesson.correct ? 'border-emerald-200/10 bg-emerald-200/[.035]' : 'border-amber-200/10 bg-amber-200/[.03]'}`
             : 'sr-only'
         }
       >
         {answered ? (
           <>
-            <span className={`block text-xs font-semibold ${selected === lesson.correct ? 'text-ok' : 'text-flag'}`}>
+            <span className="block text-xs font-semibold text-white/85">
               {selected === lesson.correct ? 'Right' : 'Not quite'}
             </span>
             <span className="mt-2 block text-xs leading-5 text-white/75">{lesson.rationale}</span>
@@ -1179,6 +1193,7 @@ function TrainingPanel({
 
       <div className="mt-5 flex gap-2">
         <Button
+          className="border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
           variant="outline"
           disabled={step === 0}
           onClick={() => goToStep(Math.max(0, step - 1))}
@@ -1187,7 +1202,7 @@ function TrainingPanel({
         </Button>
         {lastStep ? null : (
           <Button
-            className="flex-1"
+            className="flex-1 bg-sky-300 text-[#061b1c] hover:bg-sky-200"
             disabled={!answered}
             onClick={() => goToStep(step + 1)}
           >
@@ -1199,13 +1214,13 @@ function TrainingPanel({
       <p className="mt-4 text-[11px] text-white/62">{`Score so far: ${score} of ${Object.keys(answers).length} answered`}</p>
 
       {lastStep && answered ? (
-        <div className="mt-4 rounded-md border border-line-soft bg-surface p-3.5">
+        <div className="mt-4 rounded-xl border border-white/8 bg-white/[.025] p-3.5">
           <p className="text-xs leading-5 text-white/80">
             {`You got ${score} of ${trainingSteps.length}. If a question is wrong or too easy, tell me.`}
           </p>
           <Button
-            className="mt-3 w-full"
-            variant="outline"
+            className="mt-3 w-full text-white/75 hover:bg-white/5 hover:text-white"
+            variant="ghost"
             onClick={() => {
               setAnswers({});
               goToStep(0);
@@ -1254,15 +1269,15 @@ function DisclaimerDialog({ onClose }: { onClose: () => void }) {
     >
       <div>
         <div className="flex items-start justify-between gap-5">
-          <div className="grid size-10 place-items-center rounded-full border border-warn/40 text-warn">
+          <div className="grid size-10 place-items-center rounded-xl border border-amber-200/10 bg-amber-200/[.04] text-amber-200/80">
             <ShieldAlert className="size-5" aria-hidden="true" />
           </div>
           <button type="button" className="icon-button" onClick={onClose} aria-label="Close">
             <X className="size-4" />
           </button>
         </div>
-        <p className="mt-5 text-[11px] font-bold uppercase tracking-[.1em] text-warn">Research and teaching prototype</p>
-        <h2 id="disclaimer-title" className="mt-2 text-2xl font-medium tracking-[-.02em] text-white">
+        <p className="mt-5 text-xs font-semibold text-amber-100/85">Research and teaching prototype</p>
+        <h2 id="disclaimer-title" className="mt-2 text-2xl font-semibold tracking-[-.03em] text-white/92">
           Not for patient care
         </h2>
         <div id="disclaimer-description">
@@ -1277,7 +1292,7 @@ function DisclaimerDialog({ onClose }: { onClose: () => void }) {
             nothing is uploaded.
           </p>
         </div>
-        <Button className="mt-6 w-full" size="lg" onClick={onClose}>
+        <Button className="mt-6 w-full bg-emerald-300 text-[#052117] hover:bg-emerald-200" onClick={onClose}>
           OK
         </Button>
       </div>
@@ -1527,10 +1542,10 @@ export function RenalPlatform({
           </button>
           <div className="min-w-0">
             <div className="flex items-baseline gap-2">
-              <span className="truncate text-sm font-medium tracking-[-.01em] text-white sm:text-base">
+              <span className="truncate text-sm font-semibold tracking-[-.025em] text-white/92 sm:text-base">
                 CalyxView Renal
               </span>
-              <span className="shrink-0 text-[11px] font-bold uppercase tracking-[.1em] text-white/66">
+              <span className="shrink-0 text-[11px] font-medium uppercase tracking-[.12em] text-emerald-200/85">
                 3D viewer
               </span>
             </div>
