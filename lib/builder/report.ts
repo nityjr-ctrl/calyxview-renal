@@ -5,7 +5,7 @@
 import type { BuildReport } from './build.ts';
 
 export const ESTIMATE_LINE =
-  'Estimated in the browser from the outline by renalplan’s rules; approximate; not validated.';
+  'Estimated in the browser from the outline; approximate; not validated.';
 
 /** The warnings a build can carry, shown above the scores and at the top of both reports. */
 export const WARNING = {
@@ -37,10 +37,9 @@ export function keptPercent(fraction: number, removedMl: number, digits = 0): st
 }
 
 export const BROWSER_DIFFERENCES = [
-  'E uses an exact convex hull of the kidney and tumour, where renalplan builds a Delaunay hull on up to 20,000 sampled surface points. Raw E and N can differ by a few tenths, which can move a point when a value sits at a cut-off.',
-  'Uses every voxel for the centroids, long axis and percentiles, where renalplan samples up to 60,000.',
-  'The largest tumour diameter is exact over the voxel centres, where renalplan samples 8,000 surface voxels.',
-  'The surfaces come from a signed distance field resampled to an isotropic grid of at least 1 mm, lightly smoothed, then marching cubes and 5 Taubin passes, where renalplan meshes the binary mask directly with 15 passes and decimates. They are for display; the scores use the voxels.',
+  'Raw E and N can differ slightly from the reference calculation, which may change a point near a cut-off.',
+  'The browser measures centres, axes and tumour diameter from the working voxels. These are geometric estimates, not clinical assessments.',
+  'Smoothed surfaces are for display. Scores use the voxels rather than the surface you see.',
   'A large outline is sampled every nth voxel before anything else runs, and the report says so.',
 ];
 
@@ -120,7 +119,7 @@ export function reportMarkdown(report: BuildReport): string {
   for (const rule of RULES) lines.push(`- ${rule}`);
   lines.push('', '## Flags and notes', '');
   for (const note of report.notes) lines.push(`- ${note}`);
-  lines.push('', '## How this differs from renalplan', '');
+  lines.push('', '## Calculation limits', '');
   for (const item of BROWSER_DIFFERENCES) lines.push(`- ${item}`);
   lines.push(
     '',

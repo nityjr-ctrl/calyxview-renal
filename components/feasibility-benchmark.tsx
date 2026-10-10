@@ -20,7 +20,6 @@ import {
   formatRuntime,
   formatScoreConfidenceInterval,
 } from '@/lib/benchmark-results';
-import { repoFolder } from '@/lib/links';
 
 // The order matters: no outline is copied in until the outputs are locked.
 const nextRunSteps = [
@@ -34,7 +33,7 @@ const nextRunSteps = [
   },
   {
     label: 'Lock the outputs',
-    body: 'Lock predictions, failures, timings and file hashes. Publish the lock-file hash on GitHub before scoring.',
+    body: 'Lock predictions, failures, timings and file hashes. Record a dated output lock before scoring.',
   },
   {
     label: 'Then copy in the outlines',
@@ -47,20 +46,11 @@ const nextRunSteps = [
 ];
 
 const sourceLinks = [
-  {
-    href: repoFolder('research/kits23-feasibility'),
-    label: 'Method and scripts',
-  },
-  { href: 'https://github.com/neheller/kits23', label: 'KiTS23 source' },
-  {
-    href: 'https://huggingface.co/datasets/neheller/KiTS-Challenge-Imaging',
-    label: 'KiTS23 imaging (Hugging Face)',
-  },
+  { href: 'https://kits-challenge.org/kits23/', label: 'KiTS23 challenge and data' },
   {
     href: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
     label: 'Data licence',
   },
-  { href: 'https://zenodo.org/records/5126443', label: 'Published model' },
 ];
 
 // The arrow is for sighted readers. Screen readers hear the words instead.
@@ -236,10 +226,12 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
           </div>
           <div className="benchmark-intro">
             <p>
-              A published KiTS21 model, built with nnU-Net, was run unchanged on {cohortSize} KiTS23 scans
+              An earlier research component, now included in UroRef CalyxView AI,
+              was tested unchanged on {cohortSize} public KiTS23 scans
               {isScriptBlinded
                 ? ', locking each output before the expert outlines were copied in.'
-                : " it wasn't trained on (cases 400 to 419), without test-time augmentation."}{' '}
+                : " it wasn't trained on (cases 400 to 419)."}{' '}
+              This measures that component, not the whole combined model.{' '}
               This is a check within KiTS, from one US hospital system, not external validation
               {isScriptBlinded ? '' : ", and it wasn't blinded"}: the numbers measure agreement with the
               expert outlines, not clinical accuracy, and none of it is for patient care.
@@ -294,7 +286,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
             <GitCommitHorizontal aria-hidden="true" />
             <div>
               <span>Model</span>
-              <strong>nnU-Net, trained for KiTS21</strong>
+              <strong>UroRef CalyxView AI: component test</strong>
             </div>
           </article>
           <article>
@@ -370,10 +362,11 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
                 This benchmark publishes aggregate results from an offline run as JSON, without
                 scans, outlines, per-scan results or file paths. KiTS23 imaging
                 and outlines are CC BY-NC-SA 4.0.
-                The model weights are Fabian Isensee&apos;s pretrained nnU-Net
-                for KiTS21 (DKFZ), published on Zenodo under CC BY 4.0. They
-                were trained on KiTS data, which is non-commercial, so I treat
-                them as non-commercial too.
+                The combined research workflow uses separately licensed components;
+                the component tested here has a CC BY 4.0 weight licence.
+                This component check and its derivatives are for non-commercial
+                research. It does not establish clinical performance of the
+                combined model.
               </p>
               <div className="benchmark-source-links">
                 {sourceLinks.map((link) => (

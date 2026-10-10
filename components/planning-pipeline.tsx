@@ -1,13 +1,11 @@
 import {
   Boxes,
   Cpu,
-  ExternalLink,
   Ruler,
   ShieldCheck,
   SlidersHorizontal,
 } from 'lucide-react';
 
-import { repoFile, repoFolder } from '@/lib/links';
 import {
   formatDice,
   formatPercent,
@@ -68,10 +66,6 @@ function caseLabel(row: NephrometryCase): string {
 
 function casesWord(items: unknown[]): string {
   return items.length === 1 ? 'case' : 'cases';
-}
-
-function NewTab() {
-  return <span className="sr-only"> (opens in a new tab)</span>;
 }
 
 function RegionDelta({ label, region }: { label: string; region: keyof RegionSummary }) {
@@ -192,12 +186,12 @@ export function PlanningPipeline() {
           </div>
           <div className="benchmark-intro">
             <p>
-              The <code>renalplan</code> Python package builds surface models, calculates R.E.N.A.L.
-              and PADUA, and measures volumes from kidney, tumour and cyst label maps on a CPU.
+              We build surface models, calculate R.E.N.A.L. and PADUA, and
+              measure volumes from kidney, tumour and cyst outlines.
               These results use expert outlines from {count(nephrometry.casesEvaluated)} KiTS23 kidneys.
               They do not test automated segmentation or agreement with clinicians&apos; scores.
-              Those outline-based cases did not run TotalSegmentator or nnU-Net. The new local AI pilot
-              has separate source records and review requirements.
+              These expert-outline results do not evaluate the combined UroRef
+              CalyxView AI model. The AI drafts need a separate review.
             </p>
           </div>
         </div>
@@ -425,7 +419,7 @@ export function PlanningPipeline() {
                   : ''}{' '}
                 This checks the pipeline&apos;s own 3D surfaces. Its default still uses 15 smoothing
                 passes, which was not included in the sweep. The surfaces of Kidneys A to E
-                came from the separate CalyxView project (not public yet), not from this pipeline. The
+                came from the CalyxView reference collection, not from this experiment. The
                 builder&apos;s are drawn from a smoothed distance field on a 1 mm grid instead (coarser for very
                 large volumes; the report says the grid used), which
                 copes better with thick slices.
@@ -438,43 +432,27 @@ export function PlanningPipeline() {
               <h3>Published assets and data handling</h3>
               <p>
                 Published here: the five kidney meshes (Kidneys A to E in the 3D viewer), the numbers
-                calculated by renalplan from the KiTS23 outlines, and cropped, windowed axial CT slices
+                calculated from the KiTS23 outlines, and cropped, windowed axial CT slices
                 round each of those kidneys with their KiTS outlines. Kidney C&apos;s file also has the
                 ribs, psoas, colon, spleen, liver and body outline, drawn on the KiTS23 CT by
-                TotalSegmentator, an AI model (Wasserthal et al., Radiology: AI 2023).
+                automated segmentation. Those extra outlines have not been clinically reviewed.
               </p>
               <p>
-                Not published: the full CT volumes, the label volumes and model output. The KiTS case
-                numbers are in the repository, so anyone can check a case against the source.
+                We publish selected teaching derivatives, rather than the full CT or label volumes.
+                Source records are retained for research review.
               </p>
               <p>
-                For hospital scans, the pipeline&apos;s DICOM loader stops a series if its first file
-                has any of 13 identifying header fields filled in, unless the file is flagged as
-                de-identified. It doesn&apos;t look at private tags, burned-in text or NIfTI files, so
-                it&apos;s a tripwire, not a de-identification check. The anonymising has to happen
-                first.
+                Hospital scans must be de-identified before processing through an approved
+                research route. Local checks do not replace a complete privacy review,
+                including private tags and identifying text within an image.
               </p>
               <p>
                 The meshes and CT slices are adapted from KiTS23, so they carry its CC BY-NC-SA 4.0
                 licence.
               </p>
               <div className="benchmark-source-links">
-                <a href={repoFolder('pipeline')} target="_blank" rel="noreferrer">
-                  Pipeline source <ExternalLink aria-hidden="true" />
-                  <NewTab />
-                </a>
-                <a href={repoFile('pipeline/results/README.md')} target="_blank" rel="noreferrer">
-                  Full results <ExternalLink aria-hidden="true" />
-                  <NewTab />
-                </a>
-                <a href={repoFile('docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md')} target="_blank" rel="noreferrer">
-                  Study proposal <ExternalLink aria-hidden="true" />
-                  <NewTab />
-                </a>
-                <a href={repoFile('docs/PACS-DICOM-EXPORT-REQUEST.md')} target="_blank" rel="noreferrer">
-                  CalyxView teaching export request <ExternalLink aria-hidden="true" />
-                  <NewTab />
-                </a>
+                <a href="#about">About the proposed study</a>
+                <a href="mailto:nity@uroref.com?subject=CalyxView%20research">Discuss research access</a>
               </div>
             </div>
           </article>

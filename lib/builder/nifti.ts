@@ -222,7 +222,7 @@ export type LabelCheck =
   | { ok: false; reason: 'ct' | 'range' | 'empty'; message: string };
 
 const CT_MESSAGE =
-  'This looks like a CT, not an outline. The builder needs a label map, where each voxel holds a structure number (1 kidney, 2 tumour, 3 cyst). Outline the CT first with 3D Slicer or TotalSegmentator, then load the outline here.';
+  'This looks like a CT, not an outline. The builder needs a label map, where each voxel holds a structure number (1 kidney, 2 tumour, 3 cyst). Prepare and review the outlines against the CT first, then load the label map here.';
 
 /**
  * Turn voxel values into a label map. A CT gives itself away with negative

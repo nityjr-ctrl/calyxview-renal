@@ -202,8 +202,8 @@ test('6 and 12: the builder shows the diameter to two decimals and qualifies the
 });
 
 test('7: the copy explains the hull difference and claims exact agreement only on the phantom', async () => {
-  assert.ok(BROWSER_DIFFERENCES.some((item) => /Delaunay/.test(item) && /20,000/.test(item) && /exact convex hull/.test(item)));
-  assert.ok(BROWSER_DIFFERENCES.some((item) => /E and N can differ by a few tenths/.test(item)));
+  assert.ok(BROWSER_DIFFERENCES.some((item) => /reference calculation/.test(item) && /cut-off/.test(item)));
+  assert.ok(BROWSER_DIFFERENCES.some((item) => /Raw E and N can differ slightly/.test(item)));
   assert.doesNotMatch(ESTIMATE_LINE, /same rules as renalplan/);
   for (const path of ['../components/kidney-builder.tsx', '../components/site-pages.tsx']) {
     const text = await source(path);

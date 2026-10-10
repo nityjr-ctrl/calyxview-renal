@@ -26,9 +26,7 @@ import type { BuildOutput, Stage, StructureMesh } from '@/lib/builder/build';
 import { BROWSER_DIFFERENCES, ESTIMATE_LINE, keptPercent, reportJson, reportMarkdown } from '@/lib/builder/report';
 import type { FromWorker, ToWorker } from '@/lib/builder/protocol';
 
-const KITS23_URL = 'https://github.com/neheller/kits23';
-const SLICER_URL = 'https://www.slicer.org/';
-const TOTALSEG_URL = 'https://github.com/wasserth/TotalSegmentator';
+const KITS23_URL = 'https://kits-challenge.org/kits23/';
 /** A label map bigger than this is almost certainly not one. */
 const MAX_FILE_BYTES = 1024 * 1024 * 1024;
 
@@ -424,17 +422,8 @@ export function BuildIntro({
             <div>
               <p className="text-sm font-medium text-white/88">Prepare the label map</p>
               <p className="mt-1 text-xs leading-5 text-white/72">
-                Draw the kidney and tumour on the CT with free tools:{' '}
-                <a className="viewer-link" href={SLICER_URL} target="_blank" rel="noreferrer">
-                  3D Slicer
-                  <NewTab />
-                </a>{' '}
-                by hand, or{' '}
-                <a className="viewer-link" href={TOTALSEG_URL} target="_blank" rel="noreferrer">
-                  TotalSegmentator
-                  <NewTab />
-                </a>{' '}
-                for the kidneys, with the tumour usually still drawn by hand. Save it as a label map: 1 kidney,
+                Prepare the kidney and tumour outlines outside this site.
+                Check them against the CT. Save them as a label map: 1 kidney,
                 2 tumour, 3 cyst. Any other number is meshed as its own structure.
               </p>
             </div>
@@ -444,9 +433,9 @@ export function BuildIntro({
             <div>
               <p className="text-sm font-medium text-white/88">Surface reconstruction</p>
               <p className="mt-1 text-xs leading-5 text-white/72">
-                Each structure becomes a distance field, resampled to a 1 mm grid, coarser for very large
-                volumes (the report says the grid used), so thick slices don&apos;t show as steps, then
-                marching cubes and light smoothing. The scores use the original voxels,
+                Each outline becomes a display surface. It may look smoother
+                than the scan, so check small features against the source images.
+                The scores use the original voxels,
                 not the surfaces. With two kidneys in the file, the one nearest the tumour is scored and
                 the other is shown faintly.
               </p>
@@ -468,7 +457,7 @@ export function BuildIntro({
         <p className="mt-6 text-xs leading-5 text-white/72">
           Research label maps are available from the{' '}
           <a className="viewer-link" href={KITS23_URL} target="_blank" rel="noreferrer">
-            KiTS23 dataset on GitHub
+            KiTS23 research dataset
             <NewTab />
           </a>{' '}
           under CC BY-NC-SA 4.0. Load the{' '}

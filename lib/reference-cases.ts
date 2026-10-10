@@ -210,7 +210,7 @@ export const referenceCases: ReferenceCase[] = [
       {
         "name": "ribs",
         "label": "Ribs (AI outline)",
-        "provenance": "TotalSegmentator (AI), unchecked",
+        "provenance": "AI-generated context, unchecked",
         "colour": "#d8d2c4",
         "opacity": 0.5,
         "visible": false,
@@ -219,7 +219,7 @@ export const referenceCases: ReferenceCase[] = [
       {
         "name": "psoas",
         "label": "Psoas (AI outline)",
-        "provenance": "TotalSegmentator (AI), unchecked",
+        "provenance": "AI-generated context, unchecked",
         "colour": "#b98b7a",
         "opacity": 0.45,
         "visible": false,
@@ -228,7 +228,7 @@ export const referenceCases: ReferenceCase[] = [
       {
         "name": "colon",
         "label": "Colon (AI outline)",
-        "provenance": "TotalSegmentator (AI), unchecked",
+        "provenance": "AI-generated context, unchecked",
         "colour": "#c8a06a",
         "opacity": 0.45,
         "visible": false,
@@ -237,7 +237,7 @@ export const referenceCases: ReferenceCase[] = [
       {
         "name": "spleen",
         "label": "Spleen (AI outline)",
-        "provenance": "TotalSegmentator (AI), unchecked",
+        "provenance": "AI-generated context, unchecked",
         "colour": "#a8737d",
         "opacity": 0.45,
         "visible": false,
@@ -246,7 +246,7 @@ export const referenceCases: ReferenceCase[] = [
       {
         "name": "liver",
         "label": "Liver (AI outline)",
-        "provenance": "TotalSegmentator (AI), unchecked",
+        "provenance": "AI-generated context, unchecked",
         "colour": "#9d7a6b",
         "opacity": 0.4,
         "visible": false,
@@ -255,7 +255,7 @@ export const referenceCases: ReferenceCase[] = [
       {
         "name": "skin",
         "label": "Body outline (AI)",
-        "provenance": "TotalSegmentator (AI), unchecked",
+        "provenance": "AI-generated context, unchecked",
         "colour": "#8fa0ad",
         "opacity": 0.09,
         "visible": false,

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { FeasibilityBenchmark } from './feasibility-benchmark';
 import { PlanningPipeline } from './planning-pipeline';
 import { referenceCases } from '@/lib/reference-cases';
-import { repoFile } from '@/lib/links';
 import { CALYXVIEW_HOME } from '@/lib/site-assets';
 import { keyImageUrl } from './ct-slices';
 
@@ -373,9 +372,9 @@ function Build({ open }: { open: OpenWorkspace }) {
           <section>
             <h2>Prepare the outline</h2>
             <p>
-              Segment the scan outside this site. For example, outline the
-              tumour in 3D Slicer and use TotalSegmentator for the kidneys, with
-              manual review. Export the segmentation as a NIfTI label map.
+              Prepare the kidney and tumour outlines outside this site, then
+              check them against the scan. Export the reviewed segmentation as
+              a NIfTI label map.
             </p>
             <dl className="atlas-label-key">
               <div>
@@ -410,10 +409,10 @@ function Build({ open }: { open: OpenWorkspace }) {
               surgical resection plan.
             </p>
             <p>
-              The browser reproduces the Python pipeline&apos;s scores on the
+              The browser reproduces the reference calculation&apos;s scores on the
               synthetic test phantom. On other outlines, raw E and N can differ
               slightly because the browser&apos;s hull is exact, while the
-              Python pipeline uses a sampled approximation. Agreement on the
+              reference calculation uses a sampled approximation. Agreement on the
               phantom does not establish agreement on patient anatomy.
             </p>
           </section>
@@ -490,25 +489,24 @@ function Evidence({ hash }: { hash: string }) {
           <a className="atlas-link" href="#workspace/urogram?ct">Compare the separate CT urogram</a>
         </section>
         <section className="atlas-case-note" aria-labelledby="local-ai-workflow">
-          <h2 id="local-ai-workflow">AI drafts on the workstation</h2>
+          <h2 id="local-ai-workflow">Our AI research model</h2>
           <div className="atlas-workflow-copy">
           <p>
-            Our local research workflow uses TotalSegmentator to locate the
-            kidneys, a KiTS-trained model for kidney and tumour outlines, and
-            BA-Net for renal artery and vein candidates. A separate step
-            can extract contrast-visible collecting-system lumen from an
-            excretory CT. When it cannot find adequate contrast, it leaves that
-            mask unassessed. Each mask has source slices and a provenance record
-            so a reviewer can check it against the scan.
+            UroRef CalyxView AI brings several research components together to
+            draft kidney and tumour outlines, with artery and vein candidates.
+            Suitable delayed CT images may also support an outline of the
+            contrast-filled collecting system. If the scan does not show enough
+            contrast, we leave that structure unassessed. Each draft stays linked
+            to the source images so a reviewer can check it.
           </p>
           <p>
             This is an early research tool. The vessels and collecting system
             remain unqualified, and the renal pelvis has no separate automatic
             label. Every mask and any alignment between phases needs review.
-            The website does not run these GPU models or accept clinical CT
+            The website does not process clinical CT
             uploads. The local pilot is separate from the benchmark below.
           </p>
-          <a className="atlas-link" href="https://github.com/nityjr-ctrl/calyxview-renal/blob/feature/ai-segmentation-20261010/docs/AI-SEGMENTATION.md">Read the local AI setup and limits</a>
+          <a className="atlas-link" href="#about">Read the current limits</a>
           </div>
         </section>
         <nav className="atlas-evidence-nav" aria-label="Evidence sections">
@@ -548,12 +546,9 @@ function About() {
           <h2>By Nity G</h2>
           <a href="mailto:nity@uroref.com">nity@uroref.com</a>
           <p>
-            Python library and coding by Nity G. Content organisation and
-            presentation developed with AI assistance.
+            Developed by Nity G at UroRef. A research project shaped around the
+            questions we ask when looking at a kidney scan.
           </p>
-          <a href="https://github.com/nityjr-ctrl/calyxview-renal">
-            Source repository
-          </a>
         </aside>
         <div className="atlas-prose">
           <section>
@@ -597,9 +592,9 @@ function About() {
             </p>
             <a
               className="atlas-button atlas-button-outline"
-              href={repoFile('docs/PARTIAL-NEPHRECTOMY-PLANNING-PROPOSAL.md')}
+              href="mailto:nity@uroref.com?subject=CalyxView%20renal%20research"
             >
-              Read the full study proposal
+              Discuss the proposed study
             </a>
           </section>
           <section>
@@ -626,12 +621,12 @@ function About() {
             </p>
           </section>
           <section>
-            <h2>Sources and reproducibility</h2>
+            <h2>Where the examples come from</h2>
             <p>
               The case collection uses public KiTS23 imaging and expert
-              annotations under CC BY-NC-SA 4.0. The methods pages link the
-              scoring rules, code, aggregate results and benchmark protocol.
-              Model-weight licensing is stated separately with the benchmark.
+              annotations under CC BY-NC-SA 4.0. The methods pages explain the
+              scoring assumptions, aggregate results and their limits. These
+              expert outlines are separate from our AI drafts.
             </p>
             <a className="atlas-link" href="#evidence">
               Review the published evidence
@@ -688,8 +683,8 @@ export function SitePages({
             <Brand />
             <a href={CALYXVIEW_HOME}>CalyxView home</a>
             <a href="mailto:nity@uroref.com">Contact Nity G</a>
-            <a href="https://github.com/nityjr-ctrl/calyxview-renal">
-              Source code
+            <a href="#evidence">
+              Methods & evidence
             </a>
           </div>
           <div className="atlas-footer-bottom">

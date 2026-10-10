@@ -545,7 +545,7 @@ export function buildFromLabels(
 
   const report: BuildReport = {
     builderVersion: BUILDER_VERSION,
-    rulesFrom: `renalplan ${RENALPLAN_VERSION}`,
+    rulesFrom: `CalyxView reference calculation ${RENALPLAN_VERSION}`,
     source,
     grid: {
       fileDims,

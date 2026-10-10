@@ -30,6 +30,7 @@ const forbiddenNames = [
   /(?:^|[._-])predictions?(?:[._-]|$)/i,
 ];
 const forbiddenText = [
+  /github\.com\/nityjr-ctrl|TotalSegmentator|nnU-Net|Task135|BA-Net|ASSIST-U|\b(?:Codex|Claude|ChatGPT)\b/i,
   /case_\d{5}/i,
   /(?:^|["'\s(])(?:[a-z]:[\\/])|file:\/\/|\/(?:users|home|mnt|tmp|root|var|opt|srv)\//i,
   /(?:patientname|patientid|studyinstanceuid|seriesinstanceuid)/i,

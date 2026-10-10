@@ -1,6 +1,4 @@
-import publicSummary from '@/research/kits23-feasibility/results/summary.public.json';
-
-import { parsePublicBenchmarkSummary } from './benchmark-results-contract';
+import publicResult from 'virtual:calyxview-benchmark';
 
 export type {
   AggregateMetric,
@@ -11,7 +9,7 @@ export type {
   UnavailableBenchmarkResult,
 } from './benchmark-results-contract';
 
-export const benchmarkResults = parsePublicBenchmarkSummary(publicSummary);
+export const benchmarkResults = publicResult;
 
 // Visible placeholders avoid dashes; they only show if a value is missing.
 const NOT_YET = 'not yet';

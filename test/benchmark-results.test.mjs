@@ -279,7 +279,7 @@ test('benchmark copy keeps the facts a reader needs', () => {
   assert.match(componentText, /\bfailedCases\b/);
 
   // Which model, which data, and what kind of check it is.
-  assert.match(componentText, /KiTS21/);
+  assert.match(componentText, /component, not the whole combined model/);
   assert.match(componentText, /KiTS23/);
   assert.match(componentText, /within\s+KiTS/i);
   assert.match(componentText, /not\s+external\s+validation/i);
@@ -310,7 +310,7 @@ test('benchmark copy keeps the facts a reader needs', () => {
 
   assert.match(
     componentText,
-    /https:\/\/huggingface\.co\/datasets\/neheller\/KiTS-Challenge-Imaging/,
+    /https:\/\/kits-challenge\.org\/kits23\//,
   );
   assert.match(componentText, /Mass \(tumour \+ cyst\)/);
 
@@ -408,7 +408,7 @@ test('pipeline section states its limits and links nothing private', () => {
   assert.doesNotMatch(pipelineComponentText, /every assumption/i);
   // The CalyxView endourology repository is private; don't link to it.
   assert.doesNotMatch(pipelineComponentText, /github\.com\/nityjr-ctrl\/CalyxView(?!-)/);
-  assert.match(pipelineComponentText, /not public yet/i);
+  assert.match(pipelineComponentText, /do not evaluate the combined UroRef/);
   assert.match(pipelineComponentText, /Kidneys A to E[\s\S]{0,80}cases 1 to 5/);
   assert.match(pipelineComponentText, /hilar \(h\) suffix/i);
   assert.match(pipelineComponentText, /collecting-system item/i);
@@ -416,8 +416,8 @@ test('pipeline section states its limits and links nothing private', () => {
   assert.match(pipelineComponentText, /not function/i);
   assert.match(pipelineComponentText, /Kutikov and Uzzo/);
   assert.match(pipelineComponentText, /Ficarra/);
-  assert.match(pipelineComponentText, /TotalSegmentator/);
-  assert.match(pipelineComponentText, /tripwire/i);
+  assert.match(pipelineComponentText, /automated segmentation/);
+  assert.match(pipelineComponentText, /complete privacy review/i);
   assert.match(pipelineComponentText, /CC BY-NC-SA 4\.0/);
   assert.match(pipelineComponentText, /doesn&apos;t show it\s+helps real model output/i);
 });

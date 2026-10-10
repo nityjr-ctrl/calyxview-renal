@@ -103,7 +103,7 @@ test('NIfTI: a CT is refused politely, a label map is accepted', () => {
   const refused = toLabelMap(ct);
   assert.equal(refused.ok, false);
   assert.match(refused.message, /looks like a CT, not an outline/);
-  assert.match(refused.message, /3D Slicer or TotalSegmentator/);
+  assert.match(refused.message, /Prepare and review the outlines against the CT/);
   const many = new Uint16Array(64).map((_, i) => i);
   assert.equal(toLabelMap(many).ok, false);
   const fractional = new Float32Array([0, 1, 1.5, 2]);
@@ -292,7 +292,7 @@ test('the sample reproduces renalplan 0.2.0 on its own phantom', () => {
 
   const wider = remargin(state, 10);
   assert.ok(wider.planning.preservedFraction < planning.preservedFraction);
-  assert.match(reportMarkdown(output.report), /by renalplan’s rules; approximate; not validated/);
+  assert.match(reportMarkdown(output.report), /from the outline; approximate; not validated/);
   // renalplan's phantom puts the right kidney and tumour past the grid's +x face
   // (kidney to x = 81 mm, tumour to 87 mm, grid to 79 mm), so the edge flag is true here.
   assert.equal(output.report.flags.touchesEdge, true);

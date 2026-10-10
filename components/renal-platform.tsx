@@ -714,7 +714,7 @@ function PlanningInspector({
                 <div>
                   <dt>Source</dt>
                   <dd>
-                    <a className="viewer-link" href="https://github.com/neheller/kits23" target="_blank" rel="noreferrer">
+                    <a className="viewer-link" href="https://kits-challenge.org/kits23/" target="_blank" rel="noreferrer">
                       KiTS23
                       <span className="sr-only"> (opens in a new tab)</span>
                     </a>
@@ -735,29 +735,19 @@ function PlanningInspector({
                   <div><dt>Cyst</dt><dd>KiTS expert outline</dd></div>
                 ) : null}
                 <div><dt>3D model</dt><dd>CalyxView endourology project</dd></div>
-                <div><dt>Scores</dt><dd>renalplan, from the outlines</dd></div>
+                <div><dt>Scores</dt><dd>Calculated from the outlines</dd></div>
                 <div><dt>Pipeline run</dt><dd>{`${Math.round(activeCase.runtimeSeconds)} s on a CPU`}</dd></div>
                 <div><dt>Clinical review</dt><dd>Not clinically reviewed</dd></div>
               </dl>
               <p className="mt-4 text-xs leading-5 text-white/72">
-                The separate CalyxView endourology project (not public yet) generated these surfaces
+                CalyxView generated these surfaces
                 from the KiTS23 outlines. The meshes retain the source data&apos;s non-commercial,
                 share-alike licence.
               </p>
-              {activeCase.structures.some((s) => s.provenance.startsWith('TotalSegmentator')) ? (
+              {activeCase.structures.some((s) => s.provenance.startsWith('AI-generated')) ? (
                 <p className="mt-3 text-xs leading-5 text-white/72">
                   The ribs, psoas, colon, spleen, liver and body outline in this file aren’t KiTS labels. They’re
-                  outlines of the same CT from{' '}
-                  <a
-                    className="viewer-link"
-                    href="https://github.com/wasserth/TotalSegmentator"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    TotalSegmentator
-                    <span className="sr-only"> (opens in a new tab)</span>
-                  </a>{' '}
-                  (Wasserthal et al., Radiology: AI 2023), an AI model. These outlines have not been
+                  automatically generated outlines of the same CT. These outlines have not been
                   reviewed and are hidden by default.
                 </p>
               ) : null}
@@ -834,7 +824,7 @@ function PlanningInspector({
               </dl>
               <div className="mt-5 rounded-xl border border-white/8 bg-white/[.025] p-3.5">
                 <p className="text-xs leading-5 text-white/75">
-                  renalplan scored these from the KiTS23 outlines, not from the mesh on screen. KiTS doesn’t
+                  These scores use the KiTS23 outlines, not the mesh on screen. KiTS doesn’t
                   outline the renal sinus, so it’s estimated from the kidney outline. L and the PADUA pole are
                   measured against planes across the kidney’s own long axis, placed from that estimate, so
                   they’re approximate. For the PADUA pole a tumour counts as between the poles only if more
@@ -900,7 +890,7 @@ function PlanningInspector({
                 </div>
                 <p className="mt-3 text-xs leading-5 text-white/75">
                   Parenchyma outside a uniform 5 mm band round the tumour, as a share of the tumour-side kidney,
-                  from renalplan. Volume, not function. Enucleation takes less; renorrhaphy and devascularised
+                  from the outline. Volume, not function. Enucleation takes less; renorrhaphy and devascularised
                   tissue take more.
                 </p>
                 <p className="mt-2 text-xs leading-5 text-white/75">Only the 5 mm margin was evaluated for this case.</p>
