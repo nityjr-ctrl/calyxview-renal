@@ -226,7 +226,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
       <div className="site-shell">
         <div className="benchmark-heading-grid">
           <div>
-            <p className="eyebrow">The benchmark</p>
+            <p className="eyebrow">05 / The benchmark</p>
             <h2 id="benchmark-title">
               Can a published model draw the outlines?{' '}
               {isScriptBlinded

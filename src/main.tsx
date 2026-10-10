@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { RenalSite } from '@/components/renal-site';
 import '@/app/globals.css';
+import '@/app/editorial.css';
 
 const root = document.getElementById('root');
 

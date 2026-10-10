@@ -12,8 +12,7 @@ import {
   RotateCcw,
   ShieldAlert,
   SlidersHorizontal,
-  Sparkles,
-  Wand2,
+  Eye,
   X,
   ZoomIn,
   ZoomOut,
@@ -232,7 +231,6 @@ function CaseSidebar({
             {activeCase ? 'De-identified CT, KiTS expert outlines' : 'A right kidney with an interpolar tumour, made in code'}
           </p>
         </div>
-        <span className="status-dot mt-1" aria-hidden="true" />
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
@@ -297,7 +295,7 @@ function CaseSidebar({
             variant="outline"
             onClick={() => setKidneyOpacity(34)}
           >
-            <Sparkles /> Ghost
+            <Eye /> Ghost
           </Button>
           <Button
             className="flex-1 border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
@@ -497,7 +495,7 @@ function ModelWorkspace({
       <div className="viewer-topbar">
         {building ? (
           <p className="flex items-center gap-2 text-xs text-white/75">
-            <Wand2 className="size-3.5" aria-hidden="true" />
+            <Box className="size-3.5" aria-hidden="true" />
             {modelName}
             <span className="hidden text-white/66 sm:inline">(built in this tab)</span>
           </p>
@@ -561,7 +559,6 @@ function ModelWorkspace({
 
         <div className="viewer-chips">
           <div className="viewer-chip">
-            <span className="size-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
             {building ? 'Built from an outline' : activeCase ? 'KiTS expert outlines' : 'Hand-made model'}
           </div>
           <div className="viewer-chip">
@@ -1265,7 +1262,7 @@ export function RenalPlatform({
           </button>
           <div className="min-w-0">
             <div className="flex items-baseline gap-2">
-              <span className="truncate text-sm font-semibold tracking-[-.025em] text-white/92 sm:text-base">
+              <span className="workspace-wordmark truncate">
                 CalyxView Renal
               </span>
               <span className="shrink-0 text-[11px] font-medium uppercase tracking-[.12em] text-emerald-200/85">
@@ -1277,7 +1274,7 @@ export function RenalPlatform({
         </div>
 
         <nav className="mode-nav" aria-label="Viewer modes">
-          <ModeButton active={building} icon={<Wand2 className="size-3.5" />} label="Make a 3D kidney" onClick={() => changeMode('build')} />
+          <ModeButton active={building} icon={<Box className="size-3.5" />} label="Make a 3D kidney" onClick={() => changeMode('build')} />
           <ModeButton active={mode === 'plan'} icon={<Box className="size-3.5" />} label="Kidneys" onClick={() => changeMode('plan')} />
         </nav>
 

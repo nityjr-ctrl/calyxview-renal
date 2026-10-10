@@ -1,8 +1,6 @@
 'use client';
 
 import {
-  Activity,
-  ArrowDown,
   ArrowRight,
   Check,
   CircleAlert,
@@ -58,13 +56,10 @@ const CONTACT_EMAIL = 'nity@uroref.com';
 const HERO_SCAN = '/ct/reference-c/key.webp';
 
 const navLinks = [
-  { href: '#build', label: 'Make a 3D kidney' },
-  { href: '#kidneys', label: 'Real kidneys' },
-  { href: '#hand-made', label: 'Hand-made kidney' },
-  { href: '#planning', label: 'Pipeline' },
-  { href: '#research', label: 'Benchmark' },
-  { href: '#next', label: 'Next step' },
-  { href: '#limits', label: 'Limits' },
+  { href: '#kidneys', label: 'Case atlas' },
+  { href: '#build', label: 'Build a model' },
+  { href: '#planning', label: 'Research' },
+  { href: '#limits', label: 'Limitations' },
 ];
 
 const buildSteps = [
@@ -195,7 +190,6 @@ class LoadErrorBoundary extends Component<
 function Brand() {
   return (
     <a className="site-brand" href="#top" aria-label="CalyxView Renal home">
-      <span className="site-brand-mark"><Activity /></span>
       <span>
         <strong>CalyxView</strong>
         <small>Renal</small>
@@ -238,7 +232,7 @@ function SiteHeader({ openDemo }: { openDemo: OpenDemo }) {
             <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
           ))}
           <button type="button" className="site-nav-cta" data-return-focus="header" onClick={() => openDemo()}>
-            Open the 3D viewer <ArrowRight />
+            Open 3D viewer
           </button>
         </nav>
       </div>
@@ -251,22 +245,22 @@ function HeroSection({ openDemo }: { openDemo: OpenDemo }) {
     <section className="hero-section" aria-labelledby="hero-title">
       <div className="site-shell hero-inner">
         <div className="hero-content">
-          <p className="hero-eyebrow">Partial nephrectomy research prototype</p>
-          <h1 id="hero-title">Renal tumours in 3D, with the nephrometry scored from the outline.</h1>
+          <h1 id="hero-title">A closer look<br />at the <em>kidney.</em></h1>
           <p className="hero-copy">
-            Load a kidney and tumour outline to get a 3D model with R.E.N.A.L. and PADUA scored by stated
-            rules, or open five real KiTS23 CTs beside their 3D models.
+            From CT to 3D anatomy. Examine five renal tumours, compare their outlines
+            and follow how R.E.N.A.L. and PADUA scores are calculated.
           </p>
           <div className="hero-actions">
-            <button type="button" className="button button-mint" data-return-focus="hero" onClick={() => openDemo('build')}>
-              Make a 3D kidney <ArrowRight />
+            <button type="button" className="button button-mint" data-return-focus="hero" onClick={() => openDemo('plan', 'reference-c', { ct: true })}>
+              Open Kidney C <ArrowRight />
             </button>
-            <a className="button button-glass" href="#kidneys">
-              See the five real kidneys <ArrowDown />
+            <a className="hero-secondary" href="#kidneys">
+              Browse the case atlas
             </a>
           </div>
           <p className="hero-footnote">
-            <a href="#limits">Read the limits</a>.
+            Partial nephrectomy research, by Nity G.<br />
+            <a href="#limits">Not validated for clinical use.</a>
           </p>
         </div>
         <figure className="hero-figure">
@@ -279,9 +273,11 @@ function HeroSection({ openDemo }: { openDemo: OpenDemo }) {
               height="635"
               fetchPriority="high"
             />
-            <span className="hero-scan-tag" aria-hidden="true">Kidney C</span>
           </div>
-          <figcaption className="hero-caption">KiTS23 CT, de-identified, CC BY-NC-SA 4.0</figcaption>
+          <figcaption className="hero-caption">
+            <strong>Kidney C <span> / </span> Axial CT</strong>
+            <span>Kidney and tumour outlined. KiTS23, de-identified.<br />CC BY-NC-SA 4.0</span>
+          </figcaption>
         </figure>
       </div>
     </section>
@@ -293,8 +289,8 @@ function BuildSection({ openDemo }: { openDemo: OpenDemo }) {
     <section id="build" className="demo-section build-section" aria-labelledby="build-title">
       <div className="site-shell">
         <div className="section-heading section-heading-light">
-          <p className="eyebrow">Make a 3D kidney</p>
-          <h2 id="build-title">Load an outline, get a 3D kidney and its scores.</h2>
+          <p className="eyebrow">02 / The model builder</p>
+          <h2 id="build-title">Start with your own outline.</h2>
           <p>
             Takes a kidney and tumour label map (.nii or .nii.gz). Returns the 3D model, R.E.N.A.L., PADUA
             and the kidney kept at your margin, by renalplan&apos;s rules. Runs in your browser; nothing is
@@ -318,7 +314,7 @@ function BuildSection({ openDemo }: { openDemo: OpenDemo }) {
                 data-return-focus="build-sample"
                 onClick={() => openDemo('build', 'synthetic', { sample: true })}
               >
-                Try the sample <ArrowRight />
+                Build the sample kidney
               </button>
               <button
                 type="button"
@@ -351,8 +347,8 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
     <section id="kidneys" className="kidneys-section" aria-labelledby="kidneys-title">
       <div className="site-shell">
         <div className="section-heading section-heading-light">
-          <p className="eyebrow">Five real kidneys</p>
-          <h2 id="kidneys-title">Five real CTs, each beside its 3D model.</h2>
+          <p className="eyebrow">01 / The case atlas</p>
+          <h2 id="kidneys-title">Five kidneys. Five different tumours.</h2>
           <p>
             De-identified KiTS23 CTs, scored by renalplan from the KiTS expert outlines. The sinus is
             estimated from the outline, so L and the PADUA pole are approximate
@@ -377,7 +373,10 @@ function KidneysSection({ openDemo }: { openDemo: OpenDemo }) {
                     decoding="async"
                   />
                 </div>
-                <h3>{item.label}</h3>
+                <div className="kidney-identity">
+                  <h3>{item.label}</h3>
+                  <p>CT &amp; 3D reconstruction</p>
+                </div>
                 <dl className="kidney-facts">
                   <div>
                     <dt>R.E.N.A.L.</dt>
@@ -433,9 +432,7 @@ function HandMadeSection() {
     veins: true,
     collecting: true,
   });
-  // The preview turns by itself until someone touches it or presses the button.
-  // WCAG 2.2.2 asks for a way to stop moving content, so the button is always there.
-  const [turning, setTurning] = useState(true);
+  const [turning, setTurning] = useState(false);
   const [reduceMotion] = useState(
     () => typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
@@ -465,11 +462,11 @@ function HandMadeSection() {
     <section id="hand-made" className="demo-section" aria-labelledby="hand-made-title">
       <div className="site-shell">
         <div className="section-heading section-heading-light">
-          <p className="eyebrow">Hand-made kidney</p>
-          <h2 id="hand-made-title">A right kidney with an interpolar tumour, made in code.</h2>
+          <p className="eyebrow">03 / An anatomical illustration</p>
+          <h2 id="hand-made-title">See the structures around the tumour.</h2>
           <p>
-            Arteries, veins and collecting system drawn by hand, so there is no patient in it. The only
-            model here with vessels.
+            A right kidney with an interpolar tumour, made in code. Arteries, veins and collecting system
+            are drawn by hand; this is an illustration, not a patient reconstruction.
           </p>
         </div>
 
@@ -516,7 +513,7 @@ function HandMadeSection() {
             </div>
             {reduceMotion ? null : (
               <button type="button" className="text-link" onClick={() => setTurning((value) => !value)}>
-                {turning ? 'Stop it turning' : 'Let it turn'}
+                {turning ? 'Pause rotation' : 'Rotate the model'}
               </button>
             )}
           </aside>
@@ -531,7 +528,7 @@ function NextStepSection() {
     <section id="next" className="next-section" aria-labelledby="next-title">
       <div className="site-shell next-grid">
         <div className="section-heading section-heading-light next-intro">
-          <p className="eyebrow">Next step</p>
+          <p className="eyebrow">06 / The next study</p>
           <h2 id="next-title">The study I want to run.</h2>
           <p>
             None of these scores has been compared with clinicians&apos; yet, so on our own partial
@@ -564,9 +561,9 @@ function LimitsSection() {
     <section id="limits" className="safety-section" aria-labelledby="limits-title">
       <div className="site-shell">
         <div id="safety" className="section-heading section-heading-light">
-          <p className="eyebrow">Limits</p>
-          <h2 id="limits-title">What&apos;s here now, and what clinical use would need.</h2>
-          <p>None of it is validated.</p>
+          <p className="eyebrow">07 / Limitations</p>
+          <h2 id="limits-title">A prototype, with questions still to answer.</h2>
+          <p>The models and scores have not been clinically validated.</p>
         </div>
         <div className="safety-grid">
           <article className="safety-card safety-card-ready" aria-labelledby="limits-now-title">
@@ -592,14 +589,14 @@ function Overview({ openDemo }: { openDemo: OpenDemo }) {
     <div className="site-page" id="top">
       <a className="skip-link" href="#main-content">Skip to content</a>
       <div className="prototype-strip" role="note">
-        Research and teaching prototype. Not for patient care.
+        Research &amp; teaching only. Not for patient care.
       </div>
       <SiteHeader openDemo={openDemo} />
 
       <main id="main-content" tabIndex={-1}>
         <HeroSection openDemo={openDemo} />
-        <BuildSection openDemo={openDemo} />
         <KidneysSection openDemo={openDemo} />
+        <BuildSection openDemo={openDemo} />
         <HandMadeSection />
 
         <PlanningPipeline />
@@ -612,7 +609,7 @@ function Overview({ openDemo }: { openDemo: OpenDemo }) {
         <section className="closing-section" aria-labelledby="closing-title">
           <div className="site-shell closing-inner">
             <div>
-              <h2 id="closing-title">Contact</h2>
+              <h2 id="closing-title">A question about the work?</h2>
               <p className="closing-copy">
                 <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
               </p>
@@ -641,7 +638,7 @@ function Overview({ openDemo }: { openDemo: OpenDemo }) {
             coding by Nity G. Content organisation and presentation done with help of AI.
           </p>
           <div className="footer-meta">
-            <span>Last updated September 2026</span>
+            <span>Last updated October 2026</span>
             <span>© 2026 CalyxView Renal</span>
           </div>
         </div>

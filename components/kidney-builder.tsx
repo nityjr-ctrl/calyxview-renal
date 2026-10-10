@@ -15,7 +15,6 @@ import {
   Info,
   LoaderCircle,
   RotateCcw,
-  Sparkles,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
 
@@ -343,7 +342,7 @@ export function BuildControls({
           disabled={running}
           focusableWhenDisabled
         >
-          {running ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
+          {running ? <LoaderCircle className="animate-spin" /> : null}
           Try the sample
         </Button>
         {state.output && !running ? (
@@ -644,7 +643,6 @@ export function BuiltSidebar({
             {building ? 'Building…' : `${(report.totalMs / 1000).toFixed(1)} s`}
           </p>
         </div>
-        <span className="status-dot mt-1" aria-hidden="true" />
       </div>
 
       {building ? null : <Warnings warnings={report.warnings} className="mt-4" />}
@@ -754,12 +752,10 @@ type InspectorTab = 'source' | 'scores' | 'plan' | 'limits';
 
 function Rule({ term, points, children }: { term: string; points: string; children: string }) {
   return (
-    <div className="build-rule">
-      <div className="flex items-baseline justify-between gap-3">
-        <dt className="text-xs font-medium text-white/88">{term}</dt>
-        <dd className="font-mono text-xs text-emerald-100/90">{points}</dd>
-      </div>
-      <p className="mt-1 text-xs leading-5 text-white/72">{children}</p>
+    <div className="build-rule grid grid-cols-[1fr_auto] items-baseline gap-x-3">
+      <dt className="text-xs font-medium text-white/88">{term}</dt>
+      <dd className="font-mono text-xs text-emerald-100/90">{points}</dd>
+      <dd className="col-span-2 mt-1 text-xs leading-5 text-white/72">{children}</dd>
     </div>
   );
 }

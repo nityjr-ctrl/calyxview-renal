@@ -187,7 +187,7 @@ export function PlanningPipeline() {
       <div className="site-shell">
         <div className="benchmark-heading-grid">
           <div>
-            <p className="eyebrow">The pipeline</p>
+            <p className="eyebrow">04 / The research pipeline</p>
             <h2 id="pipeline-title">From CT outlines to a measured 3D kidney.</h2>
           </div>
           <div className="benchmark-intro">
