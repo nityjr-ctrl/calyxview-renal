@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renalplan"
-version = "0.2.0"
+version = "0.3.0"
 description = "3D models and computed nephrometry from kidney and tumour outlines (research and teaching prototype)"
 requires-python = ">=3.11"
 dependencies = [
@@ -12,11 +12,17 @@ dependencies = [
   "fast-simplification>=0.1.9", "rtree>=1.1", "shapely>=2.0", "nibabel>=5.2", "pydicom>=2.4", "matplotlib>=3.8",
 ]
 
+[project.optional-dependencies]
+ai = ["SimpleITK>=2.3", "Pillow>=10", "TotalSegmentator==2.14.0"]
+
 [project.scripts]
 renalplan = "renalplan.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["renalplan*"]
+
+[tool.setuptools.package-data]
+renalplan = ["review_assets/*.html", "review_assets/*.js", "model_specs/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

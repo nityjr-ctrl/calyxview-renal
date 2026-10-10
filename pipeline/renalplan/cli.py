@@ -533,6 +533,8 @@ def main(argv=None):
     p.add_argument("--out", type=Path, required=True), p.add_argument("--seed", type=int, default=0)
     p.set_defaults(fn=cmd_phantom)
 
+    from .ai import add_parser
+    add_parser(sub)
     a = ap.parse_args(argv)
     a.fn(a)
 

@@ -24,7 +24,15 @@ de-identified DICOM export) plus a kidney / tumour / cyst label map, and produce
 
 It is deliberately CPU-first so everything can be run and scored on a laptop.
 The GPU model backends (TotalSegmentator, nnU-Net) are wrapped as subprocess
-calls for the workstation.
+calls for the workstation. Version 0.3 adds a separate local AI draft workflow:
+`renalplan ai` uses TotalSegmentator for localisation, a KiTS-trained nnU-Net
+for kidney and tumour drafts, and KiPA22 BA-Net for unqualified renal vessel
+candidates. It exports CT overlays and separate masks for review. A declared
+excretory phase can support a partial collecting-system candidate; insufficient
+contrast produces an explicit unassessed result. The renal pelvis has no
+separate automatic label. See
+[the AI workflow instructions](../docs/AI-SEGMENTATION.md) for setup, provenance
+and limitations. This command withholds nephrometry and planning measurements.
 
 ## Install
 
@@ -33,7 +41,7 @@ cd pipeline
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install -e .            # gives you the `renalplan` command
-pytest                      # 35 tests: a synthetic phantom with known geometry, the score cut-offs and rules, the DICOM tripwire
+pytest                      # geometry, score rules, input/provenance failures and draft workflow tests
 ```
 
 `pip install -e .` points the `renalplan` command at this folder. If an older

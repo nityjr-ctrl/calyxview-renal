@@ -1,0 +1,40 @@
+{
+  "sourceRevision": "db16c6cef5fdd5a180159184e46b58bcca670446",
+  "modelRelative": "nnUNet/3d_fullres/Task135_KiTS2021/nnUNetTrainerV2__nnUNetPlansv2.1",
+  "plans": {
+    "bytes": 143080,
+    "sha256": "d15d46664240f0a9056ef1320e00df46fbd866ea94323a98e47b3e9eff1f4e39"
+  },
+  "folds": {
+    "0": {
+      "checkpoint_bytes": 249826698,
+      "checkpoint_sha256": "d64a21c10973c459870297e57e39811304c689e3b9bddd5bbaeb7a8384d64cf7",
+      "metadata_bytes": 143564,
+      "metadata_sha256": "9f6f0d03dcbe0a67a2e5894f2f10ea6b0f58dd5de5348b3c6a7b6c0e1bede0b2"
+    },
+    "1": {
+      "checkpoint_bytes": 249826570,
+      "checkpoint_sha256": "6038808474337ca2f27cc2592847622f3665f8c526165dfe945ca8d905a0e27c",
+      "metadata_bytes": 143564,
+      "metadata_sha256": "d1d5dafb9de471634a1d3ded474ca6554f6b731f49154c30ff81a18fac6174f6"
+    },
+    "2": {
+      "checkpoint_bytes": 249826762,
+      "checkpoint_sha256": "54e61742f2acf83fe6b163d73e41c3a4629cecfa3441b70257c9e6b96d64efc9",
+      "metadata_bytes": 143564,
+      "metadata_sha256": "99acda476f067ac55236dfe01ea0f220d86867cba094366733b5e9eef338731b"
+    },
+    "3": {
+      "checkpoint_bytes": 249826570,
+      "checkpoint_sha256": "abddc1d98252bd1b8f90af10b42a58ebd6c27059f4360af9307618f2977bcd0b",
+      "metadata_bytes": 143564,
+      "metadata_sha256": "fcd1ea1b1eced829852f64a42d9d8a5b6cbee35190a87dace853255124227adf"
+    },
+    "4": {
+      "checkpoint_bytes": 249826826,
+      "checkpoint_sha256": "849e9bad2031ca99096fd4a827283838541c7822d84063b74337621d649b92ef",
+      "metadata_bytes": 143564,
+      "metadata_sha256": "975843163c8150e60c12f651b437a9256de48c5a3810fa21c6d77a2f2be77898"
+    }
+  }
+}

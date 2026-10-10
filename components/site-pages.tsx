@@ -489,6 +489,26 @@ function Evidence({ hash }: { hash: string }) {
           </p>
           <a className="atlas-link" href="#workspace/urogram?ct">Compare the separate CT urogram</a>
         </section>
+        <section className="atlas-case-note" aria-labelledby="local-ai-workflow">
+          <h2 id="local-ai-workflow">AI drafts on the workstation</h2>
+          <p>
+            Our local research workflow uses TotalSegmentator to locate the
+            kidneys, a KiTS-trained model for kidney and tumour outlines, and
+            BA-Net for renal artery and vein candidates. A separate step
+            can extract contrast-visible collecting-system lumen from an
+            excretory CT. When it cannot find adequate contrast, it leaves that
+            mask unassessed. Each mask has source slices and a provenance record
+            so a reviewer can check it against the scan.
+          </p>
+          <p>
+            This is an early research tool. The vessels and collecting system
+            remain unqualified, and the renal pelvis has no separate automatic
+            label. Every mask and any alignment between phases needs review.
+            The website does not run these GPU models or accept clinical CT
+            uploads. The local pilot is separate from the benchmark below.
+          </p>
+          <a className="atlas-link" href="https://github.com/nityjr-ctrl/calyxview-renal/blob/feature/ai-segmentation-20261010/docs/AI-SEGMENTATION.md">Read the local AI setup and limits</a>
+        </section>
         <nav className="atlas-evidence-nav" aria-label="Evidence sections">
           <a
             href="#evidence/scoring"

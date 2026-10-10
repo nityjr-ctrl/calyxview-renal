@@ -13,10 +13,12 @@ Modules
   planning     resection margin envelope, residual parenchyma, distances
   mesh         mask -> mesh, mesh fidelity back-check
   report       case bundle (GLB + planning.json) and Markdown/JSON reports
+  ai           pinned KiPA22 inference, phase registration and draft provenance
+  ai_review    local source-CT overlays and reviewer interface
   cli          `renalplan` command line
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 DISCLAIMER = (
     "Research and teaching prototype. Not a medical device. Not for diagnosis, "
