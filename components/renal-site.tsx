@@ -640,9 +640,13 @@ function Overview({ openDemo }: { openDemo: OpenDemo }) {
             By Nity G, <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Python library and
             coding by Nity G. Content organisation and presentation done with help of AI.
           </p>
+          <p className="footer-byline">
+            CalyxView Renal is a trading name of UroRef Ltd, a company registered in England and Wales
+            (company number 17504491). Registered office: 71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom.
+          </p>
           <div className="footer-meta">
             <span>Last updated September 2026</span>
-            <span>© 2026 CalyxView Renal</span>
+            <span>© 2026 UroRef Ltd</span>
           </div>
         </div>
       </footer>
