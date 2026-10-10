@@ -4,6 +4,8 @@ import { FeasibilityBenchmark } from './feasibility-benchmark';
 import { PlanningPipeline } from './planning-pipeline';
 import { referenceCases } from '@/lib/reference-cases';
 import { repoFile } from '@/lib/links';
+import { CALYXVIEW_HOME } from '@/lib/site-assets';
+import { keyImageUrl } from './ct-slices';
 
 export type OpenWorkspace = (
   mode?: 'plan' | 'build',
@@ -66,6 +68,7 @@ function Header({ page }: { page: string }) {
         className={expanded ? 'atlas-nav is-open' : 'atlas-nav'}
         aria-label="Main navigation"
       >
+        <a href={CALYXVIEW_HOME}>CalyxView home</a>
         {pages.map(([id, label]) => (
           <a
             href={`#${id}`}
@@ -130,7 +133,7 @@ function Home({ open }: { open: OpenWorkspace }) {
         </div>
         <figure className="atlas-cover">
           <img
-            src="/ct/reference-c/key.webp"
+            src={keyImageUrl('reference-c')}
             alt="Axial CT slice of Kidney C with the kidney and tumour outlines overlaid"
             width="512"
             height="512"
@@ -226,7 +229,7 @@ function Cases({ open }: { open: OpenWorkspace }) {
           <article className="atlas-case" key={item.id}>
             <figure>
               <img
-                src={`/ct/${item.id}/key.webp`}
+                src={keyImageUrl(item.id)}
                 alt={`Axial CT of ${item.label}, with kidney and tumour outlines`}
                 width="512"
                 height="512"
@@ -457,6 +460,35 @@ function Evidence({ hash }: { hash: string }) {
             establishes clinical accuracy.
           </p>
         </PageIntro>
+        <section className="atlas-case-note" aria-labelledby="kits-explained">
+          <h2 id="kits-explained">What is the KiTS competition?</h2>
+          <p>
+            KiTS stands for Kidney Tumour Segmentation. Research teams compete
+            to teach software to outline the kidney, tumours and cysts on CT.
+            The organisers compare those predictions with expert outlines.
+            The five kidneys here use KiTS23 expert outlines; they are not
+            predictions from our model or evidence that CalyxView won a challenge.
+          </p>
+          <p>
+            <a className="atlas-link" href="https://kits-challenge.org/kits23/">Read the organisers&apos; description of KiTS23</a>
+          </p>
+          <h3>Why no collecting system in the tumour cases?</h3>
+          <p>
+            KiTS23 labels the kidney, tumours and cysts. It supplies no separate
+            outline of the collecting system. Its scans use corticomedullary or
+            nephrographic contrast phases, rather than a dedicated excretory
+            series showing contrast in the urine. We have no supported
+            calyceal reconstruction to show for these five cases, so we leave
+            it out. A missing surface means it was not reconstructed.
+          </p>
+          <p>
+            That limits the scores too: collecting-system involvement is not
+            assessed. The separate CT urogram uses different source imaging and
+            shows only the contrast-supported lumen, with expert review pending.
+            It does not fill the gaps in the KiTS cases.
+          </p>
+          <a className="atlas-link" href="#workspace/urogram?ct">Compare the separate CT urogram</a>
+        </section>
         <nav className="atlas-evidence-nav" aria-label="Evidence sections">
           <a
             href="#evidence/scoring"
@@ -502,6 +534,25 @@ function About() {
           </a>
         </aside>
         <div className="atlas-prose">
+          <section>
+            <h2>Part of CalyxView</h2>
+            <p>
+              This is the renal tumour research section of CalyxView. The
+              endourology lessons on the main site explore the scope and access
+              route; here you can compare kidney and tumour outlines, work
+              through scoring assumptions and build a model from a label map.
+            </p>
+            <a className="atlas-link" href={CALYXVIEW_HOME}>Return to the main CalyxView site</a>
+          </section>
+          <section>
+            <h2>Why so plain?</h2>
+            <p>
+              I want the anatomy to be the thing you notice. The quiet colours,
+              readable text and space around the images leave room to compare
+              the scan with the model. Movement belongs in the viewer, where
+              you can pause it and look again.
+            </p>
+          </section>
           <section>
             <h2>The next study</h2>
             <p>
@@ -613,6 +664,7 @@ export function SitePages({
         <div className="atlas-shell">
           <div className="atlas-footer-top">
             <Brand />
+            <a href={CALYXVIEW_HOME}>CalyxView home</a>
             <a href="mailto:nity@uroref.com">Contact Nity G</a>
             <a href="https://github.com/nityjr-ctrl/calyxview-renal">
               Source code

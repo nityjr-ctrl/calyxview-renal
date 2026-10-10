@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { siteAsset } from '@/lib/site-assets';
 import { ensureSurfaceNormals, orientSurfaceOutward, smoothDisplaySurface } from '@/lib/surface-normals';
 
 import type { SlicePlane } from '@/components/ct-slices';
@@ -303,7 +304,7 @@ export function ReferenceCaseScene({
     } else if (referenceCase.mesh) {
       const loader = new GLTFLoader();
       loader.load(
-        referenceCase.mesh,
+        siteAsset(referenceCase.mesh),
         (gltf) => install(gltf.scene),
         (event) => {
           if (disposed || !event.lengthComputable || !event.total) return;

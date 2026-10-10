@@ -7,6 +7,7 @@
 
 import { Crosshair, PenLine } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { siteAsset } from '@/lib/site-assets';
 
 type Polyline = number[];
 
@@ -50,8 +51,8 @@ const OUTLINE_COLOURS = {
 const requests = new Map<string, Promise<CtSliceSet>>();
 
 function ctFolder(caseId: string) {
-  if (caseId === 'urogram') return '/urogram/ct/';
-  return `/ct/${caseId}/`;
+  if (caseId === 'urogram') return siteAsset('urogram/ct/');
+  return siteAsset(`ct/${caseId}/`);
 }
 
 export function sliceUrl(caseId: string, index: number) {
