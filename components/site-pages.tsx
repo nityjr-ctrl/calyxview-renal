@@ -297,6 +297,10 @@ function Cases({ open }: { open: OpenWorkspace }) {
         ))}
       </div>
       <section className="atlas-illustrative atlas-two-column">
+        <div><p className="atlas-kicker">CT urography</p><h2>Inside the collecting system</h2></div>
+        <div><p>An excretory-phase CT with separate kidney and contrast-filled collecting-system surfaces. Compare the reconstruction with the source slices. Automatic outlines await expert review.</p><button className="atlas-button atlas-button-outline" data-return-focus="urogram" onClick={() => open('plan', 'urogram', { ct: true })}>Open the CT urogram</button><p>TCGA Research Network / TCIA · CC BY 3.0. A separate case from the five KiTS23 kidneys.</p></div>
+      </section>
+      <section className="atlas-illustrative atlas-two-column">
         <div>
           <p className="atlas-kicker">Illustrative anatomy</p>
           <h2>A model made in code</h2>

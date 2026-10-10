@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { ensureSurfaceNormals, orientSurfaceOutward, smoothDisplaySurface } from '@/lib/surface-normals';
 
 import type { SlicePlane } from '@/components/ct-slices';
 import type { ReferenceStructure } from '@/lib/reference-cases';
@@ -233,6 +234,10 @@ export function ReferenceCaseScene({
         if (!(child instanceof THREE.Mesh)) return;
         const structure = byName.get(child.name);
         if (!structure) return;
+        ensureSurfaceNormals(child.geometry);
+        orientSurfaceOutward(child.geometry);
+        // Only the broad kidney envelope is smoothed; small lumen branches stay exact.
+        if (referenceCase.mesh && child.name === 'parenchyma') smoothDisplaySurface(child.geometry);
         const material = new THREE.MeshPhysicalMaterial({
           color: new THREE.Color(structure.colour),
           roughness: 0.62,
@@ -241,7 +246,7 @@ export function ReferenceCaseScene({
           transparent: true,
           opacity: structure.opacity,
           depthWrite: structure.opacity > 0.92,
-          side: THREE.DoubleSide,
+          side: THREE.FrontSide,
           clippingPlanes: [clipPlane],
         });
         child.material = material;

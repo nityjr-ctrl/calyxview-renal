@@ -16,6 +16,7 @@ export type CtSlice = {
   kidney?: Polyline[];
   tumour?: Polyline[];
   cyst?: Polyline[];
+  collecting?: Polyline[];
 };
 
 export type CtSliceSet = {
@@ -42,12 +43,14 @@ const OUTLINE_COLOURS = {
   kidney: '#c4aa8c',
   tumour: '#d85c60',
   cyst: '#8fb8d8',
+  collecting: '#5ad2e2',
 } as const;
 
 // One request per kidney for the whole visit.
 const requests = new Map<string, Promise<CtSliceSet>>();
 
 function ctFolder(caseId: string) {
+  if (caseId === 'urogram') return '/urogram/ct/';
   return `/ct/${caseId}/`;
 }
 
@@ -128,6 +131,8 @@ export function CtPanel({
   setIndex,
   outlines,
   setOutlines,
+  sourceLabel = 'KiTS23 CT, axial',
+  focusLabel = 'Go to the tumour',
 }: {
   caseId: string;
   label: string;
@@ -137,6 +142,8 @@ export function CtPanel({
   setIndex: (value: number) => void;
   outlines: boolean;
   setOutlines: (value: boolean) => void;
+  sourceLabel?: string;
+  focusLabel?: string;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const count = data?.slices.length ?? 0;
@@ -189,7 +196,7 @@ export function CtPanel({
 
   const slice = data?.slices[current];
   const hasCyst = Boolean(slice?.cyst?.length);
-  const outlined = ['kidney', slice?.tumour?.length ? 'tumour' : null, hasCyst ? 'cyst' : null].filter(Boolean);
+  const outlined = ['kidney', slice?.tumour?.length ? 'tumour' : null, hasCyst ? 'cyst' : null, slice?.collecting?.length ? 'collecting system' : null].filter(Boolean);
   const outlineWords = outlined.length > 1 ? `${outlined.slice(0, -1).join(', ')} and ${outlined.at(-1)}` : 'kidney';
   const alt = data
     ? `CT slice ${current + 1} of ${count} through ${label}${outlines ? `, ${outlineWords} outlined` : ''}`
@@ -198,13 +205,13 @@ export function CtPanel({
   return (
     <div className="ct-panel">
       <div className="flex items-center justify-between gap-2">
-        <p className="section-label">KiTS23 CT, axial</p>
+        <p className="section-label">{sourceLabel}</p>
         <button
           type="button"
           className="ct-chip"
           aria-pressed={outlines}
           onClick={() => setOutlines(!outlines)}
-          title="Show or hide the KiTS expert outlines"
+          title="Show or hide the source outlines"
         >
           <PenLine className="size-3" aria-hidden="true" />
           Outlines
@@ -223,7 +230,7 @@ export function CtPanel({
             <img src={sliceUrl(caseId, current)} alt={alt} width={data.width} height={data.height} draggable={false} />
             {outlines ? (
               <svg viewBox={`0 0 ${data.width} ${data.height}`} aria-hidden="true" preserveAspectRatio="none">
-                {(['kidney', 'cyst', 'tumour'] as const).map((name) =>
+                {(['kidney', 'cyst', 'tumour', 'collecting'] as const).map((name) =>
                   (slice[name] ?? []).map((line, n) => (
                     <polygon
                       // Outlines never reorder within a slice, so the index is a stable key.
@@ -278,7 +285,7 @@ export function CtPanel({
           onClick={() => data && setIndex(data.tumourSlice)}
         >
           <Crosshair className="size-3" aria-hidden="true" />
-          Go to the tumour
+          {focusLabel}
         </button>
       </div>
 
@@ -286,13 +293,14 @@ export function CtPanel({
         <>
           <ul className="ct-legend" aria-label="Outline colours">
             <li><span style={{ background: OUTLINE_COLOURS.kidney }} />Kidney</li>
-            <li><span style={{ background: OUTLINE_COLOURS.tumour }} />Tumour</li>
+            {data.slices.some((s) => s.tumour?.length) ? <li><span style={{ background: OUTLINE_COLOURS.tumour }} />Tumour</li> : null}
+            {data.slices.some((s) => s.collecting?.length) ? <li><span style={{ background: OUTLINE_COLOURS.collecting }} />Collecting system</li> : null}
             {data.slices.some((s) => s.cyst?.length) ? (
               <li><span style={{ background: OUTLINE_COLOURS.cyst }} />Cyst</li>
             ) : null}
           </ul>
           <p className="mt-2 text-[11px] leading-4 text-white/66">
-            {`Soft-tissue window, ${mm(data.sliceMm)} mm slabs, seen from the feet. The pale plane through the 3D model is this slice.`}
+            {`Window level ${data.window.level}, width ${data.window.width} HU; ${mm(data.sliceMm)} mm slice spacing, seen from the feet. The pale plane through the 3D model is this slice.`}
           </p>
         </>
       ) : null}

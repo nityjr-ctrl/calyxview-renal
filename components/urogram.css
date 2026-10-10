@@ -1,0 +1,16 @@
+.urogram-workspace { min-height: 100vh; background: #101e24; color: #e6e9e6; padding: 24px; }
+.urogram-workspace header { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; border-bottom: 1px solid #526168; padding-bottom: 22px; }
+.urogram-workspace h1 { font-family: Georgia, serif; font-size: clamp(28px, 3vw, 42px); }
+.urogram-workspace h2 { font-size: 18px; margin: 16px 0; }
+.urogram-workspace p { font-size: 14px; line-height: 1.65; margin: 14px 0; color: #c8d3d6; }
+.urogram-workspace a { text-decoration: underline; }
+.urogram-layout { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(300px, 2.2fr) minmax(280px, 1.3fr); gap: 24px; }
+.urogram-controls label { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 20px 0; }
+.urogram-controls input[type=range] { width: 100%; }
+.urogram-controls input[type=checkbox] { width: 22px; height: 22px; }
+.urogram-controls select, .urogram-buttons button { background: #263b44; color: white; border: 1px solid #72878e; border-radius: 3px; padding: 10px; min-height: 44px; }
+.urogram-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.urogram-model { height: 76vh; min-height: 460px; }
+.urogram-workspace :focus-visible { outline: 3px solid #edc291; outline-offset: 4px; }
+@media(max-width: 1100px) { .urogram-layout { grid-template-columns: 1fr 1.5fr; } .urogram-ct { grid-column: 1 / -1; max-width: 550px; } }
+@media(max-width: 650px) { .urogram-workspace { padding: 16px; } .urogram-layout { display: flex; flex-direction: column; } .urogram-model { order: -1; height: 55vh; min-height: 320px; } }

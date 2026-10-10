@@ -1,0 +1,28 @@
+{
+  "sourceComparisonMaxHu": 0.0,
+  "workingSpacingMm": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "surfaceSmoothing": false,
+  "artificialBridging": false,
+  "expertReview": "pending",
+  "structures": {
+    "kidney": {
+      "voxels": 196331,
+      "vertices": 31158,
+      "triangles": 62304,
+      "maskSha256": "ded19deda773f29aae0a7948bdf84fd6a2137b65a73916cdb33427cb35364d5c",
+      "meshVolumeMm3": 196297.25
+    },
+    "collecting": {
+      "voxels": 21247,
+      "vertices": 23185,
+      "triangles": 47334,
+      "maskSha256": "f822c2e26d05fc51d6401fd72a46f3926a44f59cc7024182de76df2324f975a4",
+      "meshVolumeMm3": 22007.333333333332
+    }
+  },
+  "ctSlices": 65
+}

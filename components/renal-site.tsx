@@ -19,8 +19,10 @@ const RenalPlatform = lazy(() =>
     default: module.RenalPlatform,
   })),
 );
+const UrogramWorkspace = lazy(() => import('./urogram-workspace').then(module => ({ default: module.UrogramWorkspace })));
 const knownCaseIds = new Set([
   'synthetic',
+  'urogram',
   ...referenceCases.map((item) => item.id),
 ]);
 type EntryMode = 'plan' | 'build';
@@ -195,7 +197,7 @@ export function RenalSite() {
       <Suspense
         fallback={<div className="route-loading">Loading the 3D viewer…</div>}
       >
-        <RenalPlatform
+        {workspaceCase === 'urogram' ? <UrogramWorkspace onExit={closeDemo}/> : <RenalPlatform
           key={`${workspaceMode}${workspaceCase}${workspaceNotFound ? '-not-found' : ''}`}
           initialMode={workspaceMode}
           initialCaseId={workspaceCase}
@@ -203,7 +205,7 @@ export function RenalSite() {
           startOnCt={workspaceCt}
           kidneyNotFound={workspaceNotFound}
           onExit={closeDemo}
-        />
+        />}
       </Suspense>
     </LoadErrorBoundary>
   ) : (
