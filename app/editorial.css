@@ -304,6 +304,12 @@ body:has(.site-page) {
   max-width: 54rem;
   color: var(--ink-soft);
 }
+.atlas-workflow-copy > * + * {
+  margin-top: 1rem;
+}
+.atlas-workflow-copy .atlas-link {
+  display: inline-block;
+}
 .atlas-case-note a,
 .atlas-source-line a,
 .atlas-byline a,

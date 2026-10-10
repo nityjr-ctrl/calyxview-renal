@@ -196,7 +196,8 @@ export function PlanningPipeline() {
               and PADUA, and measures volumes from kidney, tumour and cyst label maps on a CPU.
               These results use expert outlines from {count(nephrometry.casesEvaluated)} KiTS23 kidneys.
               They do not test automated segmentation or agreement with clinicians&apos; scores.
-              The package&apos;s TotalSegmentator and nnU-Net integrations have not yet been run.
+              Those outline-based cases did not run TotalSegmentator or nnU-Net. The new local AI pilot
+              has separate source records and review requirements.
             </p>
           </div>
         </div>

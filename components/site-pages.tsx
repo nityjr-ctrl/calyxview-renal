@@ -491,6 +491,7 @@ function Evidence({ hash }: { hash: string }) {
         </section>
         <section className="atlas-case-note" aria-labelledby="local-ai-workflow">
           <h2 id="local-ai-workflow">AI drafts on the workstation</h2>
+          <div className="atlas-workflow-copy">
           <p>
             Our local research workflow uses TotalSegmentator to locate the
             kidneys, a KiTS-trained model for kidney and tumour outlines, and
@@ -508,6 +509,7 @@ function Evidence({ hash }: { hash: string }) {
             uploads. The local pilot is separate from the benchmark below.
           </p>
           <a className="atlas-link" href="https://github.com/nityjr-ctrl/calyxview-renal/blob/feature/ai-segmentation-20261010/docs/AI-SEGMENTATION.md">Read the local AI setup and limits</a>
+          </div>
         </section>
         <nav className="atlas-evidence-nav" aria-label="Evidence sections">
           <a
