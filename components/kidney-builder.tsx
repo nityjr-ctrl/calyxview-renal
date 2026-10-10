@@ -21,7 +21,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type Keyboa
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { SceneCase } from '@/components/reference-case-scene';
-import { ApproachNotes, LayerButton, Metric } from '@/components/viewer-ui';
+import { LayerButton, Metric } from '@/components/viewer-ui';
 import type { BuildOutput, Stage, StructureMesh } from '@/lib/builder/build';
 import { BROWSER_DIFFERENCES, ESTIMATE_LINE, keptPercent, reportJson, reportMarkdown } from '@/lib/builder/report';
 import type { FromWorker, ToWorker } from '@/lib/builder/protocol';
@@ -405,22 +405,24 @@ export function BuildIntro({
     <section className="import-workspace" aria-labelledby="build-title">
       <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-10">
         <h1 id="build-title" className="max-w-xl text-2xl font-semibold tracking-[-.03em] text-white/92 sm:text-3xl">
-          Make a 3D kidney from an outline
+          Build a kidney model
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">
-          Takes a kidney and tumour label map. Returns the 3D model, R.E.N.A.L. and PADUA by renalplan&apos;s
-          rules, and the model and a report to download. Runs in this tab; nothing is uploaded.
+          Load a kidney and tumour label map to create a 3D surface model and a report of computed
+          R.E.N.A.L. and PADUA scores. Processing stays in this browser; nothing is uploaded.
         </p>
 
-        <div className="mt-6 rounded-xl border border-white/9 bg-white/[.025] p-4 sm:p-5">
+        <div className="build-upload-panel mt-6 border border-white/15 p-4 sm:p-5">
           <BuildControls builder={builder} marginMm={marginMm} setMarginMm={setMarginMm} />
         </div>
 
-        <ol className="build-steps mt-6" aria-label="The three steps">
+        <details className="build-method-details mt-6">
+        <summary className="cursor-pointer py-3 text-sm text-white/85">Input format and calculation methods</summary>
+        <ol className="build-steps mt-3" aria-label="Build process">
           <li>
             <span className="build-step-number">1</span>
             <div>
-              <p className="text-sm font-medium text-white/88">Outline the CT. Not done here.</p>
+              <p className="text-sm font-medium text-white/88">Prepare the label map</p>
               <p className="mt-1 text-xs leading-5 text-white/72">
                 Draw the kidney and tumour on the CT with free tools:{' '}
                 <a className="viewer-link" href={SLICER_URL} target="_blank" rel="noreferrer">
@@ -440,7 +442,7 @@ export function BuildIntro({
           <li>
             <span className="build-step-number">2</span>
             <div>
-              <p className="text-sm font-medium text-white/88">Build the surfaces. Done here.</p>
+              <p className="text-sm font-medium text-white/88">Surface reconstruction</p>
               <p className="mt-1 text-xs leading-5 text-white/72">
                 Each structure becomes a distance field, resampled to a 1 mm grid, coarser for very large
                 volumes (the report says the grid used), so thick slices don&apos;t show as steps, then
@@ -453,7 +455,7 @@ export function BuildIntro({
           <li>
             <span className="build-step-number">3</span>
             <div>
-              <p className="text-sm font-medium text-white/88">Score it. Done here.</p>
+              <p className="text-sm font-medium text-white/88">Measurements and scores</p>
               <p className="mt-1 text-xs leading-5 text-white/72">
                 R.E.N.A.L., PADUA and the share of kidney kept outside a margin you choose, each with the rule
                 beside it. The sinus is estimated from the outline, so N, L and the PADUA pole are approximate.
@@ -461,23 +463,25 @@ export function BuildIntro({
             </div>
           </li>
         </ol>
+        </details>
 
         <p className="mt-6 text-xs leading-5 text-white/72">
-          For a real outline to try, the{' '}
+          Research label maps are available from the{' '}
           <a className="viewer-link" href={KITS23_URL} target="_blank" rel="noreferrer">
             KiTS23 dataset on GitHub
             <NewTab />
           </a>{' '}
-          has expert kidney and tumour label maps from de-identified CTs (CC BY-NC-SA 4.0). Each case folder has a{' '}
-          <code className="font-mono text-white/80">segmentation.nii.gz</code> you can load here.
+          under CC BY-NC-SA 4.0. Load the{' '}
+          <code className="font-mono text-white/80">segmentation.nii.gz</code> file from a case folder.
         </p>
 
-        <div className="mt-6 rounded-xl border border-amber-200/12 bg-amber-200/[.035] p-4">
+        <div className="mt-6 border-l-2 border-amber-200/60 p-4">
           <div className="flex gap-3">
             <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-200/80" aria-hidden="true" />
             <p className="text-xs leading-5 text-white/78">
-              Not validated. The scores follow published rules but haven&apos;t been compared with
-              clinicians&apos; scoring.
+              Unvalidated research output. N, L and the PADUA pole use estimated anatomy;
+              collecting-system involvement is not assessed. Scores have not been compared with
+              clinicians&apos; assessments. Volume outside a margin is not renal function or a resection plan.
             </p>
           </div>
         </div>
@@ -489,25 +493,17 @@ export function BuildIntro({
 export function BuildStepsSidebar() {
   return (
     <aside className="workspace-sidebar left-sidebar">
-      <p className="section-label">Make a 3D kidney</p>
-      <p className="mt-2 text-lg font-semibold tracking-tight text-white/90">What happens where</p>
-      <ol className="mt-5 space-y-1" aria-label="Where each step happens">
+      <p className="section-label">Model builder</p>
+      <h2 className="mt-2 text-lg font-semibold tracking-tight text-white/90">Before loading a file</h2>
+      <dl className="mt-5 space-y-5">
         {[
-          ['Outline the CT', 'Outside the browser, with 3D Slicer or TotalSegmentator'],
-          ['Build the surfaces', 'In this tab'],
-          ['Score it', 'In this tab'],
-        ].map(([label, where], index) => (
-          <li key={label} className="flex gap-3 rounded-lg px-2 py-2.5">
-            <span className="grid size-5 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[.035] font-mono text-[11px] text-white/70">
-              {index + 1}
-            </span>
-            <div>
-              <p className="text-xs text-white/80">{label}</p>
-              <p className="mt-1 text-[11px] leading-4 text-white/62">{where}</p>
-            </div>
-          </li>
+          ['File type', 'NIfTI label map (.nii or .nii.gz), not the raw CT.'],
+          ['Labels', '1 kidney, 2 tumour, 3 cyst. Other labels become separate surfaces.'],
+          ['Data', 'Use public, synthetic or properly de-identified research outlines.'],
+        ].map(([label, description]) => (
+          <div key={label}><dt className="text-sm font-medium text-white/90">{label}</dt><dd className="mt-1 text-sm leading-6 text-white/72">{description}</dd></div>
         ))}
-      </ol>
+      </dl>
     </aside>
   );
 }
@@ -515,13 +511,13 @@ export function BuildStepsSidebar() {
 export function BuildPrivacyPanel() {
   return (
     <aside className="workspace-sidebar right-sidebar">
-      <p className="section-label">What the builder does with your file</p>
+      <h2 className="section-label">File handling</h2>
       <ul className="mt-4 space-y-3">
         {[
-          'Read into this tab’s memory. No upload request, no server.',
-          'Nothing kept: no file name, no browser storage. Downloads are named calyxview-renal.',
-          'Outlines only. Not DICOM; a file that looks like CT is refused.',
-          'The NIfTI header’s free-text description is not read or copied.',
+          'Processing runs in this tab’s memory, without an upload request.',
+          'The file and its name are not saved in browser storage. Downloads use the name calyxview-renal.',
+          'Only label maps are accepted. DICOM and data resembling raw CT are rejected.',
+          'The NIfTI header’s free-text description is neither read nor copied.',
         ].map((fact) => (
           <li key={fact} className="flex gap-3">
             <CircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-300/80" aria-hidden="true" />
@@ -531,30 +527,14 @@ export function BuildPrivacyPanel() {
       </ul>
 
       <div className="mt-5 rounded-xl border border-amber-200/12 bg-amber-200/[.035] p-3.5">
-        <p className="text-xs font-medium text-amber-50/90">Use outlines you’re allowed to use here</p>
+        <p className="text-sm font-medium text-amber-50/90">Local processing does not anonymise data</p>
         <p className="mt-1.5 text-xs leading-5 text-white/75">
           Your organisation&apos;s rules on patient data apply on this computer. Use public, synthetic or
           properly de-identified outlines; removing the name from a header doesn&apos;t de-identify a scan.
         </p>
       </div>
 
-      <div className="mt-6 border-t border-white/8 pt-5">
-        <p className="section-label">What a clinical version would need</p>
-        <div className="mt-4 space-y-3">
-          {[
-            'A locked-down store for identifiable data, and a tested de-identification process',
-            'Checks on the scan protocol, with the contrast phases registered to each other',
-            'Validated outlines, with the uncertainty shown and a way for an expert to correct them',
-            'Vessel and collecting-system outlines, so the hilar suffix and PADUA’s collecting-system item can be scored',
-            'A record of where each structure came from, and a signed clinical review',
-          ].map((item) => (
-            <div key={item} className="flex gap-3">
-              <Circle className="mt-1 size-3 shrink-0 text-white/50" aria-hidden="true" />
-              <p className="text-xs leading-5 text-white/72">{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <p className="mt-6 border-t border-white/10 pt-5 text-sm leading-6 text-white/72">After building, inspect the scores and their flags before exporting. Reloading this page clears the working model.</p>
     </aside>
   );
 }
@@ -775,7 +755,7 @@ export function BuiltInspector({
   const tabs: Array<{ id: InspectorTab; label: string }> = [
     { id: 'source', label: 'About' },
     { id: 'scores', label: 'Scores' },
-    { id: 'plan', label: 'Plan' },
+    { id: 'plan', label: 'Volumes' },
     { id: 'limits', label: 'Limits' },
   ];
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -1000,19 +980,18 @@ export function BuiltInspector({
             ) : (
               <p className="mt-3 text-xs leading-5 text-white/75">Nothing to plan without a kidney and a tumour.</p>
             )}
-            <ApproachNotes />
           </>
         ) : null}
 
         {!building && tab === 'limits' ? (
           <>
-            <p className="section-label">What this can’t tell you</p>
+            <p className="section-label">Calculation limitations</p>
             <ul className="viewer-limits mt-3">
               {[
-                'Step 1, outlining the CT, isn’t done here. The scores are only as good as the outline.',
+                'Segmentation is performed outside this site. Calculated scores depend on the quality of that outline.',
                 'The sinus is estimated from the outline, not seen, so N, L and the PADUA pole are approximate.',
                 'There are no vessels or collecting system, so no hilar suffix, no PADUA collecting-system item, and nothing on clamping.',
-                'The scores haven’t been compared with clinicians’ own scoring. It isn’t validated and it isn’t a medical device.',
+                'These scores have not been compared with independent clinician assessments. This is unvalidated research output, not a clinical planning tool.',
                 ...BROWSER_DIFFERENCES.map((item) => `Compared with renalplan: ${item.charAt(0).toLowerCase()}${item.slice(1)}`),
               ].map((item) => (
                 <li key={item}>

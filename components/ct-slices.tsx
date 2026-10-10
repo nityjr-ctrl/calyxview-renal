@@ -182,7 +182,7 @@ export function CtPanel({
   if (status === 'failed') {
     return (
       <p className="mt-3 text-xs leading-5 text-white/75">
-        The CT slices didn&apos;t load. Try reloading the page, and tell me if it keeps happening.
+        The CT slices could not load. Reload the page to try again.
       </p>
     );
   }

@@ -371,6 +371,7 @@ test('pipeline and benchmark copy avoid en and em dashes', () => {
 test('the rest of the site copy avoids en and em dashes too', async () => {
   const paths = [
     '../components/renal-site.tsx',
+    '../components/site-pages.tsx',
     '../components/renal-platform.tsx',
     '../components/kidney-scene.tsx',
     '../components/reference-case-scene.tsx',
@@ -390,7 +391,7 @@ test('the rest of the site copy avoids en and em dashes too', async () => {
 
 // The lesson was taken out in October 2026. The hand-made kidney stays as a model.
 test('the lesson is gone and the hand-made kidney is not framed as teaching', async () => {
-  const siteText = await readFile(new URL('../components/renal-site.tsx', import.meta.url), 'utf8');
+  const siteText = (await Promise.all(['renal-site', 'site-pages'].map((name) => readFile(new URL(`../components/${name}.tsx`, import.meta.url), 'utf8')))).join('\n');
   const sceneText = await readFile(new URL('../components/kidney-scene.tsx', import.meta.url), 'utf8');
   for (const text of [siteText, platformText, sceneText]) {
     assert.doesNotMatch(text, /'learn'|trainingStep|TrainingPanel|lessonSteps/);

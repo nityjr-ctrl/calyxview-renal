@@ -193,10 +193,10 @@ test('6 and 12: the builder shows the diameter to two decimals and qualifies the
   const builder = await source('../components/kidney-builder.tsx');
   assert.doesNotMatch(builder, /radiusCm\.toFixed\(1\)/);
   assert.match(builder, /radiusCm\.toFixed\(2\)/);
-  for (const path of ['../components/kidney-builder.tsx', '../components/renal-site.tsx']) {
+  for (const path of ['../components/kidney-builder.tsx', '../components/site-pages.tsx']) {
     const text = await source(path);
     for (const match of text.matchAll(/1 mm grid[^.]*/g)) {
-      assert.match(match[0], /coarser for very\s+large\s+volumes/, `${path}: ${match[0]}`);
+      assert.match(match[0], /coarser(?: grid)? for (?:very\s+)?large\s+volumes/, `${path}: ${match[0]}`);
     }
   }
 });
@@ -205,12 +205,12 @@ test('7: the copy explains the hull difference and claims exact agreement only o
   assert.ok(BROWSER_DIFFERENCES.some((item) => /Delaunay/.test(item) && /20,000/.test(item) && /exact convex hull/.test(item)));
   assert.ok(BROWSER_DIFFERENCES.some((item) => /E and N can differ by a few tenths/.test(item)));
   assert.doesNotMatch(ESTIMATE_LINE, /same rules as renalplan/);
-  for (const path of ['../components/kidney-builder.tsx', '../components/renal-site.tsx']) {
+  for (const path of ['../components/kidney-builder.tsx', '../components/site-pages.tsx']) {
     const text = await source(path);
     assert.doesNotMatch(text, /same rules as renalplan|agree on every score/, path);
   }
   assert.match(await source('../components/kidney-builder.tsx'), /raw E and N can differ slightly because the browser’s hull is exact/);
-  assert.match(await source('../components/renal-site.tsx'), /raw E and N can differ slightly because the\s+browser&apos;s hull is exact/);
+  assert.match((await source('../components/site-pages.tsx')).replace(/\s+/g, ' '), /raw E and N can differ slightly because the browser&apos;s hull is exact/);
 });
 
 test('10 and 15: the viewer hides stale numbers while building and stands its controls down without WebGL', async () => {

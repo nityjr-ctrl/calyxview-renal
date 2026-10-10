@@ -46,7 +46,7 @@ import {
   useKidneyBuilder,
 } from '@/components/kidney-builder';
 import { CtPanel, slicePlaneFor, useCtSlices, type CtSliceSet, type SlicePlane } from '@/components/ct-slices';
-import { ApproachNotes, LayerButton, Metric } from '@/components/viewer-ui';
+import { LayerButton, Metric } from '@/components/viewer-ui';
 import { referenceCases, type ReferenceCase } from '@/lib/reference-cases';
 
 export type WorkspaceMode = 'plan' | 'build';
@@ -164,7 +164,7 @@ function share(fraction: number) {
 }
 
 function caseSummary(activeCase: ReferenceCase | null) {
-  if (!activeCase) return 'Hand-made kidney: example R.E.N.A.L. 9a (moderate), tumour 2.8 cm';
+  if (!activeCase) return 'Illustrative kidney: example R.E.N.A.L. 9a (moderate), tumour 2.8 cm';
   const { nephrometry: n } = activeCase;
   return `${activeCase.label}: R.E.N.A.L. ${n.renalLabel} (${n.renalComplexity}), PADUA ${n.paduaTotal} (${n.paduaComplexity}), tumour ${n.diameterCm.toFixed(1)} cm`;
 }
@@ -223,9 +223,9 @@ function CaseSidebar({
     <aside className="workspace-sidebar left-sidebar">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="section-label">{activeCase ? 'KiTS23 kidney' : 'Hand-made model'}</p>
+          <p className="section-label">{activeCase ? 'KiTS23 kidney' : 'Synthetic model'}</p>
           <h1 className="mt-2 text-lg font-semibold tracking-tight text-white/90">
-            {activeCase ? activeCase.label : 'Hand-made kidney'}
+            {activeCase ? activeCase.label : 'Illustrative kidney'}
           </h1>
           <p className="mt-1 text-xs leading-5 text-white/70">
             {activeCase ? 'De-identified CT, KiTS expert outlines' : 'A right kidney with an interpolar tumour, made in code'}
@@ -242,7 +242,7 @@ function CaseSidebar({
         <Metric
           label="PADUA"
           value={activeCase ? String(activeCase.nephrometry.paduaTotal) : 'Not scored'}
-          detail={activeCase ? capitalise(activeCase.nephrometry.paduaComplexity) : 'Hand-made kidney'}
+          detail={activeCase ? capitalise(activeCase.nephrometry.paduaComplexity) : 'Illustrative kidney'}
         />
       </div>
 
@@ -268,7 +268,7 @@ function CaseSidebar({
                 active={layers[layer.key]}
                 color={layer.color}
                 label={layer.label}
-                provenance="Hand-made"
+                provenance="Synthetic anatomy"
                 onClick={() => setLayers((current) => ({ ...current, [layer.key]: !current[layer.key] }))}
               />
             ))}
@@ -295,7 +295,7 @@ function CaseSidebar({
             variant="outline"
             onClick={() => setKidneyOpacity(34)}
           >
-            <Eye /> Ghost
+            <Eye /> Translucent
           </Button>
           <Button
             className="flex-1 border-white/10 bg-white/[.035] text-white/80 hover:bg-white/8 hover:text-white"
@@ -376,9 +376,9 @@ function CasePicker({
         type="button"
         aria-pressed={caseId === HAND_MADE_CASE_ID}
         onClick={() => chooseCase(HAND_MADE_CASE_ID)}
-        title="Hand-made kidney"
+        title="Illustrative kidney, made in code"
       >
-        Hand-made
+        Illustrative
       </button>
       {referenceCases.map((item) => {
         const letter = item.label.replace(/^Kidney\s+/, '');
@@ -487,7 +487,7 @@ function ModelWorkspace({
   };
 
   const axes = orientation[preset];
-  const modelName = sceneCase ? sceneCase.label : 'Hand-made kidney';
+  const modelName = sceneCase ? sceneCase.label : 'Illustrative kidney';
   const showMargin = building || (!activeCase && mode !== 'build');
 
   return (
@@ -559,7 +559,7 @@ function ModelWorkspace({
 
         <div className="viewer-chips">
           <div className="viewer-chip">
-            {building ? 'Built from an outline' : activeCase ? 'KiTS expert outlines' : 'Hand-made model'}
+            {building ? 'Built from an outline' : activeCase ? 'KiTS expert outlines' : 'Synthetic model'}
           </div>
           <div className="viewer-chip">
             <LockKeyhole className="size-3" aria-hidden="true" />
@@ -648,7 +648,7 @@ function PlanningInspector({
     { id: 'source', label: 'About' },
     { id: 'scores', label: 'Scores' },
     ...(activeCase ? [{ id: 'ct' as const, label: 'CT' }] : []),
-    { id: 'plan', label: 'Plan' },
+    { id: 'plan', label: 'Volumes' },
     { id: 'limits', label: 'Limits' },
   ];
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -697,7 +697,7 @@ function PlanningInspector({
         {tab === 'source' ? (
           activeCase ? (
             <>
-              <p className="section-label">Where this model comes from</p>
+              <p className="section-label">Model provenance</p>
               <div className="mt-3 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-white/90">{activeCase.label}</p>
@@ -706,8 +706,8 @@ function PlanningInspector({
                   </Badge>
                 </div>
                 <p className="mt-2 text-xs leading-5 text-white/75">
-                  From a de-identified CT of a real patient in the public KiTS23 dataset. Your browser gets the
-                  3D model, the numbers and cropped CT slices round this kidney, not the whole scan.
+                  Reconstructed from a de-identified CT in the public KiTS23 dataset. This viewer
+                  contains the surface model, computed measurements and cropped CT slices, not the full scan.
                 </p>
               </div>
               <dl className="definition-list mt-5">
@@ -734,15 +734,15 @@ function PlanningInspector({
                 {activeCase.structures.some((s) => s.name === 'cyst') ? (
                   <div><dt>Cyst</dt><dd>KiTS expert outline</dd></div>
                 ) : null}
-                <div><dt>3D model</dt><dd>My CalyxView endourology project</dd></div>
+                <div><dt>3D model</dt><dd>CalyxView endourology project</dd></div>
                 <div><dt>Scores</dt><dd>renalplan, from the outlines</dd></div>
                 <div><dt>Pipeline run</dt><dd>{`${Math.round(activeCase.runtimeSeconds)} s on a CPU`}</dd></div>
-                <div><dt>Clinical review</dt><dd>None yet</dd></div>
+                <div><dt>Clinical review</dt><dd>Not clinically reviewed</dd></div>
               </dl>
               <p className="mt-4 text-xs leading-5 text-white/72">
-                The mesh came from the mesh step of my separate CalyxView endourology project (not public yet),
-                built from the same KiTS23 outlines. KiTS23 is licensed non-commercial share-alike, and the
-                meshes carry the same terms.
+                The separate CalyxView endourology project (not public yet) generated these surfaces
+                from the KiTS23 outlines. The meshes retain the source data&apos;s non-commercial,
+                share-alike licence.
               </p>
               {activeCase.structures.some((s) => s.provenance.startsWith('TotalSegmentator')) ? (
                 <p className="mt-3 text-xs leading-5 text-white/72">
@@ -757,8 +757,8 @@ function PlanningInspector({
                     TotalSegmentator
                     <span className="sr-only"> (opens in a new tab)</span>
                   </a>{' '}
-                  (Wasserthal et al., Radiology: AI 2023), an AI model. Nobody has checked them, so they start
-                  hidden.
+                  (Wasserthal et al., Radiology: AI 2023), an AI model. These outlines have not been
+                  reviewed and are hidden by default.
                 </p>
               ) : null}
               {activeCase.structures.some((s) => s.name === 'cyst' && !s.framing) ? (
@@ -770,12 +770,12 @@ function PlanningInspector({
             </>
           ) : (
             <>
-              <p className="section-label">Where this model comes from</p>
+              <p className="section-label">Model provenance</p>
               <div className="mt-3 rounded-xl border border-emerald-200/10 bg-emerald-200/[.035] p-3.5">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-white/90">Hand-made kidney</p>
+                  <p className="text-sm font-medium text-white/90">Illustrative kidney</p>
                   <Badge className="border-white/10 bg-white/5 text-[11px] text-white/80" variant="outline">
-                    Hand-made
+                    Synthetic
                   </Badge>
                 </div>
                 <p className="mt-2 text-xs leading-5 text-white/75">
@@ -850,7 +850,7 @@ function PlanningInspector({
             </>
           ) : (
             <>
-              <p className="section-label">Example numbers</p>
+              <p className="section-label">Illustrative measurements</p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <Metric label="R.E.N.A.L." value="9a" detail="R 1, E 2, N 3, L 3, example" />
                 <Metric label="Tumour" value="2.8 cm" detail="4 cm or less, so R 1" />
@@ -865,7 +865,7 @@ function PlanningInspector({
               </dl>
               <div className="mt-5 rounded-xl border border-white/8 bg-white/[.025] p-3.5">
                 <p className="text-xs leading-5 text-white/75">
-                  Set by hand to match the model. Kidneys A to E have computed scores.
+                  Assigned to the synthetic model for illustration. Kidneys A to E use computed scores.
                 </p>
               </div>
             </>
@@ -887,7 +887,7 @@ function PlanningInspector({
 
         {tab === 'plan' ? (
           <>
-            <p className="section-label">Kidney kept</p>
+            <p className="section-label">Volume outside the margin</p>
             {activeCase && n ? (
               <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
                 <p className="text-[11px] uppercase tracking-[.1em] text-white/66">At a 5 mm margin</p>
@@ -903,7 +903,7 @@ function PlanningInspector({
                   from renalplan. Volume, not function. Enucleation takes less; renorrhaphy and devascularised
                   tissue take more.
                 </p>
-                <p className="mt-2 text-xs leading-5 text-white/75">No slider here: the pipeline only ran 5 mm.</p>
+                <p className="mt-2 text-xs leading-5 text-white/75">Only the 5 mm margin was evaluated for this case.</p>
               </div>
             ) : (
               <div className="mt-3 rounded-xl border border-white/8 bg-black/10 p-3.5">
@@ -921,29 +921,28 @@ function PlanningInspector({
                   className="range-control mt-2 w-full"
                 />
                 <p className="mt-3 text-xs leading-5 text-white/75">
-                  The slider redraws the margin shell to scale. Hand-made kidney, so no volumes and no kept
-                  figure.
+                  The slider changes the illustrative margin shell to scale. This synthetic model has
+                  no calculated volume measurements.
                 </p>
               </div>
             )}
-            <ApproachNotes />
           </>
         ) : null}
 
         {tab === 'limits' ? (
           <>
-            <p className="section-label">What this can’t tell you</p>
+            <p className="section-label">Model limitations</p>
             <ul className="viewer-limits mt-3">
               {(activeCase
                 ? [
-                    'There are no vessels or collecting system in this model, because KiTS doesn’t outline them. So it says nothing about clamping or how close the calyces are.',
-                    'Nobody has compared these scores with clinicians’ own scoring yet. That’s the first study I’d like to do.',
-                    'It can’t export a plan.',
+                    'KiTS does not label the vessels or collecting system. This model cannot assess clamping or proximity to the calyces.',
+                    'The computed scores have not been compared with independent clinician assessments.',
+                    'This is a research viewer. It does not produce a surgical plan.',
                   ]
                 : [
-                    'Everything in it, including the measurements, is made up.',
-                    'The vessels and collecting system are drawn by hand, not taken from a scan.',
-                    'It can’t export a plan.',
+                    'The anatomy and measurements are synthetic and illustrative.',
+                    'The vessels and collecting system are drawn in code, without source imaging.',
+                    'This is a research viewer. It does not produce a surgical plan.',
                   ]
               ).map((item) => (
                 <li key={item}>
@@ -1007,13 +1006,13 @@ function DisclaimerDialog({ onClose }: { onClose: () => void }) {
         </h2>
         <div id="disclaimer-description">
           <p className="mt-4 text-sm leading-6 text-white/78">
-            This hasn’t been clinically validated and it isn’t a medical device. It has no UKCA or CE mark and
-            isn’t FDA cleared. Don’t use it to diagnose, plan or guide treatment for a real patient. The anatomy
-            and the numbers may be incomplete or wrong.
+            CalyxView Renal has not been clinically validated. It is not UKCA or CE marked and is not
+            FDA cleared. Do not use it for diagnosis, treatment or surgical planning. Models and
+            measurements may be incomplete or inaccurate.
           </p>
           <p className="mt-3 text-sm leading-6 text-white/78">
-            It covers a hand-made kidney, five de-identified KiTS23 kidneys (A to E) and kidneys built in this
-            tab from your own outline.
+            The viewer contains an illustrative kidney, five de-identified KiTS23 cases (A to E),
+            and models built locally from research label maps.
           </p>
         </div>
         <Button className="mt-6 w-full bg-emerald-300 text-[#052117] hover:bg-emerald-200" onClick={onClose}>
@@ -1265,7 +1264,7 @@ export function RenalPlatform({
               <span className="workspace-wordmark truncate">
                 CalyxView Renal
               </span>
-              <span className="shrink-0 text-[11px] font-medium uppercase tracking-[.12em] text-emerald-200/85">
+              <span className="shrink-0 text-xs text-white/72">
                 3D viewer
               </span>
             </div>
@@ -1274,8 +1273,8 @@ export function RenalPlatform({
         </div>
 
         <nav className="mode-nav" aria-label="Viewer modes">
-          <ModeButton active={building} icon={<Box className="size-3.5" />} label="Make a 3D kidney" onClick={() => changeMode('build')} />
-          <ModeButton active={mode === 'plan'} icon={<Box className="size-3.5" />} label="Kidneys" onClick={() => changeMode('plan')} />
+          <ModeButton active={building} icon={<Box className="size-3.5" />} label="Build a model" onClick={() => changeMode('build')} />
+          <ModeButton active={mode === 'plan'} icon={<Box className="size-3.5" />} label="Case viewer" onClick={() => changeMode('plan')} />
         </nav>
 
         <div className="flex items-center justify-end gap-2">
@@ -1297,7 +1296,7 @@ export function RenalPlatform({
               aria-label="Back to the overview"
             >
               <ArrowLeft className="size-3" aria-hidden="true" />
-              <span className="hidden sm:inline">Overview</span>
+              <span className="hidden sm:inline">Back to site</span>
             </button>
           ) : null}
         </div>
@@ -1310,7 +1309,7 @@ export function RenalPlatform({
 
       {notFoundNotice && !building ? (
         <output className="viewer-notice">
-          Kidney not found; showing the hand-made kidney.
+          Kidney not found; showing the illustrative model.
           <button type="button" onClick={() => setNotFoundNotice(false)} aria-label="Dismiss">
             <X className="size-3.5" aria-hidden="true" />
           </button>

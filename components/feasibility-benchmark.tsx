@@ -26,15 +26,15 @@ import { repoFolder } from '@/lib/links';
 const nextRunSteps = [
   {
     label: 'CT only',
-    body: 'Pick 20 scans by a written rule, without looking at their outlines.',
+    body: 'Select 20 scans using a recorded rule, without inspecting their reference outlines.',
   },
   {
     label: 'Run the model',
-    body: 'Give the unchanged model each CT on its own, with at most two tries a scan, and record every success and failure.',
+    body: 'Run the unchanged model on each CT, with at most two attempts per scan. Record every success and failure.',
   },
   {
     label: 'Lock the outputs',
-    body: "Seal the outputs, failures, timings and file fingerprints, and post the seal's own fingerprint on GitHub, before any scoring.",
+    body: 'Lock predictions, failures, timings and file hashes. Publish the lock-file hash on GitHub before scoring.',
   },
   {
     label: 'Then copy in the outlines',
@@ -195,20 +195,20 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
 
   let resultHeading: string;
   if (!isComplete) {
-    resultHeading = `Scores stay hidden until all ${cohortSize} have run.`;
+    resultHeading = `Awaiting all ${cohortSize} scans`;
   } else if (failed === 0) {
-    resultHeading = `All ${cohortSize} ran.`;
+    resultHeading = `${cohortSize} scans completed`;
   } else if (failed === 1) {
-    resultHeading = `${ran} of ${cohortSize} ran. The one that failed still counts.`;
+    resultHeading = `${ran} completed, 1 failed. All ${cohortSize} included.`;
   } else {
-    resultHeading = `${ran} of ${cohortSize} ran. The ${failed} that failed still count.`;
+    resultHeading = `${ran} completed, ${failed} failed. All ${cohortSize} included.`;
   }
 
   let failureRule: string;
   if (!isComplete) {
-    failureRule = 'Nothing partial is shown.';
+    failureRule = 'Results remain hidden until the full cohort has been processed and checked.';
   } else if (failed === 0) {
-    failureRule = 'Every average below covers all of them.';
+    failureRule = 'Every reported mean includes the full cohort.';
   } else {
     failureRule =
       `${failed === 1 ? 'It stays' : 'They stay'} in every average, scored as a complete miss: Dice 0, surface Dice 0, an HD95 equal to the scan's full diagonal (or 1,000 mm if that can't be worked out), and a volume error equal to the whole reference volume.` +
@@ -226,22 +226,21 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
       <div className="site-shell">
         <div className="benchmark-heading-grid">
           <div>
-            <p className="eyebrow">05 / The benchmark</p>
+            <p className="eyebrow">Segmentation benchmark</p>
             <h2 id="benchmark-title">
-              Can a published model draw the outlines?{' '}
+              Automated outlines on {cohortSize} CT scans.{' '}
               {isScriptBlinded
-                ? `A blinded check on ${cohortSize} scans.`
-                : `A first check on ${cohortSize} scans.`}
+                ? 'Script-blinded evaluation.'
+                : 'An initial technical check.'}
             </h2>
           </div>
           <div className="benchmark-intro">
             <p>
-              Contouring every case by hand doesn&apos;t scale, so I ran a published KiTS21 model, built
-              with nnU-Net, unchanged on {cohortSize} KiTS23 scans
+              A published KiTS21 model, built with nnU-Net, was run unchanged on {cohortSize} KiTS23 scans
               {isScriptBlinded
                 ? ', locking each output before the expert outlines were copied in.'
                 : " it wasn't trained on (cases 400 to 419), without test-time augmentation."}{' '}
-              It&apos;s a check within KiTS, from one US hospital system, not external validation
+              This is a check within KiTS, from one US hospital system, not external validation
               {isScriptBlinded ? '' : ", and it wasn't blinded"}: the numbers measure agreement with the
               expert outlines, not clinical accuracy, and none of it is for patient care.
             </p>
@@ -253,7 +252,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
             <p className="eyebrow">
               {isScriptBlinded
                 ? 'Blinded by the scripts'
-                : `First run${month ? `, ${month}` : ''}, not blinded`}
+                : `Historical run${month ? `, ${month}` : ''}. Not blinded.`}
             </p>
             <h3 id="current-benchmark-results-title">{resultHeading}</h3>
           </div>
@@ -318,9 +317,8 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
               ↑ higher is better, ↓ lower is better. Each value is the mean over
               all {cohortSize} scans. The 95% confidence interval with it is a
               percentile bootstrap from 10,000 resamples of the {cohortSize} scans.
-              With {cohortSize} scans and a few very large values, these intervals
-              are rough. The HD95 and volume ones mostly show how many of those
-              few land in a resample.
+              With {cohortSize} scans, these intervals are imprecise. HD95 and volume-error intervals
+              are particularly sensitive to the few extreme values selected in each resample.
             </p>
           </>
         ) : null}
@@ -328,7 +326,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
         <div className="benchmark-method-grid">
           <article className="benchmark-method-card">
             <div>
-              <h3>What the numbers mean</h3>
+              <h3>Metric definitions</h3>
               <p>
                 Dice is the overlap between the model&apos;s outline and the
                 expert one, where 1.0 means identical. Surface Dice is the share
@@ -347,7 +345,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
           {isComplete ? (
             <article className="benchmark-method-card">
               <div>
-                <h3>Why the HD95 averages are so high</h3>
+                <h3>Interpreting the high HD95 means</h3>
                 <p>
                   {hd95Means.length > 0
                     ? `A mean HD95 of ${Math.round(Math.min(...hd95Means))} to ${Math.round(Math.max(...hd95Means))} mm doesn't mean the model is usually centimetres out. `
@@ -358,8 +356,8 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
                   {isScriptBlinded
                     ? ''
                     : "This run's public file only has means, so there are no medians to show. "}
-                  The clean-up rules in the pipeline section are aimed at those
-                  stray bits, but I haven&apos;t run them on these outputs yet.
+                  The postprocessing experiment addresses remote false positives, but those rules
+                  have not yet been tested on these model outputs.
                 </p>
               </div>
             </article>
@@ -367,9 +365,9 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
           <article className="benchmark-method-card benchmark-method-card-wide">
             <ShieldCheck aria-hidden="true" />
             <div>
-              <h3>What&apos;s published</h3>
+              <h3>Sources, publication and licences</h3>
               <p>
-                Only the averages from my offline run, in a small JSON file. No
+                This benchmark publishes aggregate results from an offline run as JSON, without
                 scans, outlines, per-scan results or file paths. KiTS23 imaging
                 and outlines are CC BY-NC-SA 4.0.
                 The model weights are Fabian Isensee&apos;s pretrained nnU-Net
@@ -424,7 +422,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
               <h3 id="next-run-title" className="inline text-[1.375rem]">
                 How the next run will be done
               </h3>
-              <span className="ml-3 inline-block rounded-[2px] border border-[var(--rule)] bg-[var(--paper-alt)] px-2 py-1 align-middle text-[.6875rem] font-bold uppercase tracking-[.12em] text-[var(--ink-muted)]">
+              <span className="ml-3 inline-block align-middle text-sm text-[var(--ink-muted)]">
                 Draft, not run yet
               </span>
             </summary>
@@ -450,7 +448,7 @@ function AvailableBenchmark({ result }: { result: AvailableBenchmarkResult }) {
                 ))}
               </ol>
               <div className="benchmark-blinding-limit" role="note">
-                <strong>What it doesn&apos;t cover</strong>
+                <strong>Limits of blinding</strong>
                 <p>
                   It&apos;s script-blinded, not operator-blinded. The
                   model&apos;s scripts can&apos;t see the outlines before the
@@ -482,14 +480,13 @@ export function FeasibilityBenchmark() {
             <div>
               <p className="eyebrow">The benchmark</p>
               <h2 id="benchmark-title">
-                The benchmark numbers aren&apos;t showing right now.
+                Benchmark results unavailable
               </h2>
             </div>
             <div className="benchmark-intro">
               <p>
-                The results file didn&apos;t pass the site&apos;s checks, so
-                it&apos;s hidden rather than shown half right. The rest of the
-                site works as normal.
+                The results file failed validation and cannot be displayed.
+                The cases and model builder remain available.
               </p>
             </div>
           </div>
