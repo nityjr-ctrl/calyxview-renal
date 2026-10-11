@@ -14,6 +14,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { siteAsset } from '@/lib/site-assets';
 import { ensureSurfaceNormals, orientSurfaceOutward, smoothDisplaySurface } from '@/lib/surface-normals';
+import { SoftwareCaseScene } from './software-case-scene';
 
 import type { SlicePlane } from '@/components/ct-slices';
 import type { ReferenceStructure } from '@/lib/reference-cases';
@@ -80,12 +81,13 @@ function nearestTurn(angle: number, target: number) {
 /** A WebGL renderer, or null when the browser can't make one (WebGL off or blocked). */
 function createRenderer(): THREE.WebGLRenderer | null {
   try {
+    const phone = matchMedia('(pointer: coarse)').matches || innerWidth < 768;
     return new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: !phone,
       alpha: true,
       // Kept so "Save image" can read the canvas back.
       preserveDrawingBuffer: true,
-      powerPreference: 'high-performance',
+      powerPreference: phone ? 'low-power' : 'default',
     });
   } catch {
     return null;
@@ -121,13 +123,7 @@ export function ReferenceCaseScene({
     onUserRotateRef.current = onUserRotate;
   }, [onUserRotate]);
 
-  const onNoWebglRef = useRef(onNoWebgl);
-  useEffect(() => {
-    onNoWebglRef.current = onNoWebgl;
-  }, [onNoWebgl]);
-  useEffect(() => {
-    if (status === 'no-webgl') onNoWebglRef.current?.();
-  }, [status]);
+  void onNoWebgl;
 
   // The parent remounts this component per case, so status starts at 'loading'
   // for each one and is only advanced from the loader's callbacks, or to no-webgl.
@@ -143,7 +139,7 @@ export function ReferenceCaseScene({
       return () => cancelAnimationFrame(noWebglFrame);
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, matchMedia('(pointer: coarse)').matches || innerWidth < 768 ? 1 : 2));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -444,6 +440,7 @@ export function ReferenceCaseScene({
     };
 
     const animate = () => {
+      if (renderer.getContext().isContextLost()) { setStatus('no-webgl'); return; }
       frame = requestAnimationFrame(animate);
       if (!onScreen) return;
       const current = stateRef.current;
@@ -530,6 +527,8 @@ export function ReferenceCaseScene({
     };
   }, [referenceCase]);
 
+  if (status === 'no-webgl') return <SoftwareCaseScene referenceCase={referenceCase} visible={visible} parenchymaOpacity={parenchymaOpacity} clipPercent={clipPercent} preset={preset} viewNonce={viewNonce} resetNonce={resetNonce} zoomRequest={zoomRequest} onUserRotate={onUserRotate} />;
+
   return (
     <div className="relative h-full w-full">
       <div ref={hostRef} className="h-full w-full" />
@@ -541,8 +540,6 @@ export function ReferenceCaseScene({
               {/* The percentage is for sighted readers; announcing every 5% is noise. */}
               <span aria-hidden="true">{progress !== null ? `, ${progress}%` : ''}</span>…
             </span>
-          ) : status === 'no-webgl' ? (
-            'Your browser can’t show 3D here. The scores and the rest of the page still work.'
           ) : (
             'This kidney didn’t load. Try reloading the page, and tell me if it keeps happening.'
           )}

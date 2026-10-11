@@ -5,6 +5,7 @@ import { PlanningPipeline } from './planning-pipeline';
 import { referenceCases } from '@/lib/reference-cases';
 import { CALYXVIEW_HOME } from '@/lib/site-assets';
 import { keyImageUrl } from './ct-slices';
+import { CtPhaseNote } from './ct-phase-note';
 
 export type OpenWorkspace = (
   mode?: 'plan' | 'build',
@@ -241,6 +242,7 @@ function Cases({ open }: { open: OpenWorkspace }) {
                 KiTS23 / {String(index + 1).padStart(2, '0')}
               </p>
               <h2>{item.label}</h2>
+              <CtPhaseNote label={item.label} />
               <p>
                 {item.id === 'reference-c'
                   ? 'Includes surrounding organs from unchecked automated outlines.'

@@ -35,6 +35,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { AnatomyLayers, ViewPreset, ZoomRequest } from '@/components/kidney-scene';
 import type { SceneCase } from '@/components/reference-case-scene';
+import { CtPhaseNote } from './ct-phase-note';
 import {
   BuildIntro,
   BuildPrivacyPanel,
@@ -623,6 +624,7 @@ function ModelWorkspace({
       <div className="viewer-statusbar">
         <p>{rebuilding ? 'Building…' : building ? builtLine : caseSummary(activeCase)}</p>
       </div>
+      {activeCase && <CtPhaseNote label={activeCase.label} />}
     </section>
   );
 }

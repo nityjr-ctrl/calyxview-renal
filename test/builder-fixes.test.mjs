@@ -223,9 +223,8 @@ test('10 and 15: the viewer hides stale numbers while building and stands its co
   assert.match(platform, /rebuilding \? 'Building…'/);
   assert.match(platform, /onSnapshot=\{snapshot\}\s*disabled=\{noWebgl\}/);
   assert.match(platform, /id="clip-plane"[\s\S]{0,200}disabled=\{noWebgl\}/);
-  for (const path of ['../components/kidney-scene.tsx', '../components/reference-case-scene.tsx']) {
-    assert.match(await source(path), /onNoWebglRef\.current\?\.\(\)/, path);
-  }
+  assert.match(await source('../components/kidney-scene.tsx'), /onNoWebglRef\.current\?\.\(\)/);
+  assert.match(await source('../components/reference-case-scene.tsx'), /if \(status === 'no-webgl'\) return <SoftwareCaseScene/);
 });
 
 // ---------------------------------------------------------------------------
