@@ -55,7 +55,7 @@ export function SoftwareCaseScene(props: {
   useEffect(() => { if (props.zoomRequest.nonce) viewer.current?.zoom(props.zoomRequest.direction); }, [props.zoomRequest]);
   return <div className="software-case-view">
     <canvas ref={canvas} id="renal-3d-canvas" data-testid="software-model" aria-label={`${props.referenceCase.label}, rotatable 3D compatibility view`} />
-    <p className="software-view-note">Compatibility view · same mesh, simplified shading. Drag to turn; pinch or use the zoom buttons. CT slices remain in the CT tab.</p>
+    <p className="software-view-note">Compatibility view · simplified shading. Drag to turn; CT slices remain in the CT tab.</p>
     {status && <output className="software-view-status">{status}{status.includes('retry') && <button type="button" onClick={() => setAttempt(a => a + 1)}>Retry model</button>}</output>}
   </div>;
 }
